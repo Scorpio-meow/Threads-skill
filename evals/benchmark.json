@@ -1,0 +1,1564 @@
+{
+  "skill_name": "threads-api",
+  "iterations": [
+    {
+      "iteration": 1,
+      "metadata": {
+        "skill_name": "threads-api",
+        "skill_path": "<path/to/skill>",
+        "executor_model": "claude-opus-5-5",
+        "analyzer_model": "claude-opus-5-5",
+        "timestamp": "2026-10-13T07:07:50Z",
+        "evals_run": [
+          1,
+          2,
+          3
+        ],
+        "runs_per_configuration": 1
+      },
+      "runs": [
+        {
+          "eval_id": 1,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 1105.9,
+            "tokens": 233203,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Each carousel item container is created with is_carousel_item=true and an explicit media_type of IMAGE or VIDEO.",
+              "passed": true,
+              "evidence": "threads_carousel.py L367 creates every item with api('POST', 'me/threads', is_carousel_item=True, **item). as_item() (L166-175) maps .jpg/.jpeg/.png to {media_type: 'IMAGE', image_url} and .mp4/.mov to {media_type: 'VIDEO', video_url}. _encode(True) sends the string 'true' (L115-116), and validate_post() rejects any item whose media_type is not IMAGE or VIDEO (L196-197). test_waits_for_video_then_publishes_once captures the outgoing payloads and asserts media types ['IMAGE','IMAGE','VIDEO'] and is_carousel_item == 'true' on all three. I re-ran the suite on SHA256-identical copies of the outputs and got 25/25 OK. This matches Threads Posts.md, Carousel Step 1 (is_carousel_item required; media_type IMAGE or VIDEO)."
+            },
+            {
+              "text": "The parent container is created with media_type=CAROUSEL and `children` as a comma-separated list of the item container IDs.",
+              "passed": true,
+              "evidence": "L372-373: api('POST', 'me/threads', media_type='CAROUSEL', children=item_container_ids, text=..., topic_tag=..., reply_control=...). For a list of plain IDs, _encode() returns ','.join(...) (L119-120). The test asserts parent['media_type'] == 'CAROUSEL' and parent['children'] == 'C1,C2,C3', using the IDs returned for the three item POSTs. This matches Threads Posts.md, Carousel Step 2 (children is a comma-separated list of container IDs)."
+            },
+            {
+              "text": "Before publishing, the code polls GET /{container-id}?fields=status (with error_message) and only proceeds once the containers (at least the video) report FINISHED.",
+              "passed": true,
+              "evidence": "wait_until_finished() (L278-303) loops over every pending container with api('GET', cid, fields='status,error_message') and returns only when none is still waiting. It runs on all three item containers before the parent is created (L371), and again on the carousel parent before _publish() (L375). The test asserts that the last GET of the video container C3 comes before the parent POST, and that the sleeps were [3, 6] (video IN_PROGRESS twice, then FINISHED). One minor deviation: polling starts at 3 s and doubles to 60 s, which is more aggressive at first than the docs' 'once per minute, no more than 5 minutes'. The docstring acknowledges this, and it does not contradict the assertion."
+            },
+            {
+              "text": "The code handles a container in ERROR (surfacing error_message), EXPIRED, and a polling timeout without publishing.",
+              "passed": true,
+              "evidence": "L292-293: status ERROR, EXPIRED or PUBLISHED raises ContainerFailed(cid, status, error_message, label). The exception message includes the status, the raw error_message, the file name and a fix hint. The HINTS dict covers all 10 documented error_message values, including the docs' own spelling 'INVALID_ASPEC_RATIO'. L298-300: passing the deadline raises StillProcessing, which main() turns into exit code 75 plus a --resume-items/--resume-parent command. Both exceptions propagate before _publish() runs, and main() prints ContainerFailed to stderr ('發文失敗：...'). Tests: test_video_error_stops_before_carousel_and_publish (error_message 'INVALID_ASPEC_RATIO' surfaced, 0 threads_publish calls, no parent created); test_resume_after_24h_reports_expired (EXPIRED raises ContainerFailed with the 24-hour hint); test_slow_video_times_out_then_resume_reuses_containers (sleeps total 300 s, 0 publish calls). If the status check after a failed publish returns ERROR or EXPIRED, it also raises instead of re-publishing (L341-342)."
+            },
+            {
+              "text": "topic_tag=攝影展 is sent as the topic_tag parameter and reply_control=accounts_you_follow is set, both on the carousel parent container.",
+              "passed": true,
+              "evidence": "The parent-container POST (L372-373) carries topic_tag=topic_tag and reply_control=reply_control. main() passes TOPIC_TAG = '攝影展' and REPLY_CONTROL = 'accounts_you_follow' (L30-31, L414). Item containers get only media_type and the URL (L367). The test asserts the parent payload tuple ('CAROUSEL', 'C1,C2,C3', '攝影展', 'accounts_you_follow'). The library-usage snippet in response.md also passes both kwargs. Caveat: the function defaults for both are None, so a caller who omits them gets neither. Every documented call path sets them, and validate_post() checks the topic_tag rules (1-50 chars, no . or &) and the lowercase reply_control values."
+            },
+            {
+              "text": "The link is not sent as link_attachment on the carousel, and the reply explains that link preview cards only work on text-only posts (the link stays plain text).",
+              "passed": true,
+              "evidence": "A grep of threads_carousel.py finds no link_attachment parameter. The URL is part of POST_TEXT, sent as 'text' on the parent, and the test asserts assertNotIn('link_attachment', parent). response.md: '活動頁連結不會有預覽卡片：`link_attachment` 只能用在純文字貼文，所以網址是直接寫在內文裡。它會顯示成一般文字，但仍然算進 5 個連結的上限。' This matches Threads Posts.md > Links > Limitations ('only available for text-only posts. It will not work with image, video, or carousel posts'). It also offers an optional follow-up text-only reply that would carry a link_attachment, and correctly says that would need threads_manage_replies (Get Started.md)."
+            },
+            {
+              "text": "It publishes via POST /{user}/threads_publish with creation_id=<carousel container id>, then fetches the permalink with the returned media ID (GET /{media-id}?fields=permalink) and prints it.",
+              "passed": true,
+              "evidence": "_publish() (L322-346) POSTs me/threads_publish with creation_id=parent_container_id. L379 then calls api('GET', media_id, fields='permalink,shortcode,reply_audience'), and L388 prints '貼文網址：{permalink}'. The test asserts creation_id == 'P1' (the carousel container) and that stdout contains '貼文網址：https://www.threads.com/@me/post/ABC'. If permalink is omitted (the documented copyright case), the script prints the media ID and a threads.com/t/{shortcode} URL; that format is documented in oEmbed.md. Caveat, not counted against this assertion: reply_audience is requested in the same GET. The Threads Changelog (June 12, 2024) says reading reply_audience requires threads_read_replies, and the response tells the user only threads_basic + threads_content_publish are needed. In my probe, a permission error on that field made the script print only '已發佈（media ID M1），但沒取得 permalink', and it never retried with fields=permalink alone. Whether the real API errors or silently drops the field is unverified."
+            },
+            {
+              "text": "The access token comes from the environment/config (not hard-coded) and requests go to graph.threads.net/v1.0 (or graph.threads.com/v1.0).",
+              "passed": true,
+              "evidence": "L127-129: token = os.environ.get('THREADS_ACCESS_TOKEN'), raising RuntimeError if it is missing. There is no token literal anywhere. L33 sets API = 'https://graph.threads.net/v1.0', and every Threads call goes through api() to f'{API}/{path}', with the token in the query string for GET and the form body for POST. test_waits_for_video_then_publishes_once asserts the token location on every call, and test_network_error_hides_token_and_only_get_is_retried shows the token is masked in errors. The only other requests are token-less S3 Range probes in preflight_media()."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was written. These items come from response.md's '想跟你確認' and test sections: the executor did not call the real Threads API (no token), so all flow verification is against a fake API.",
+            "Executor asks whether the user wants a link preview card via an automatic text-only reply under the carousel (needs threads_manage_replies).",
+            "Executor asks whether the user's script uses requests or httpx/aiohttp/async, offering to port the code.",
+            "Run 'python threads_carousel.py --check' against the real company S3 URLs before the first real publish (executor's recommendation).",
+            "Grader: either grant threads_read_replies or drop reply_audience from the post-publish GET (or retry with fields=permalink alone), so a permission error cannot stop the post URL from printing."
+          ],
+          "eval_name": "eval-1-carousel-video-python"
+        },
+        {
+          "eval_id": 2,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 9,
+            "failed": 0,
+            "total": 9,
+            "time_seconds": 1373.0,
+            "tokens": 252415,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Token refresh calls GET https://graph.threads.net/refresh_access_token with grant_type=th_refresh_token and the current long-lived token.",
+              "passed": true,
+              "evidence": "threadsToken.ts:92-99 refreshLongLivedToken() calls threadsGet('refresh_access_token', { grant_type: 'th_refresh_token', access_token: longLivedToken }, { versioned: false }); threadsApi.ts:90/100 builds https://graph.threads.net/refresh_access_token?... (no /v1.0 when versioned:false) and fetch() is called without a method, i.e. GET. ThreadsTokenManager passes the stored current token (threadsToken.ts:243 refreshLongLivedToken(record.accessToken)). Grader probe intercepting fetch captured exactly: 'GET https://graph.threads.net/refresh_access_token keys=access_token,grant_type grant_type=th_refresh_token access_token=<old token>'. Matches the sample request in Get Started/Long-Lived Access Tokens.md."
+            },
+            {
+              "text": "Refresh logic follows the documented rules: only refreshes a token that is unexpired and at least 24 h old, refreshes well before the ~60-day expiry, and persists the new token together with its expiry.",
+              "passed": true,
+              "evidence": "Unexpired: ensureValidToken (threadsToken.ts:231-237) throws EXPIRED before any refresh when expiresAt <= now. >=24 h: isRefreshDue (253-258) returns false when age < 24h+10min (MIN_AGE_FOR_REFRESH_MS). Well before expiry: refresh when age >= 7 days (refreshAfterDays default 7) or <= 10 days left. Persisted with expiry: saveRefreshed (260-293) writes {accessToken, issuedAt: now, expiresAt: now + expires_in*1000 (fallback: debug_token expires_at), dataAccessExpiresAt, userId, updatedAt} via FileTokenStore.save (tmp file + fsync + rename, mode 0600). Independent grader simulation of 120 daily 09:00 runs with a mocked refresh endpoint: refreshes on days 5,12,19,...,117 (every 7 days), never refreshed a token younger than 24 h, minimum remaining validity 54 days, 0 alerts. Re-run executor tests 'expired -> EXPIRED, no refresh attempted', 'unknown expiry refreshes once >24h old, never before' and '8 days old -> refreshed, saved ... expiresAt = T0 + 5184000 s' all pass."
+            },
+            {
+              "text": "The reply explains that an already-expired token cannot be refreshed and needs re-authorization, and the code fails loudly / alerts in that case.",
+              "passed": true,
+              "evidence": "response.md: 'token 一旦過期就沒辦法續期，只能重新走 OAuth 授權。' plus a dedicated section '如果目前的 token 已經過期' ('過期的 token 不能續期，只能重新授權一次') with 4 concrete re-auth steps (authorize URL, strip #_, code -> short-lived token, seed script exchanges it for a long-lived token). Code: known-expired token -> onAlert level 'critical' + throw ThreadsTokenError('EXPIRED') (threadsToken.ts:231-237); refresh failure where GET /me returns code 190 -> critical alert + throw ThreadsTokenError('INVALID') (295-301); seedThreadsToken throws '這支 token 已過期或無效，無法續期，只能重新走 OAuth 授權' on code 190; fetchDailyThreadsReport rethrows auth errors to abort the run. Re-run tests 'expired -> EXPIRED', 'refresh 190 and /me 190 -> INVALID + critical', 'seed: expired token -> friendly re-auth error' pass."
+            },
+            {
+              "text": "follower_demographics is requested with breakdown=country and without since/until.",
+              "passed": true,
+              "evidence": "threadsInsights.ts:249-253 fetchFollowerCountries: threadsGet('me/threads_insights', { metric: 'follower_demographics', breakdown: 'country', access_token }) - its own call, no date params. Grader probe captured: 'GET /v1.0/me/threads_insights keys=access_token,breakdown,metric { metric: follower_demographics, breakdown: country }'. The executor's re-run test also asserts no since/until on /me/threads_insights and breakdown=country. Matches Threads Insights API.md (no since/until; exactly one breakdown from country/city/age/gender)."
+            },
+            {
+              "text": "The reply or code states that follower_demographics requires at least 100 followers.",
+              "passed": true,
+              "evidence": "response.md: '帳號要有 100 位以上的粉絲。' Code: threadsInsights.ts:17-18 'follower_demographics 只提供給粉絲數 ≥ 100 的帳號' / MIN_FOLLOWERS_FOR_DEMOGRAPHICS = 100, and lines 128-131 skip the call with a warning when followers_count < 100 (re-run test '<100 followers -> demographics skipped without calling it' passes). Matches the Insights doc ('at least 100 followers')."
+            },
+            {
+              "text": "followers_count is requested without since/until.",
+              "passed": true,
+              "evidence": "threadsInsights.ts:225-235 fetchFollowersCount: threadsGet('me/threads_insights', { metric: 'followers_count', access_token }) with the comment 'followers_count 不支援 since/until，所以單獨呼叫'; value read from total_value.value. Grader probe captured: 'GET /v1.0/me/threads_insights keys=access_token,metric { metric: followers_count }'."
+            },
+            {
+              "text": "Per-post metrics use GET /{media-id}/insights with metric including views, likes and replies, parsing values[0].value.",
+              "passed": true,
+              "evidence": "threadsInsights.ts:206-222 fetchPostMetrics: threadsGet(`${encodeURIComponent(mediaId)}/insights`, { metric: ['views','likes','replies'] }), sent comma-joined; metricNumber (423-429) reads values[0].value for media insights (total_value.value is checked first only as a fallback). Grader probe: request 'GET /v1.0/p1/insights metric=views,likes,replies'; for a response with values [{value:7},{value:999}] the parsed views was 7, i.e. values[0].value. Matches the Media Insights response format in Threads Insights API.md."
+            },
+            {
+              "text": "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100.",
+              "passed": true,
+              "evidence": "threadsInsights.ts:176-203 listOwnPosts: GET v1.0/me/threads with fields, since, until (Unix seconds for Asia/Taipei yesterday 00:00-24:00; until capped at now per the docs), limit: 100, and after = res.paging?.cursors?.after; the loop stops on a missing cursor, an empty page or a repeated cursor (MAX_PAGES 50), and posts are re-filtered by timestamp. Grader probe: since=1791734400 (2026-10-12 00:00 +08), until=1791820800, limit=100, single call when no paging object. The re-run executor test verifies the second page is requested with after=c1 (3 /me/threads calls in total) and that an out-of-window post is dropped."
+            },
+            {
+              "text": "The code is TypeScript and does not hard-code the token or the app secret.",
+              "passed": true,
+              "evidence": "All four modules are .ts. Grader type-checked fresh copies cleanly with TS 6.0.3 (NodeNext, strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes + noUnused*) and TS 5.4.5 (CommonJS, strict). The token comes from the token store (FileTokenStore JSON file) or env vars THREADS_ACCESS_TOKEN / THREADS_SHORT_LIVED_TOKEN, and the app secret from THREADS_APP_SECRET (seedThreadsToken.ts:19-23). A grep for token or secret literals found none; the only match is response.md's curl, which uses the shell variable $THREADS_APP_SECRET."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was written; items here come from response.md's own '驗證了什麼、還沒驗證什麼' section.",
+            "Never run against the user's real account; the real follower_demographics response shape is unverified (the parser logs raw JSON by default so it can be checked on day one).",
+            "The user's actual follower_demographics error message and parameters are unknown, so the root cause is not confirmed.",
+            "FileTokenStore needs a persistent disk with a single runner; on Cloud Run/Lambda or with multiple instances, implement ThreadsTokenStore with a DB or Secret Manager.",
+            "debug_token-based 90-day permission reminders only work if the account is a Threads tester of the app.",
+            "follower_demographics parser accepts several plausible response shapes because the docs do not specify one."
+          ],
+          "eval_name": "eval-2-token-refresh-insights-ts"
+        },
+        {
+          "eval_id": 3,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 6,
+            "failed": 0,
+            "total": 6,
+            "time_seconds": 311.6,
+            "tokens": 130424,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "The reply states definitively that a ghost post (24 h auto-disappearing post) cannot carry a poll — not merely that it might not.",
+              "passed": true,
+              "evidence": "response.md section 1 heading: '投票和限時貼文不能放在同一則' (a poll and a ghost post can't be in the same post). Body: 'Threads 的限時貼文（ghost post，24 小時後自動封存）只能是純文字，唯一能加的是文字防雷。投票、GIF、連結預覽卡、文字附件都不支援。所以這則沒辦法「附投票」又「24 小時後消失」。' No may/might hedging anywhere. Matches Create Posts/Ghost Posts.md: 'Ghost posts are text-only posts... The only feature supported with ghost posts is text spoilers.' The local validator also blocks the combination: check_results.txt shows 'ghost posts only support text spoilers, not poll_attachment', reproduced by the grader re-running the check."
+            },
+            {
+              "text": "It does not silently drop either feature: it offers at least two concrete alternatives (e.g. ghost post without the poll / regular post with the poll) and asks the user to choose.",
+              "passed": true,
+              "evidence": "response.md says '我不會自己幫你拿掉其中一個，請你選' (I won't drop either one myself; please choose). A table follows with three options, each showing what it keeps and gives up: A '限時貼文，不附投票', B '一般貼文＋投票（淺焙／深焙）', C '拆成兩則' (a ghost post with the promo plus a regular post with the poll). It also describes and advises against a fourth route: post B and delete it after 24 h. It closes with '請回我 1. 要 A、B 還是 C？'. A and B each have a ready spec file. C needs poll text from the user, and the reply asks for it."
+            },
+            {
+              "text": "Nothing is published: no publish call succeeds and the reply does not claim a post was made.",
+              "passed": true,
+              "evidence": "The reply opens with '還沒發出去' (not posted yet). It gives no media ID or permalink and promises them only after posting ('發完回報 media ID 和貼文連結'). No publish could have succeeded. environment_check.txt shows THREADS_ACCESS_TOKEN unset in the shell, no .env and no profile entry. The grader re-checked independently: the variable is unset, /home/claude/threads-api-workspace/.env does not exist, and no profile mentions it. threads_client.py token() exits with 'THREADS_ACCESS_TOKEN not found' before any request, and a request without a token gets OAuth code 190 (reproduced). Caveat: no transcript was saved, so attempted calls can't be audited, but none could have succeeded."
+            },
+            {
+              "text": "It checks the environment for THREADS_ACCESS_TOKEN, reports that the token is not available here, and asks the user to provide or set it.",
+              "passed": true,
+              "evidence": "environment_check.txt (the executor's captured output) lists 'THREADS_ACCESS_TOKEN: NOT set in this shell', '.env in working folder (/home/claude/threads-api-workspace): none' and 'shell profiles (~/.bashrc ... /etc/profile*): no THREADS_ACCESS_TOKEN entry'. The token value is never printed. response.md section 2: '這個執行環境裡找不到 `THREADS_ACCESS_TOKEN`。環境變數、工作資料夾的 `.env`、shell 設定檔我都查過了。' It explains the likely cause: the user set the variable in their own terminal, which doesn't reach this environment. It offers three fixes: set it as an env var here, add it to /home/claude/threads-api-workspace/.env, or paste it, warning that a pasted token stays in the chat log. It also offers running the client on the user's own machine. It asks '3. token 設好或貼上了沒？'. The grader confirmed independently that the token is absent."
+            },
+            {
+              "text": "It shows the exact payload it would send after confirmation, including poll_attachment {option_a: 淺焙, option_b: 深焙} on a TEXT post for the poll option and is_ghost_post=true for the ghost option.",
+              "passed": true,
+              "evidence": "spec_B_regular_with_poll.json = {\"media_type\": \"TEXT\", \"text\": \"週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale\", \"poll_attachment\": {\"option_a\": \"淺焙\", \"option_b\": \"深焙\"}}. spec_A_ghost_no_poll.json = {\"media_type\": \"TEXT\", \"text\": <same>, \"is_ghost_post\": true}. The text is byte-identical to the user's (grader-verified). threads_client.py publish() sends the spec unchanged to POST /me/threads, encoding the bool as 'true' and the dict as JSON, then calls /threads_publish. So these files are exactly what would be sent. The reply names them as the publish inputs ('python3 threads_client.py publish spec_A_ghost_no_poll.json'; '選 B 的話，把檔名換成 spec_B_regular_with_poll.json') and lists them under the outputs folder. Passed, with a weakness: the reply text never shows the payload inline or mentions is_ghost_post or poll_attachment. In chat it shows only the verbatim post text and the option labels, so a reader must open the spec files to see the parameters."
+            },
+            {
+              "text": "It plans to verify which account it will post to (e.g. GET /me?fields=id,username) before publishing.",
+              "passed": true,
+              "evidence": "response.md: '所以我也還沒能確認要發到哪個帳號' (so I couldn't confirm the account yet). The first run step is 'python3 threads_client.py get me fields=id,username   # 先確認是哪個帳號', ahead of check and publish. Under '請回我' it asks '順便告訴我你預期的帳號名稱。我會先查 `/me`，帳號對得上就直接發'. environment_check.txt shows it already ran 'python3 threads_client.py get me fields=id,username', which exited with 'THREADS_ACCESS_TOKEN not found'. So it attempted the check, not just promised it."
+            }
+          ],
+          "notes": [
+            "(No user_notes.md; taken from response.md.) The docs don't say whether the sale URL in a ghost post's text renders as a preview card or is rejected.",
+            "Before anything can be published, the user must choose A, B or C, decide whether to add a poll question, give the poll text if C, and supply the token plus the expected account name.",
+            "The token can't be reached from the sandbox, so the reply also offers running threads_client.py on the user's own machine, where the token is set."
+          ],
+          "eval_name": "eval-3-operate-ghost-poll-conflict"
+        },
+        {
+          "eval_id": 1,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 875.6,
+            "tokens": 183291,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Each carousel item container is created with is_carousel_item=true and an explicit media_type of IMAGE or VIDEO.",
+              "passed": true,
+              "evidence": "threads_carousel.py L426-432: client.post(f'{user_id}/threads', media_type=item.media_type, is_carousel_item='true', image_url=<url if IMAGE>, video_url=<url if VIDEO>). _validate() rejects any media_type other than IMAGE/VIDEO, and main() builds MediaItem('IMAGE',...) x2 + MediaItem('VIDEO',...). The grader ran the code against a local mock HTTP server. The wire log shows three form-encoded POST /v1.0/123/threads calls: {'media_type': 'IMAGE', 'is_carousel_item': 'true', 'image_url': ...} x2 and {'media_type': 'VIDEO', 'is_carousel_item': 'true', 'video_url': ...}. No text/topic_tag is sent on the children."
+            },
+            {
+              "text": "The parent container is created with media_type=CAROUSEL and `children` as a comma-separated list of the item container IDs.",
+              "passed": true,
+              "evidence": "L441-448: client.post(..., media_type='CAROUSEL', children=','.join(children), ...). children is an insertion-ordered dict keyed by the container IDs returned by the three item POSTs. Wire log: POST /v1.0/123/threads {'media_type': 'CAROUSEL', 'children': 'c1,c2,c3', ...}. The executor's test also asserts carousel['children'] == 'c1,c2,c3'. Matches Threads Posts.md, Carousel Step 2 (children = comma-separated list of container IDs)."
+            },
+            {
+              "text": "Before publishing, the code polls GET /{container-id}?fields=status (with error_message) and only proceeds once the containers (at least the video) report FINISHED.",
+              "passed": true,
+              "evidence": "wait_for_containers() (L253-280) calls client.get(cid, fields='status,error_message') for every pending container. A container is dropped from the pending set only when status == 'FINISHED', and the loop backs off from 10s to 60s. It runs on all three items before the carousel container is created (L438) and again on the carousel container before threads_publish (L451). Wire log with the video returning IN_PROGRESS, IN_PROGRESS, FINISHED: GET /v1.0/c3 {'fields': 'status,error_message'} x3, then the CAROUSEL POST, then GET /v1.0/car, then POST threads_publish."
+            },
+            {
+              "text": "The code handles a container in ERROR (surfacing error_message), EXPIRED, and a polling timeout without publishing.",
+              "passed": true,
+              "evidence": "L269-270: status in ('ERROR','EXPIRED') raises MediaProcessingError, carrying error_message plus a fix hint. L277-278: waited >= timeout raises MediaProcessingTimeout. Both are raised before carousel creation or publish, and main() logs '沒有完成發文：<message>'. Grader's mock-server runs: (1) ERROR -> 'MediaProcessingError: 第 3 個項目（影片）處理失敗（container c3，status=ERROR，error_message=FAILED_DOWNLOADING_VIDEO）：Threads 抓不到檔案…', publish calls 0. (2) EXPIRED -> 'status=EXPIRED … container 超過 24 小時沒發佈已過期，需要重新建立', publish calls 0. (3) Stuck IN_PROGRESS with processing_timeout=300 -> 'MediaProcessingTimeout: 等了 300 秒仍在處理中…這次不發文', publish calls 0. The executor's own tests cover ERROR and timeout. Only the grader's run covers EXPIRED."
+            },
+            {
+              "text": "topic_tag=攝影展 is sent as the topic_tag parameter and reply_control=accounts_you_follow is set, both on the carousel parent container.",
+              "passed": true,
+              "evidence": "The carousel POST (L441-448) includes topic_tag=topic_tag and reply_control=reply_control. main() passes topic_tag='攝影展' and reply_control='accounts_you_follow'. The function default is 'everyone', but both the script and the usage example in response.md pass accounts_you_follow. Wire log: POST /v1.0/123/threads {'media_type': 'CAROUSEL', 'children': 'c1,c2,c3', 'text': …, 'topic_tag': '攝影展', 'reply_control': 'accounts_you_follow'}. The child POSTs carry neither field. Both values are valid per Publishing.md."
+            },
+            {
+              "text": "The link is not sent as link_attachment on the carousel, and the reply explains that link preview cards only work on text-only posts (the link stays plain text).",
+              "passed": true,
+              "evidence": "'link_attachment' appears nowhere in threads_carousel.py (grep). The wire-level CAROUSEL POST contains only media_type/children/text/topic_tag/reply_control. The URL stays in text: link_url is appended to the text only if missing. response.md, 要注意的地方: '**連結不會有預覽卡片。** `link_attachment` 只支援純文字貼文，所以輪播貼文的連結只會是內文裡可點的網址。' This matches Threads Posts.md, Links: 'only available for text-only posts. It will not work with image, video, or carousel posts'."
+            },
+            {
+              "text": "It publishes via POST /{user}/threads_publish with creation_id=<carousel container id>, then fetches the permalink with the returned media ID (GET /{media-id}?fields=permalink) and prints it.",
+              "passed": true,
+              "evidence": "publish_container() calls client.post(f'{user_id}/threads_publish', retries=0, creation_id=creation_id) with creation_id=carousel_id and returns resp['id']. get_permalink() then calls client.get(media_id, fields='permalink'), and L459 runs print(f'發文成功：{permalink}'). Wire log: POST /v1.0/123/threads_publish {'creation_id': 'car'} -> GET /v1.0/m1 {'fields': 'permalink'} -> stdout '發文成功：https://www.threads.com/@studio/post/ABC'. If no permalink comes back, it prints the media id instead of raising."
+            },
+            {
+              "text": "The access token comes from the environment/config (not hard-coded) and requests go to graph.threads.net/v1.0 (or graph.threads.com/v1.0).",
+              "passed": true,
+              "evidence": "main() L469: token = os.environ.get('THREADS_ACCESS_TOKEN'), with an error exit if unset. publish_carousel_post() takes access_token as a parameter. threads_carousel.py contains no literal token; the only one, 'TEST-TOKEN-123', is in the offline test file. API_BASE = 'https://graph.threads.net/v1.0' (L30) is used for every Threads call. The wire log shows every call under /v1.0/, with access_token in the query string (GET) or the form body (POST)."
+            }
+          ],
+          "notes": [
+            "No user_notes.md exists; these items come from response.md. The code was never run against the real Threads API (no token or S3 URLs, and running it would post publicly).",
+            "The executor says it could not check the official docs; parameter names and limits came from memory, and it flagged topic_tag as a newer parameter.",
+            "Confirm that '只讓我追蹤的人回覆' means accounts_you_follow (people the user follows) and not followers_only (the user's followers).",
+            "Confirm the carousel order (image, image, video), and replace the placeholder S3 URLs and post text.",
+            "A carousel cannot show a link preview card. If a card is needed, the response suggests a text-only self-reply with link_attachment."
+          ],
+          "eval_name": "eval-1-carousel-video-python"
+        },
+        {
+          "eval_id": 2,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.78,
+            "passed": 7,
+            "failed": 2,
+            "total": 9,
+            "time_seconds": 1215.3,
+            "tokens": 221750,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Token refresh calls GET https://graph.threads.net/refresh_access_token with grant_type=th_refresh_token and the current long-lived token.",
+              "passed": true,
+              "evidence": "src/threads/threads-token.ts L166-174 refreshLongLivedToken: `new URL(`${THREADS_GRAPH_ORIGIN}/refresh_access_token`)` + `appendParams(url, { grant_type: 'th_refresh_token', access_token: longLivedToken })`, where THREADS_GRAPH_ORIGIN = 'https://graph.threads.net' (threads-http.ts L11-12) and the request uses method 'GET' (threads-http.ts L172-176). It is called with the current stored token: `refreshLongLivedToken(t.accessToken, this.http)` (threads-token.ts L420). The unversioned path matches the docs' sample request in Long-Lived Access Tokens.md exactly. The executor's test 'store 是空的…' asserts origin, path, grant_type and access_token. The grader re-ran the suite: 21/21 pass."
+            },
+            {
+              "text": "Refresh logic follows the documented rules: only refreshes a token that is unexpired and at least 24 h old, refreshes well before the ~60-day expiry, and persists the new token together with its expiry.",
+              "passed": false,
+              "evidence": "Partly met. MET: (1) A 24 h minimum-age gate applies when the issue time is known: MIN_TOKEN_AGE_FOR_REFRESH_MS = 24h + 5min, `if (obtained !== null && nowMs - obtained < MIN_TOKEN_AGE_FOR_REFRESH_MS) return false` (L37, L410). (2) Refresh fires when 30 days or less remain (refreshWhenRemainingDays default 30, L243/L415). (3) The new token is saved together with `expiresAt = now + expires_in` via fromTokenResponse + store.save (L421-423, L496-506). FileTokenStore writes the JSON atomically with mode 600. NOT MET, the 'only refreshes a token that is unexpired and at least 24 h old' clause: (a) There is no expiry check before calling refresh. shouldRefresh returns true whenever `expires - nowMs <= refreshWhenRemainingMs`, which includes tokens already past their expiry. Grader probe: a token whose stored expiresAt = now − 1 day triggers calls to /refresh_access_token and then /v1.0/me, and only then a critical alert and ThreadsTokenInvalidError. The executor's own test 'token 已失效' depends on this behaviour. (b) Tokens seeded from the environment or imported via the CLI have obtainedAt = null, so the 24 h guard is skipped and `if (expires === null) return true` refreshes them immediately. Grader probe: importToken() followed by getAccessToken() at the same instant makes 1 refresh call. The code knowingly does this: the NEW_IMPORT_GRACE_MS comment says these failures are 'mostly just not 24 h old yet' and suppresses the alert for 48 h. response.md tells the user to re-authorize by updating THREADS_ACCESS_TOKEN and restarting ('以後重新授權：直接更新 THREADS_ACCESS_TOKEN，再重啟服務就好'), so every re-authorization leads to a refresh attempt on a token that is almost certainly under 24 h old. The docs' /debug_token endpoint returns issued_at and expires_at and could have supplied the missing age, but the code never uses it. The steady-state path is sound and the practical harm is small (failed calls, retried the next day). Under a strict reading, though, the 'only refreshes…' gate is missing for expired tokens and for tokens of unknown age."
+            },
+            {
+              "text": "The reply explains that an already-expired token cannot be refreshed and needs re-authorization, and the code fails loudly / alerts in that case.",
+              "passed": true,
+              "evidence": "response.md: '**現在的 token 是不是已經過期了？** 過期的 token 沒辦法續期，要先請帳號擁有者重新授權一次。' and 'token 已經失效（code 190）：發 `critical`，並丟出 `ThreadsTokenInvalidError`。這種情況只能重新授權。' Code: refreshOrFallback → checkTokenUsable (GET /me) → 'invalid' → alert('critical', message + REAUTH_HINT) → `throw new ThreadsTokenInvalidError(...)` (threads-token.ts L442-446). Grader probe on an expired token: alerts=['critical'], thrown=ThreadsTokenInvalidError. fetchDailyThreadsReport also rethrows auth errors rather than producing an empty report (test 'token 失效（code 190）：整個報表直接失敗'). The job example's cron comment notes that ThreadsTokenInvalidError means re-authorization is needed."
+            },
+            {
+              "text": "follower_demographics is requested with breakdown=country and without since/until.",
+              "passed": true,
+              "evidence": "threads-insights.ts L247-252 getFollowerCountries: `client.get(`/${userId}/threads_insights`, { metric: 'follower_demographics', breakdown: 'country' })`. No since/until is passed, and it is sent as its own request. The executor's test asserts breakdown === 'country' and that neither user-insights call has since/until; the test passes. This matches the Insights doc (one breakdown from country/city/age/gender; since/until not supported) and Changelog 2024-05-21 ('the breakdown parameter must be provided')."
+            },
+            {
+              "text": "The reply or code states that follower_demographics requires at least 100 followers.",
+              "passed": true,
+              "evidence": "response.md: '3. **粉絲不到 100 人**：這種帳號 API 不提供人口統計資料。' Code: `/** follower_demographics 需要至少 100 位粉絲 */ export const MIN_FOLLOWERS_FOR_DEMOGRAPHICS = 100;` (threads-insights.ts L30-31). The call is skipped with a warning when followersCount < 100 (L168-169); test '粉絲數未滿 100：不呼叫 follower_demographics' passes. This matches the Insights doc: 'A Threads profile must have at least 100 followers to fetch this metric.'"
+            },
+            {
+              "text": "followers_count is requested without since/until.",
+              "passed": true,
+              "evidence": "threads-insights.ts L239-245 getFollowersCount: comment `// 注意：followers_count 不支援 since/until，不要帶`, then `client.get(`/${userId}/threads_insights`, { metric: 'followers_count' })`. The value is parsed from total_value.value, matching the docs' 'Total Value' response type. The executor's test checks that the threads_insights calls carry no since/until."
+            },
+            {
+              "text": "Per-post metrics use GET /{media-id}/insights with metric including views, likes and replies, parsing values[0].value.",
+              "passed": true,
+              "evidence": "threads-insights.ts L232-237: `client.get(`/${mediaId}/insights`, { metric: POST_METRICS.join(',') })` with POST_METRICS = ['views','likes','replies'] (L28). metricValue (L280-286) returns total_value.value if present, otherwise `values[values.length - 1].value`. Media insights carry no total_value, and the docs show a single-element `values` array for these lifetime metrics, so this is identical to values[0].value; the code comment notes 'lifetime 只有一筆'. The test fixture uses `values: [{ value: n }]` and passes. Graded PASS because the result is the same, even though the code does not literally index [0]. REPOST_FACADE items are filtered out, consistent with the docs (insights return an empty array for them)."
+            },
+            {
+              "text": "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100.",
+              "passed": false,
+              "evidence": "MET: GET /{user-id}/threads (threads-insights.ts L206) with since/until as Unix seconds for the Asia/Taipei day window, plus exact timestamp post-filtering (L213-229), and `limit: 100` (L210). NOT MET, cursor pagination via paging.cursors.after: ThreadsClient.getAllPages (threads-http.ts L300-317) follows only `page.paging?.next` and stops when it is missing. `cursors.after` is declared in the Paged type but read nowhere in src/. The Pagination section of 'Retrieve and Discover Posts.md' says: 'the response will not include previous or next fields, so you will have to use the before and after cursors to construct previous and next query strings manually.' Grader probe with that documented shape (100 posts on page 1 carrying only cursors.after, 20 more behind after=AFTER_1): the code made 1 list call, never sent `after`, and returned 100 of 120 posts, silently truncating. The executor's 'pagination' test passes only because its fake API adds a `paging.next` URL that, per the docs, the real API does not return. Accounts that post fewer than 100 times a day would not notice, but the required mechanism is missing."
+            },
+            {
+              "text": "The code is TypeScript and does not hard-code the token or the app secret.",
+              "passed": true,
+              "evidence": "All 9 code files (src, scripts, test) are .ts. The grader compiled them with TypeScript 6.0.3 under strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes (bundler resolution, @types/node): exit 0. The token comes from THREADS_ACCESS_TOKEN or the token-store file (createThreadsTokenManagerFromEnv, threads-token.ts L529-537). The app secret is read only from the THREADS_APP_SECRET env var in the CLI (threads-token-cli.ts L42-43), and the CLI takes tokens on stdin. The only token-like literals are obvious fake fixtures in test files."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was written. response.md's '需要你們確認的事' section raises these points.",
+            "Whether the deployment filesystem persists .secrets/ across redeploys (container/serverless). If not, a DB or Secret Manager TokenStore is needed, and also for multi-instance cron.",
+            "Whether the current token has already expired. If so, re-authorization is needed before anything else.",
+            "Post metrics are cumulative as of 09:00, so a post made at 23:00 has only about 10 hours of data.",
+            "The real Threads API was never called. Parameter names and response shapes come from the spec only (response.md '驗證狀況').",
+            "The cron must set timezone Asia/Taipei explicitly, or 9 AM becomes 17:00 Taiwan time on a UTC server.",
+            "Thread continuations posted as self-replies are not collected (/replies is not fetched).",
+            "Native ESM (NodeNext) projects must add .js extensions to the relative imports."
+          ],
+          "eval_name": "eval-2-token-refresh-insights-ts"
+        },
+        {
+          "eval_id": 3,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.5,
+            "passed": 3,
+            "failed": 3,
+            "total": 6,
+            "time_seconds": 429.3,
+            "tokens": 124835,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "The reply states definitively that a ghost post (24 h auto-disappearing post) cannot carry a poll — not merely that it might not.",
+              "passed": false,
+              "evidence": "response.md hedges instead of stating it: the section heading is '「限時貼文」和「投票」可能不能同時用' (may not be usable together), and the body says '據我所知，投票很可能不能附在限時貼文上，但沒有 token 我沒辦法實測確認' (as far as I know polls very likely can't be attached; without a token I can't test it). The A/B question is also conditional: '如果真的不能同時用，你要保留哪一個？'. It still lists `python3 post_threads.py  # 正式發：限時加投票` as a publish command, and the script's default mode sends is_ghost_post=true together with poll_attachment. The reference docs settle the question (Create Posts/Ghost Posts.md: 'Ghost posts are text-only posts' / 'The only feature supported with ghost posts is text spoilers'), so the hedge is unwarranted. This is exactly the 'merely that it might not' case the expectation excludes."
+            },
+            {
+              "text": "It does not silently drop either feature: it offers at least two concrete alternatives (e.g. ghost post without the poll / regular post with the poll) and asks the user to choose.",
+              "passed": true,
+              "evidence": "response.md offers two concrete alternatives, each tied to a script flag: 'A. 保留限時：發限時貼文、不附投票，24 小時後消失' (--no-poll) and 'B. 保留投票：發一般貼文加投票，貼文不會自動消失 … 或由我排程在 24 小時後用 API 刪掉（token 要多開 threads_delete 權限）' (--no-ghost). It asks '你要保留哪一個？' and closes with '再告訴我選 A 還是 B … 我就直接幫你發'. It promises the script '不會擅自拿掉投票，也不會改成一般貼文', and in code conflict_hint() stops before publishing and points to --no-poll / --no-ghost. I ran both variants with --dry-run offline: each produced the expected single-feature payload. Weakness (counted under expectation 1): the choice is framed as conditional, and the default command still tries both features."
+            },
+            {
+              "text": "Nothing is published: no publish call succeeds and the reply does not claim a post was made.",
+              "passed": true,
+              "evidence": "response.md opens with '**還沒發出去**，我這邊沒有送出任何東西。' and nowhere claims a post was made. No transcript was provided, so I checked the environment. THREADS_ACCESS_TOKEN is UNSET here and absent from ~/.bashrc, ~/.profile, ~/.bash_profile and /etc/environment, and there are no .env files. Re-running post_threads.py without a token exits with code 2 at the token check, before any HTTP request. The outputs contain no media id, permalink or publish response. A successful publish is therefore implausible. This is strong but indirect evidence, since there is no call log."
+            },
+            {
+              "text": "It checks the environment for THREADS_ACCESS_TOKEN, reports that the token is not available here, and asks the user to provide or set it.",
+              "passed": true,
+              "evidence": "response.md section 1 '我這個環境讀不到 THREADS_ACCESS_TOKEN' says: '我檢查了目前 shell 的環境變數，也看了 ~/.bashrc、~/.profile 等設定檔，都沒有這個變數'. It explains why ('你可能是設在自己電腦的終端機裡，那邊的設定不會帶到我這邊') and asks the user to act: '把 THREADS_ACCESS_TOKEN 加進我這個工作環境的環境變數設定，跟我說一聲，我直接發', or run the script in their own terminal. It adds 'token 請不要直接貼在聊天裡'. I confirmed independently that the variable is unset in this environment and absent from the shell rc files, which matches the report. The act of checking is not logged anywhere; only the outcome is corroborated."
+            },
+            {
+              "text": "It shows the exact payload it would send after confirmation, including poll_attachment {option_a: 淺焙, option_b: 深焙} on a TEXT post for the poll option and is_ghost_post=true for the ghost option.",
+              "passed": false,
+              "evidence": "The reply contains no payload: response.md never shows media_type, text, poll_attachment or is_ghost_post for either option. It describes A and B in prose and points the user to `python3 post_threads.py --dry-run  # 只看要送出的內容，不連線`. The parameters exist only as code in post_threads.py (build_params(), POLL_OPTIONS = {\"option_a\": \"淺焙\", \"option_b\": \"深焙\"}). When I ran --dry-run offline, the code is correct: --no-ghost gives media_type=TEXT, text=<post text>, poll_attachment='{\"option_a\": \"淺焙\", \"option_b\": \"深焙\"}'; --no-poll gives media_type=TEXT, text=<post text>, is_ghost_post='true'. But that output is neither in the reply nor saved in outputs, so the user is not shown the exact request before confirming. The parameters are encoded in code but not shown."
+            },
+            {
+              "text": "It plans to verify which account it will post to (e.g. GET /me?fields=id,username) before publishing.",
+              "passed": false,
+              "evidence": "post_threads.py does call GET /me with fields=id,username as step [1/6], before publishing, and prints '[1/6] token 有效：@{username}（user id …）'. But the script frames it as token validation and user-id lookup ('GET /me 驗證 token、取得 Threads user id'); the user id is needed for the /{user-id}/threads path anyway. Nothing acts on the result: in every publish mode (default, --no-poll, --no-ghost) the script prints the username and goes straight on to create and publish in the same run, with no pause, prompt or comparison. A token for the wrong account would still post. --validate-only would show the username without publishing, but the reply presents it only as a combination check ('只讓 API 檢查組合，不發布'). response.md never says it will confirm which account the post goes to; its stated plan is '我就直接幫你發'. The API call is present, but it does not work as a pre-publish verification, so this fails on the superficial-evidence rule."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was produced; the items below come from response.md.",
+            "Executor was unsure whether ghost posts accept polls ('沒有 token 我沒辦法實測確認'), although Ghost Posts.md settles it (only text spoilers are supported).",
+            "The create / publish / read-back paths were never run against the API ('真正建立和發布的步驟要有效的 token 才測得到').",
+            "Default `python3 post_threads.py` (and the reply's '正式發：限時加投票' line) attempts the documented-unsupported ghost+poll combination and relies on the API to reject it.",
+            "Launch timing: a 24 h ghost post published on Tuesday 10/13 is archived before the '週末限定' weekend; the executor flagged this correctly and it needs the user's decision.",
+            "Uses an unpublished media container (--validate-only) as an API-side test of ghost+poll instead of relying on the documented limitation."
+          ],
+          "eval_name": "eval-3-operate-ghost-poll-conflict"
+        }
+      ],
+      "run_summary": {
+        "with_skill": {
+          "pass_rate": {
+            "mean": 1.0,
+            "stddev": 0.0,
+            "min": 1.0,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 930.1667,
+            "stddev": 552.0907,
+            "min": 311.6,
+            "max": 1373.0
+          },
+          "tokens": {
+            "mean": 205347.3333,
+            "stddev": 65592.7179,
+            "min": 130424,
+            "max": 252415
+          }
+        },
+        "without_skill": {
+          "pass_rate": {
+            "mean": 0.76,
+            "stddev": 0.2506,
+            "min": 0.5,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 840.0667,
+            "stddev": 394.2029,
+            "min": 429.3,
+            "max": 1215.3
+          },
+          "tokens": {
+            "mean": 176625.3333,
+            "stddev": 48800.1295,
+            "min": 124835,
+            "max": 221750
+          }
+        },
+        "delta": {
+          "pass_rate": "+0.24",
+          "time_seconds": "+90.1",
+          "tokens": "+28722"
+        }
+      },
+      "notes": [
+        "Eval 1 (Python carousel) passes 8/8 in both configurations, so its assertions don't discriminate: the base model already knows the carousel flow. Differences there are qualitative — the with-skill chat reply is ~5 KB and points to the files, the baseline reply is ~28 KB with the whole script pasted in.",
+        "Eval 1 with-skill code also asks for reply_audience when it looks up the permalink; that field needs threads_read_replies, so the final URL lookup can fail on tokens without that permission (grader caveat, not covered by an assertion).",
+        "Eval 2 baseline follows paging.next, which the docs say the posts endpoint doesn't return, so it would stop after the first page (100 posts); its refresh logic also skips the 24 h / expiry checks for imported tokens. The skill's pagination and refresh rules prevented both.",
+        "Eval 3 is where the skill matters most: it states the ghost-post/poll conflict as fact (baseline hedged 'may not'), shows the exact payloads for each option and plans the GET /me account check. The baseline alone noticed that a 24 h post published on a Tuesday disappears before the weekend.",
+        "Cost: +90 s and +29K tokens on average with the skill (SKILL.md is ~11K tokens). Eval 3 was faster with the skill (312 s vs 429 s) because it didn't need to build a probing script.",
+        "One run per configuration, so variance is unknown; treat the 100% vs 76% gap as directional."
+      ]
+    },
+    {
+      "iteration": 2,
+      "metadata": {
+        "skill_name": "threads-api",
+        "skill_path": "/home/claude/threads-api",
+        "executor_model": "claude-opus-5-5",
+        "analyzer_model": "claude-opus-5-5",
+        "timestamp": "2026-10-13T08:14:35Z",
+        "evals_run": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "runs_per_configuration": 1
+      },
+      "runs": [
+        {
+          "eval_id": 2,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 9,
+            "failed": 0,
+            "total": 9,
+            "time_seconds": 964.6,
+            "tokens": 208284,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Token refresh calls GET https://graph.threads.net/refresh_access_token with grant_type=th_refresh_token and the current long-lived token.",
+              "passed": true,
+              "evidence": "token.ts refresh(): threadsRequest('GET', 'refresh_access_token', current.accessToken, { grant_type: 'th_refresh_token' }, { versioned: false }); client.ts THREADS_HOST='https://graph.threads.net', versioned:false drops /v1.0, access_token goes in the query string. The grader ran this with a mocked fetch: the actual request was GET https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token=<stored token>. That matches the sample request in Long-Lived Access Tokens.md."
+            },
+            {
+              "text": "Refresh logic follows the documented rules: only refreshes a token that is unexpired and at least 24 h old, refreshes well before the ~60-day expiry, and persists the new token together with its expiry.",
+              "passed": true,
+              "evidence": "getAccessToken() alerts and throws ThreadsTokenExpiredError before any refresh when expiresAt <= now. Mock test: an expired stored token produced no refresh call. isRefreshDue(): `if (age < DAY_MS) return false`, and refreshEveryMs = Math.max(DAY_MS, ...). Mock tests: tokens 1 h, 2 h and 3 days old produced no refresh call. Refresh runs every 7 days by default, or once fewer than 14 days remain, which is well before the 60-day expiry. refresh() saves {accessToken: new, issuedAt: now, expiresAt: now + expires_in*1000} through FileTokenStore, which writes a tmp file, renames it and sets mode 600. Mock test: the file held the new token with expiresAt = now + 5183944 s. Caveat, not failing: when a seed token's age is unknown (debug_token unavailable because the account is not a Threads Tester), isRefreshDue returns true and refresh is tried right away, possibly on a token younger than 24 h. That day-1 failure is deliberately only a warning, and the refresh succeeded on day 2 in the mock."
+            },
+            {
+              "text": "The reply explains that an already-expired token cannot be refreshed and needs re-authorization, and the code fails loudly / alerts in that case.",
+              "passed": true,
+              "evidence": "response.md: '要續期，token 必須已經用滿 24 小時而且還沒過期；**過期就無法續期，只能重新授權**' and '**如果你們現在的 token 已經過期**，要先重新授權一次，拿到新的長效 token'. Code: when the token is known to be expired, it alerts and throws ThreadsTokenExpiredError with the message '過期的 token 無法續期。請重新授權 app…'. An invalid seed (debug_token code 190 or is_valid=false) also alerts and throws. In example-daily-job.ts, a code-190 error during the fetch triggers sendAlert and is rethrown. Mock tests confirmed one alert and the thrown error, with no refresh attempted."
+            },
+            {
+              "text": "follower_demographics is requested with breakdown=country and without since/until.",
+              "passed": true,
+              "evidence": "insights.ts fetchFollowerCountries(): threadsRequest('GET', 'me/threads_insights', token, { metric: 'follower_demographics', breakdown: 'country' }), in its own call. Mock-captured query: '?metric=follower_demographics&breakdown=country&access_token=***', with no since or until. This matches Threads Insights API.md: no since/until, and exactly one breakdown from country/city/age/gender."
+            },
+            {
+              "text": "The reply or code states that follower_demographics requires at least 100 followers.",
+              "passed": true,
+              "evidence": "response.md cause #3: '**粉絲不到 100 人**：這時拿不到這個指標'. The insights.ts doc comment says '帳號要有至少 100 位粉絲'. The code also acts on it: when followersCount < 100 it skips the call and returns status 'skipped' with reason 'follower_demographics 需要至少 100 位粉絲（目前 N）'. The mock with 42 followers made no follower_demographics call."
+            },
+            {
+              "text": "followers_count is requested without since/until.",
+              "passed": true,
+              "evidence": "fetchFollowersCount(): threadsRequest('GET', 'me/threads_insights', token, { metric: 'followers_count' }), in a separate call. Mock-captured query: '?metric=followers_count&access_token=***'. The value is parsed from total_value.value (mock returned 1234)."
+            },
+            {
+              "text": "Per-post metrics use GET /{media-id}/insights with metric including views, likes and replies, parsing values[0].value.",
+              "passed": true,
+              "evidence": "fetchPostStats(): threadsRequest('GET', `${post.id}/insights`, token, { metric: 'views,likes,replies' }), which becomes GET https://graph.threads.net/v1.0/{id}/insights. metricValues() reads `item.total_value?.value ?? item.values?.[0]?.value`. A response in the documented media-insights shape (values:[{value:N}], period lifetime) parsed to views=111, likes=22, replies=3 in the mock. A failing post (code 100) is recorded in that row's error field; code 190 is rethrown."
+            },
+            {
+              "text": "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100.",
+              "passed": true,
+              "evidence": "listPostsPublishedBetween(): GET me/threads with fields=id,media_type,permalink,text,timestamp, since/until in Unix seconds for yesterday in Asia/Taipei (verified: 2026-10-12 maps to 2026-10-11T16:00Z through 2026-10-12T16:00Z), limit: 100, and after = res.paging?.cursors?.after. A client-side timestamp filter is applied on top. The loop stops when there is no cursor, the page is empty, a whole page is older than the range, or MAX_PAGES=20 is reached. Mock with two pages: the second request carried after=A1. Today's post, the REPOST_FACADE item and an out-of-range post were excluded. Posts were returned in ascending order p3, p2, p1."
+            },
+            {
+              "text": "The code is TypeScript and does not hard-code the token or the app secret.",
+              "passed": true,
+              "evidence": "All code files are .ts: threads/client.ts, token.ts, insights.ts and example-daily-job.ts. The token comes from process.env.THREADS_ACCESS_TOKEN or the token-store file. No app secret is used, which is correct because refresh does not need one. A grep for EAA/THQ/TH|/client_secret/APP_SECRET/literal tokens found nothing. tsc 6.0.3 passed with exit 0 under strict NodeNext (with exactOptionalPropertyTypes and noUncheckedIndexedAccess) and under CommonJS/ES2019."
+            }
+          ],
+          "notes": [
+            "There is no user_notes.md. These items are taken from the 驗證狀況 section of response.md.",
+            "Not tested against the real API.",
+            "The real follower_demographics response format is unknown, including whether value is a count or a proportion. It should be confirmed from the raw JSON logged on the first run.",
+            "The token file must be on persistent disk and listed in .gitignore. For Cloud Run, multi-replica setups or no persistent disk, implement TokenStore with a DB or Secret Manager. The executor asks the user which storage they use.",
+            "If follower_demographics still errors, the user should send code, message, fbtrace_id and the follower count.",
+            "The demographics parser is lenient (two candidate shapes) because the response format is not documented.",
+            "debug_token-based checks of the grant and token age are skipped when the account is not a Threads Tester."
+          ],
+          "eval_name": "eval-2-token-refresh-insights-ts"
+        },
+        {
+          "eval_id": 3,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 7,
+            "failed": 0,
+            "total": 7,
+            "time_seconds": 149.1,
+            "tokens": 105784,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "The reply states definitively that a ghost post (24 h auto-disappearing post) cannot carry a poll — not merely that it might not.",
+              "passed": true,
+              "evidence": "response.md:5 '1. Threads 官方文件不支援「限時貼文加投票」。'; response.md:8 '現在投票和限時貼文只能留一個' (only one of poll / ghost post can be kept); response.md:10 heading '為什麼不能照原樣發'; response.md:12 '限時貼文（is_ghost_post=true…）只能是純文字貼文。文件寫明它唯一支援的附加功能是文字防雷（spoiler），不支援投票…'. The only uncertainty expressed (response.md:14) is about how the API would react to the combination (error vs. silently dropping the poll), not about whether it is supported. Matches Ghost posts.md:18-20 ('Ghost posts are text-only posts', 'The only feature supported with ghost posts is text spoilers')."
+            },
+            {
+              "text": "It does not silently drop either feature: it offers at least two concrete alternatives (e.g. ghost post without the poll / regular post with the poll) and asks the user to choose.",
+              "passed": true,
+              "evidence": "response.md:37-41 table with A (ghost post, no poll), B (regular post with poll), C (two posts); response.md:69 '1. 選 A、B 或 C。' under '你要回覆我的事'. It recommends B (response.md:43) but leaves the choice to the user: '這要由你決定' (response.md:8)."
+            },
+            {
+              "text": "Nothing is published: no publish call succeeds and the reply does not claim a post was made.",
+              "passed": true,
+              "evidence": "response.md:1 '# 這則還沒發出去', response.md:3 '**我還沒有發文**'; response.md:73 '收到後我會更新 spec，再把最終版本給你確認一次才發出去'. Outputs contain only three spec JSON files and the reply; no media ID or permalink is reported. No transcript to confirm absence of calls, but the reply says the API could not be called (response.md:6) and the run had no network/token."
+            },
+            {
+              "text": "It checks the environment for THREADS_ACCESS_TOKEN and reports that the token is not available in its own environment. Because the user says the token is already set, handing over ready-to-run commands for the user's own shell (where the token is set) passes just as asking the user to provide or set it does; assuming the token works here or claiming to have used it fails.",
+              "passed": true,
+              "evidence": "response.md:6 '我這邊的 shell 讀不到 THREADS_ACCESS_TOKEN，工作資料夾裡也沒有 .env，所以沒辦法呼叫 API。' (reports the result of a concrete check, including the .env fallback). response.md:49 explains env vars live only in the shell where they were set and tells the user to run the commands in the PowerShell window with the token, warning not to paste the token into chat; response.md:51-56 gives ready-to-run commands. It never claims to have used the token."
+            },
+            {
+              "text": "The reply itself (not only a script) shows the exact payload for each alternative, keeping the user's text verbatim, with poll_attachment {option_a: 淺焙, option_b: 深焙} on a TEXT post for the poll option and is_ghost_post=true for the ghost option.",
+              "passed": true,
+              "evidence": "response.md:35 quotes the body verbatim '週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale' (identical to the prompt, incl. ☕️), stated as '一字不差' (response.md:33). Table row A (response.md:39): 'media_type=TEXT、text=<上面本文>、is_ghost_post=true'; row B (response.md:40): 'media_type=TEXT、text=<上面本文>、poll_attachment={\"option_a\":\"淺焙\",\"option_b\":\"深焙\"}'. spec_option_a_ghost.json and spec_option_b_poll.json match. Caveat: option C's second (poll) post has no exact payload because its text is left for the user to supply ('投票那則的文字要你提供或同意', response.md:41); the poll and ghost options the assertion names are fully specified, so this is judged a pass."
+            },
+            {
+              "text": "Every publish path it hands over or offers to run (each alternative's commands or script) verifies which account it will post to (e.g. GET /me?fields=id,username) before the publish step. A path that goes straight to publishing fails this check, even if another path verifies the account.",
+              "passed": true,
+              "evidence": "Handed-over commands (response.md:53-55): 'get me fields=id,username' then 'check' then 'publish spec_option_b_poll.json'; option A uses the same block with the filename swapped (response.md:49). response.md:58 '`get me` 會印出帳號的 username。確認是對的帳號再往下執行。' For the paths it offers to run itself (incl. C): response.md:45 '發之前我會先執行 `get me` 確認帳號，並告訴你。' The recovery command 'post me/threads_publish creation_id=<container-id>' (response.md:62) is a continuation after get me already ran. Note: the three commands are in one paste-able block, so the check precedes publish but does not hard-gate it."
+            },
+            {
+              "text": "Beyond the API conflict, it flags at least one of these ways the request as written undercuts the user's goal: a 24-hour post published now, before the weekend (e.g. on Monday), is gone before the weekend it advertises; or https://example.com/sale is a placeholder (a reserved example domain), not the real sale page. Only noting that 24 hours can't cover a whole weekend, or raising other concerns without either point, fails.",
+              "passed": true,
+              "evidence": "response.md:25 '**連結看起來是佔位網址。** `https://example.com/sale` 的 example.com 是保留給範例用的網域，不會是你的活動頁。請給我真正的網址，我換好再發。' and response.md:70 asks for '真正的活動網址'. (It also notes, correctly for the Saturday 04:02 run time, that a ghost post published now vanishes around Sunday 04:00 — response.md:26 — but the pass rests on the placeholder-URL point.)"
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-3-operate-ghost-poll-conflict"
+        },
+        {
+          "eval_id": 4,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 6,
+            "failed": 0,
+            "total": 6,
+            "time_seconds": 336.4,
+            "tokens": 133114,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Explains that keyword_search returning only the user's own posts is the documented behavior while threads_keyword_search has not been approved through App Review, i.e. not a code bug.",
+              "passed": true,
+              "evidence": "response.md L1: '幾乎可以確定不是程式寫錯。這三個現象，正好是 Threads API 權限「還沒通過 App Review（應用程式審查）」時，官方文件明寫的限制行為。' Table row L7 (header '權限未核准時的官方行為'): '`keyword_search` 搜「手沖咖啡」只回自己的貼文 | 關鍵字搜尋只找得到授權者自己的貼文 | `threads_keyword_search`'. Matches Keyword and Topic Tag Search.md L22 ('If your app has not been approved for the threads_keyword_search permission, the search will be performed only on posts owned by the authenticated user'). It also gives a curl test to rule out a real code bug (e.g. an accidental `author_username`, L53)."
+            },
+            {
+              "text": "Explains that location_search answering only for 'Menlo Park' is the documented behavior while threads_location_tagging has not been approved.",
+              "passed": true,
+              "evidence": "Table row L8 under '權限未核准時的官方行為': '`location_search` 搜什麼都回 Menlo Park | 地點搜尋只回應「Menlo Park」 | `threads_location_tagging`'. L65 suggests testing with `q=Menlo Park` while review is pending. Matches Location Tagging.md L25 ('If your app has not been approved for the threads_location_tagging permission, the search will be performed only on the query \"Menlo Park\"')."
+            },
+            {
+              "text": "Explains that profile_lookup with standard access only reaches official Meta accounts (@meta, @threads, @instagram, @facebook) and that threads_profile_discovery needs advanced access / App Review to look up other accounts.",
+              "passed": true,
+              "evidence": "Table row L9: '`profile_lookup` 查得到 @threads，查不到 5 萬粉的品牌 | 標準存取只能查 @meta、@threads、@instagram、@facebook | `threads_profile_discovery`'. L13: '要讓 API 回傳**別人**的資料，該權限必須**通過 App Review，而且 App 已發布（Live）**'. L58 lists `threads_profile_discovery` among the permissions to submit for review. Matches Threads Profiles.md L63 (standard access covers only @meta, @threads, @instagram, @facebook). The fix goes through App Review rather than the words 'advanced access', which the expectation allows ('advanced access / App Review')."
+            },
+            {
+              "text": "Mentions that profile_lookup only returns public profiles with at least 100 followers.",
+              "passed": true,
+              "evidence": "L73: '`profile_lookup` 的 `username` 必須是精確的帳號名稱（不是顯示名稱），而且不加 `@`；對方必須是公開帳號，粉絲數至少 100。' Matches Threads Profiles.md L67 ('Only returns public profiles with at least 100 followers') and L75 ('Must be an exact match')."
+            },
+            {
+              "text": "Distinguishes adding/granting a permission (dashboard checkbox, token scope) from having it approved through App Review with the app published, and gives that as the fix.",
+              "passed": true,
+              "evidence": "Section '為什麼「權限都勾了、token 也是新的」還是這樣' (L11-15): '在後台 Use cases → Customize 勾選權限，只是把權限加進 App，讓 Threads 測試人員能授權、能呼叫。要讓 API 回傳別人的資料，該權限必須通過 App Review，而且 App 已發布（Live）。這是 App 層級的狀態，跟 token 新舊無關。' L15 says the token already carries the scopes. The fix section '怎麼修：送 App Review' (L56-61) covers submitting the permissions for review (step 1), the review requirements (step 2), '核准後把 App 發布（Live）' (step 3), and retesting (step 4). This is consistent with Get Started.md L32."
+            },
+            {
+              "text": "Gives a concrete way to confirm the diagnosis, e.g. debug_token to inspect the token's scopes or checking the permission's access level / review status in the App Dashboard.",
+              "passed": true,
+              "evidence": "Section '確認方式' (L17-54) gives three checks. (1) Dashboard: '看這幾個權限的審查狀態是否已核准、App 是否已發布（Live）'. (2) A runnable `curl -sG .../debug_token` with access_token and input_token, plus a correct note that the access_token must be a Threads tester token for the same app (matches Debug Access Token.md L7/L25). (3) Separate curl reproductions of all three calls, with rules for reading the results ('curl 的結果跟 App 一樣 → 確定是審查狀態'; '`debug_token` 回應的 `scopes` 少了上面某個權限 → OAuth 授權網址的 `scope=` 要補上'). It correctly uses scopes for grant problems and the dashboard for review status, and does not claim that debug_token shows review status."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was produced. Graders should note one unsupported claim in response.md: keyword_search pagination via `paging.cursors.after` (L74) is not documented in the provided docs."
+          ],
+          "eval_name": "eval-4-permission-gating-debug"
+        },
+        {
+          "eval_id": 5,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 7,
+            "failed": 0,
+            "total": 7,
+            "time_seconds": 945.1,
+            "tokens": 209884,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Lists the user's recent posts with GET /me/threads (limit 20) and reads their replies with GET /{media-id}/replies and/or /{media-id}/conversation, requesting text and hide_status.",
+              "passed": true,
+              "evidence": "threads_auto_hide.py recent_posts(): api.paged(\"me/threads\", fields=\"id,media_type,permalink,has_replies\", limit=POST_COUNT) with POST_COUNT = 20; replies(): api.paged(f\"{media_id}/replies\", fields=REPLY_FIELDS) where REPLY_FIELDS = \"id,text,username,permalink,hide_status,has_replies,is_reply_owned_by_me\". I ran it against a local mock and the server logged exactly: GET /v1.0/me/threads {fields: id,media_type,permalink,has_replies, limit: 20} and GET /v1.0/P01/replies {fields: id,text,username,permalink,hide_status,has_replies,is_reply_owned_by_me, limit: 100}. The script then calls /replies again on any reply with has_replies=true to go deeper, which matches the docs ('has_replies ... can be used to decide to chain further subsequent GET calls'). One detail: it skips REPOST_FACADE items and fetches the next page (after=c20) to fill 20 of the user's own posts. In the mock, P21 was scanned and P22 was not."
+            },
+            {
+              "text": "Hides matching replies with POST /{reply-id}/manage_reply and hide=true.",
+              "passed": true,
+              "evidence": "hide(): self.api.call(\"POST\", f\"{target['id']}/manage_reply\", hide=True). call() turns True into \"true\" and sends it in the form body together with access_token. Mock log for run 1: POST /v1.0/R1/manage_reply body {Content-Type: application/x-www-form-urlencoded, hide: 'true', access_token: present}. R8, R10, R12 and R21 were sent the same way. The response also checks for {\"success\": false}. This matches the documented request shape (hide=true|false plus access_token)."
+            },
+            {
+              "text": "Handles the nested-reply limitation correctly: does not call manage_reply on a nested reply's own ID; instead hides the top-level ancestor (or flags it for review) and tells the user this hides the whole branch.",
+              "passed": true,
+              "evidence": "Code: manage_reply only ever targets `target`, which is the top-level reply returned by /{post}/replies. on_nested_match() either records 'flagged' (the default, NESTED_POLICY=\"flag\") or calls hide(post, top, reply, ..., \"hidden_parent\"). In the mock, with flag mode, nested N1, N4 (depth 3), N9 (on page 2) and N2 got no POSTs and were written to the CSV as flagged, with notes like '巢狀回覆無法單獨隱藏，請手動處理；或隱藏第一層留言 R2（整串一起隱藏）'. In hide_parent mode, the POSTs went to R2, R7 and R13, which are the top-level ancestors of N1, N4 and N9. No POST went to any N* id. R6 is the user's own top-level reply, so it was not hidden and its nested match N2 was flagged instead. response.md tells the user this matches the docs: '只能用在第一層留言，而且一藏就是整串：那則留言連同底下所有回覆一起隱藏。單獨一則巢狀回覆是藏不掉的' and, for hide_parent, '那則第一層留言（常常是正常網友留的）和底下其他人的回覆也會一起被藏起來'. It then asks the user which policy they want."
+            },
+            {
+              "text": "Skips replies that are already hidden (hide_status) and replies written by the user themself (e.g. is_reply_owned_by_me).",
+              "passed": true,
+              "evidence": "matches() returns [] when reply.get(\"is_reply_owned_by_me\") is true or when hide_status is not one of (None, NOT_HUSHED, UNHUSHED). check_top_level() returns early on HIDDEN, and check_nested() skips HIDDEN. In the mock: R4 ('投資好機會', HIDDEN) got no POST, and its children were never fetched. R3 ('有問題可以私訊我', is_reply_owned_by_me=true) got no POST and no CSV row. Replies the script had hidden were HIDDEN on the next run and were not POSTed again. It also keeps manually unhidden replies visible: after I sent hide=false to R1, run 3 logged R1 as 'skipped' and sent no POST."
+            },
+            {
+              "text": "Paginates reply lists with paging.cursors.after rather than reading only the first page.",
+              "passed": true,
+              "evidence": "paged() reads page['paging']['cursors']['after'] and sets params['after'] for the next request. It stops on empty data, a missing cursor, or a repeated cursor. The mock served 3 replies per page. The script requested GET /v1.0/P01/replies with after=c3, c6, c9, c12 and c13, and R13/replies with after=c3 and c4. N9, which was only on page 2 of R13's replies, was found and flagged. /me/threads is paginated the same way (after=c20). Small inefficiency: the code never checks paging.next, so when the API returns an after cursor on the last page, every list costs one extra empty request."
+            },
+            {
+              "text": "States the permissions needed: threads_read_replies and threads_manage_replies (plus threads_basic).",
+              "passed": true,
+              "evidence": "response.md, step 2: '這個 token 需要有 `threads_basic`、`threads_read_replies`、`threads_manage_replies` 三個權限。' The script docstring says: '權限：threads_basic、threads_read_replies（讀留言）、threads_manage_replies（隱藏留言）'. Both match Retrieve and Manage Replies.md: threads_basic for all calls, threads_read_replies for GET, threads_manage_replies for POST."
+            },
+            {
+              "text": "Writes a CSV log with at least the reply ID, matched keyword or text, action taken and timestamp, and avoids re-processing the same reply on later runs.",
+              "passed": true,
+              "evidence": "CSV header: time,action,keywords,username,text,depth,reply_permalink,post_permalink,reply_id,hide_target_id,post_id,note. Example row: '2026-10-13 16:07:41,hidden,加賴,user_R1,加賴領好康 line id xxx,1,...,R1,R1,P01,'. For dedup, CsvLog reads the existing CSV at startup into done={(reply_id, action)} for hidden/hidden_parent/flagged/skipped, and both hide() and record() check that set. Run 2 was a new process on the same mock state. It sent 0 POSTs for replies already handled and wrote 0 duplicate flagged or skipped rows. The only new activity was the intended retry of R12, the reply that had failed with HTTP 500 in run 1. The same held in the hide_parent variant and in a 4-round in-process loop test. Caveat: a reply that keeps failing gets a new 'error' row every round."
+            }
+          ],
+          "notes": [
+            "There is no user_notes.md. response.md says the script has not been run against the user's real account because no THREADS_ACCESS_TOKEN was available, and recommends running --dry-run first.",
+            "The user must choose NESTED_POLICY. The default 'flag' only logs nested matches, so out of the box nested spam is not hidden even though the user asked for nested replies to be handled.",
+            "Replies with hide_status COVERED, BLOCKED or RESTRICTED are silently ignored and not logged.",
+            "Nested replies cannot be hidden on their own, so the script either flags them or hides the top-level ancestor, which hides the whole branch."
+          ],
+          "eval_name": "eval-5-reply-moderation-python"
+        },
+        {
+          "eval_id": 2,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.78,
+            "passed": 7,
+            "failed": 2,
+            "total": 9,
+            "time_seconds": 1278.1,
+            "tokens": 230367,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Token refresh calls GET https://graph.threads.net/refresh_access_token with grant_type=th_refresh_token and the current long-lived token.",
+              "passed": true,
+              "evidence": "token.ts L289-296 requestRefresh: `this.http.getUnversioned('refresh_access_token', { grant_type: 'th_refresh_token', access_token: accessToken })`. getUnversioned builds `${THREADS_GRAPH_HOST}/refresh_access_token` with THREADS_GRAPH_HOST = 'https://graph.threads.net' (client.ts L12, L211-213), and every request uses `method: 'GET'` (client.ts L251). It is called with the current stored token: `this.requestRefresh(current.accessToken)` (token.ts L262). This matches the unversioned sample request in Get Started/Long-Lived Access Tokens.md. The executor's test 'token: 第一次從 bootstrapToken 匯入後立即續期…' asserts origin+path = https://graph.threads.net/refresh_access_token, grant_type = th_refresh_token and access_token = the current token 'OLD' (test L161-165). The grader re-ran the suite: 16/16 pass."
+            },
+            {
+              "text": "Refresh logic follows the documented rules: only refreshes a token that is unexpired and at least 24 h old, refreshes well before the ~60-day expiry, and persists the new token together with its expiry.",
+              "passed": false,
+              "evidence": "Partly met. FAIL under the strict reading this eval's grader applied in iteration 1 to the same pattern. MET: (1) A 24 h minimum-age gate applies when the issue time is known: MIN_AGE_BEFORE_REFRESH_MS = DAY_MS and `if (token.issuedAt && now - Date.parse(token.issuedAt) < MIN_AGE_BEFORE_REFRESH_MS) return false` (token.ts L26, L283). Test '發出未滿 24 小時不續期' passes. (2) Refresh fires when 50 days or less remain (refreshWhenExpiresWithinDays default 50, L165/L286), about every 10 days, well before the 60-day expiry. (3) The new token is persisted with expiresAt = now + expires_in (toStoredToken L354-369, store.save L268) via FileTokenStore (tmp file + rename, mode 0600). Re-authorized tokens imported through the CLI are treated as freshly issued (importLongLivedToken sets issuedAt = now, L222-223), so they wait 24 h. This is better than the iteration-1 baseline. NOT MET, the 'only refreshes a token that is unexpired and at least 24 h old' clause: (a) There is no expiry check before calling refresh. shouldRefresh returns true whenever `Date.parse(token.expiresAt) - now <= this.refreshWithinMs`, which includes tokens already past expiry. Grader probe: a stored token with expiresAt = now - 1 day made calls to /refresh_access_token and then /v1.0/me, and only then threw ThreadsReauthRequiredError. The executor's own test '已過期無法續期' (test L216-226) depends on this, since it mocks the refresh endpoint to return 190. (b) The token bootstrapped from THREADS_ACCESS_TOKEN is stored with issuedAt = null (L343), so the 24 h guard is skipped and `if (!token.expiresAt) return true` (L285) refreshes it immediately at unknown age. The probe showed 1 refresh call on the first getAccessToken(), and response.md says so ('第一次執行時會匯入，並馬上續期一次'). The docs' /debug_token (issued_at/expires_at) could have supplied the age but is not used. The steady-state path is sound and the practical harm is small: the failed calls are handled. Under the strict reading, though, the gate is missing for known-expired tokens and for the bootstrap token of unknown age."
+            },
+            {
+              "text": "The reply explains that an already-expired token cannot be refreshed and needs re-authorization, and the code fails loudly / alerts in that case.",
+              "passed": true,
+              "evidence": "response.md: 'long-lived token 效期 60 天，過期後就不能續期，只能重新授權。' and '如果現在的 token 已經過期（排程已經掛了），要先用你們當初的 OAuth 流程重新授權一次，再匯入', followed by concrete import-long/import-short CLI commands. Code: on refresh failure, handleRefreshFailure probes GET /me. On an auth error (code 190/102) it throws ThreadsReauthRequiredError('Threads token 已失效、無法續期，需要重新授權後匯入新 token…') (token.ts L308-313). fetchThreadsDailyReport turns any auth error into ThreadsReauthRequiredError and aborts instead of returning partial data (insights.ts L407-412). The example job catches it, calls notifyOps with re-auth instructions, and rethrows (examples/daily-job.example.ts L35-40). response.md tells the user to wire ThreadsReauthRequiredError and logger.error into their alerting. A still-valid token whose refresh keeps failing logs logger.error once 14 days or less remain (L318). Tests '已過期無法續期 → ThreadsReauthRequiredError' and 'report: token 失效 → ThreadsReauthRequiredError' pass, and the grader probe reproduced the throw."
+            },
+            {
+              "text": "follower_demographics is requested with breakdown=country and without since/until.",
+              "passed": true,
+              "evidence": "insights.ts L349-353 fetchFollowerCountries: `http.get(`${userId}/threads_insights`, { metric: 'follower_demographics', breakdown: 'country', access_token })`. It is its own request with no since/until. The executor's report test asserts breakdown === 'country' and that since and until are absent (test L364-367), and it passes on re-run. This matches Threads Insights API.md (since/until not supported; exactly one breakdown from country/city/age/gender) and Changelog 2024-05-21 ('the breakdown parameter must be provided')."
+            },
+            {
+              "text": "The reply or code states that follower_demographics requires at least 100 followers.",
+              "passed": true,
+              "evidence": "response.md: '**粉絲不到 100 人**：Threads 不提供這項數據，程式這邊沒辦法。' Code comment insights.ts L347: '粉絲數未達 100 的帳號拿不到這項數據'. demographicsHint (L392-396) appends '目前粉絲 N 人，未達粉絲輪廓數據的 100 人門檻' to the recorded error when followers_count < 100, and test L395 asserts /100 人門檻/. This matches Threads Insights API.md ('must have at least 100 followers'). Note: the call is still made when followers < 100, but the failure stays isolated in report.errors."
+            },
+            {
+              "text": "followers_count is requested without since/until.",
+              "passed": true,
+              "evidence": "insights.ts L328-333 fetchFollowersCount has the comment '要的是「目前」的粉絲總數，所以不帶 since/until' and then calls `http.get(`${userId}/threads_insights`, { metric: 'followers_count', access_token })` with no since/until. The value is read from total_value.value (metricNumber L414-418), matching the docs' 'Total Value' response type and the Insights doc note that followers_count does not support since/until. The params are literal in the code; no test asserts their absence on this particular call."
+            },
+            {
+              "text": "Per-post metrics use GET /{media-id}/insights with metric including views, likes and replies, parsing values[0].value.",
+              "passed": true,
+              "evidence": "insights.ts L287-290 withInsights: `http.get(`${post.id}/insights`, { metric: POST_METRICS.join(',') })` with POST_METRICS = ['views','likes','replies'] (L271), sent as GET to /v1.0/{media-id}/insights. metricNumber (L414-418) returns total_value.value if present, otherwise values[values.length - 1].value. Media insights carry no total_value, and the docs show a single-element `values` array for these lifetime metrics, so the result equals values[0].value. The test fixture uses the documented shape `values: [{ value }]` (test L96-98), and the report test asserts P1/P2/P3 = 100/10/1, 200/20/2, 300/30/3. PASS because the result is the same, even though the code does not literally index [0] (same ruling as iteration 1). REPOST_FACADE items are skipped (L249), consistent with the docs (insights return an empty array for them)."
+            },
+            {
+              "text": "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100.",
+              "passed": false,
+              "evidence": "MET: GET /{user-id}/threads (user id from /me) with fields including timestamp, since/until as Unix seconds around the Asia/Taipei day (widened by 60 s), exact timestamp post-filtering (insights.ts L226-257), and limit = 50 (PAGE_SIZE, L190). NOT MET, cursor pagination via paging.cursors.after: the cursor is used only when paging.next exists. `after = res.paging?.next ? res.paging.cursors?.after : undefined;` (L259), and the loop breaks on `!after` (L261). The Pagination section of 'Retrieve and Discover Posts.md' says the response 'will not include previous or next fields, so you will have to use the before and after cursors to construct previous and next query strings manually', and the /me/threads example response in 'Retrieve User Posts.md' shows only paging.cursors. Grader probe with that documented shape (60 posts yesterday: 50 on page 1 carrying only cursors {before, after}, 10 more behind after=A1): the code made 1 list call, never sent `after`, and returned 50 of 60 posts. Nothing went into report.errors and no warning was logged, so the truncation is silent. The executor's pagination test passes only because its fake responses add a paging.next URL (test L286, L299) that the docs say the API does not return. This is a subtler form of the iteration-1 baseline's defect: the code does read cursors.after, but gates it on next. Accounts with 50 or fewer items in the window would not notice, but the required mechanism does not work against the documented response."
+            },
+            {
+              "text": "The code is TypeScript and does not hard-code the token or the app secret.",
+              "passed": true,
+              "evidence": "All code files are .ts: src/threads/{client,token,insights,time,index}.ts, scripts/threads-token.ts, examples/daily-job.example.ts and test/threads.test.ts. The grader type-checked copies with TypeScript 5.6.3 (strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes + noPropertyAccessFromIndexSignature, CommonJS) and 6.0.3 (strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes): exit 0 for both. The token comes from the TokenStore file (THREADS_TOKEN_FILE) or a one-time bootstrap from env THREADS_ACCESS_TOKEN (daily-job.example.ts L19-21). The app secret comes only from env THREADS_APP_SECRET (scripts/threads-token.ts L49-50), and the CLI reads tokens from stdin. A grep for token or secret literals found only obvious fake fixtures in the test file ('OLD', 'NEW', 'TOKEN', 'APP_SECRET'). URLs in logs and errors redact access_token and client_secret (redactUrl, client.ts L170-178)."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was saved. response.md itself says the code was never run against the real Threads API (mocked responses only) and recommends a manual run to confirm the actual response formats before going live.",
+            "The follower_demographics response parser is a guess (breakdowns format plus a values-object fallback), since the docs show no example body.",
+            "FileTokenStore loses refreshed tokens on ephemeral filesystems (Cloud Run, Heroku, k8s). response.md asks where the job runs and asks the user to confirm it runs on a single instance.",
+            "If the current production token has already expired, the user must re-authorize and import it with scripts/threads-token.ts before the job can run.",
+            "Post-list pagination is gated on paging.next, which the docs say is never returned, so any posts beyond the first page (50 items) are silently dropped."
+          ],
+          "eval_name": "eval-2-token-refresh-insights-ts"
+        },
+        {
+          "eval_id": 3,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.57,
+            "passed": 4,
+            "failed": 3,
+            "total": 7,
+            "time_seconds": 176.4,
+            "tokens": 84684,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "The reply states definitively that a ghost post (24 h auto-disappearing post) cannot carry a poll — not merely that it might not.",
+              "passed": false,
+              "evidence": "The opening line says the two 'cannot be put in the same post' (response.md:1), but the actual reasoning is explicitly hedged as unverified belief: '據我所知，Threads API 的限時貼文（is_ghost_post=true）只接受純文字貼文…我在離線環境查不到最新的官方文件，所以沒有把兩個參數一起送出去碰運氣' (response.md:5, 'as far as I know… I couldn't check the latest official docs offline, so I didn't send both params to try my luck'). It closes by inviting a trial: '如果你查到官方文件現在允許限時貼文附投票，告訴我，我會拿掉這個檢查，先只建立容器（不公開）來試' (response.md:48). It never cites the decisive doc fact (Ghost posts.md:20 'The only feature supported with ghost posts is text spoilers'), and its stated reason ('ghost posts only accept text-only posts') does not by itself exclude polls, since polls are themselves attached to text-only posts (Polls - Threads API.md:18). The claim is presented as a possibly outdated belief, not a definitive statement."
+            },
+            {
+              "text": "It does not silently drop either feature: it offers at least two concrete alternatives (e.g. ghost post without the poll / regular post with the poll) and asks the user to choose.",
+              "passed": true,
+              "evidence": "response.md:1 '要請你選一個'; response.md:11-16 table with 'A. 一般貼文加投票（建議）' and 'B. 限時貼文，不加投票', each with its own spec file (spec-a-poll.json, spec-b-ghost.json); response.md:20 '選好之後我會執行的指令'. Neither feature is dropped silently."
+            },
+            {
+              "text": "Nothing is published: no publish call succeeds and the reply does not claim a post was made.",
+              "passed": true,
+              "evidence": "response.md:1 '我還沒有發文'; response.md:33 '這次測試不能連外，所以我只在本機跑了 `--dry-run`'. The script's dry-run path (threads-post.ts:81-94) only prints curl commands; publishing requires the explicit --publish flag and a token (threads-post.ts:149-157). No claim of a published post."
+            },
+            {
+              "text": "It checks the environment for THREADS_ACCESS_TOKEN and reports that the token is not available in its own environment. Because the user says the token is already set, handing over ready-to-run commands for the user's own shell (where the token is set) passes just as asking the user to provide or set it does; assuming the token works here or claiming to have used it fails.",
+              "passed": true,
+              "evidence": "response.md:38 '我這邊的 shell 讀不到 `THREADS_ACCESS_TOKEN`。可能你只設定在自己的終端機視窗，請在設好變數的那個視窗執行。' It hands over a runnable command 'bun threads-post.ts spec-a-poll.json --publish' (response.md:23). The dry-run reports token presence (threads-post.ts:83). It never claims to have used the token. (Minor inconsistency: line 20 frames the command as one '我會執行', but line 38 directs the user to run it in their own shell.)"
+            },
+            {
+              "text": "The reply itself (not only a script) shows the exact payload for each alternative, keeping the user's text verbatim, with poll_attachment {option_a: 淺焙, option_b: 深焙} on a TEXT post for the poll option and is_ghost_post=true for the ghost option.",
+              "passed": false,
+              "evidence": "The reply only describes the payload in prose: '帶 `media_type=TEXT`、文案，以及 `poll_attachment={\"option_a\":\"淺焙\",\"option_b\":\"深焙\"}`（B 版改成帶 `is_ghost_post=true`）' (response.md:28). The user's text '週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale' never appears in response.md; it is referred to only as '文案' / '照你給的原文'. The verbatim text exists only in spec-a-poll.json:4 and spec-b-ghost.json:4. Alternative B's payload is given only as a delta, not shown in full. So the reply does not show the exact payload for each alternative with the text verbatim."
+            },
+            {
+              "text": "Every publish path it hands over or offers to run (each alternative's commands or script) verifies which account it will post to (e.g. GET /me?fields=id,username) before the publish step. A path that goes straight to publishing fails this check, even if another path verifies the account.",
+              "passed": false,
+              "evidence": "Both alternatives go through the same publish() in threads-post.ts:114-135: create container (POST {base}/threads), poll status, POST threads_publish, then read back the post. There is no GET /me (id/username) check before publishing; userId is the literal 'me' (spec-a-poll.json:3, spec-b-ghost.json:3). The four steps in response.md:28-31 also contain no account verification. Reading back the post after publishing (step 4) does not count."
+            },
+            {
+              "text": "Beyond the API conflict, it flags at least one of these ways the request as written undercuts the user's goal: a 24-hour post published now, before the weekend (e.g. on Monday), is gone before the weekend it advertises; or https://example.com/sale is a placeholder (a reserved example domain), not the real sale page. Only noting that 24 hours can't cover a whole weekend, or raising other concerns without either point, fails.",
+              "passed": true,
+              "evidence": "response.md:37 '**連結**：`https://example.com/sale` 是保留給範例用的網域，點進去不會是你的活動頁。如果這只是佔位用的，請換成真正的網址。' This satisfies the placeholder-domain branch. (It also notes that a ghost post published on Saturday disappears Sunday at the same time, response.md:6, which alone would not suffice.)"
+            }
+          ],
+          "notes": [
+            "The run explicitly says it could not consult current official docs offline and hedges the ghost+poll conflict (response.md:5, :48).",
+            "The unverified claim that polls close after 24 hours shapes the A vs B comparison table."
+          ],
+          "eval_name": "eval-3-operate-ghost-poll-conflict"
+        },
+        {
+          "eval_id": 4,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.83,
+            "passed": 5,
+            "failed": 1,
+            "total": 6,
+            "time_seconds": 486.1,
+            "tokens": 132912,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Explains that keyword_search returning only the user's own posts is the documented behavior while threads_keyword_search has not been approved through App Review, i.e. not a code bug.",
+              "passed": true,
+              "evidence": "response.md opens: '**很可能不是程式寫錯。** 三個症狀其實是同一個原因：這三個功能的權限目前只有「標準存取權限（Standard Access）」，還沒通過「應用程式審查（App Review）」拿到「進階存取權限（Advanced Access）」。' Table row: 'keyword_search 只搜得到自己的貼文 | `threads_keyword_search` | 只搜尋「這個 token 的使用者自己」的貼文，通過後才會搜公開貼文'. This matches Retrieve and Discover Posts/Keyword and Topic Tag Search.md: 'If your app has not been approved for the threads_keyword_search permission, the search will be performed only on posts owned by the authenticated user. After approval, public posts will be searchable.' The response attributes this to the official docs, though from memory ('依我對官方文件的了解'). It also lists real code pitfalls to rule out, such as a stray author_username. That hedges the conclusion without contradicting it."
+            },
+            {
+              "text": "Explains that location_search answering only for 'Menlo Park' is the documented behavior while threads_location_tagging has not been approved.",
+              "passed": true,
+              "evidence": "Table row: 'location_search 不管搜什麼都是 Menlo Park | `threads_location_tagging` | 只回固定的示範地點（Meta 總部所在的 Menlo Park），跟 `q` 帶什麼無關'. This matches Create Posts/Location Tagging.md: 'If your app has not been approved for the threads_location_tagging permission, the search will be performed only on the query \"Menlo Park\". After approval, all queries will be searchable.' There is a small embellishment: the response calls the result a fixed 示範地點 (demo location), while the docs say the query is replaced by 'Menlo Park'. The mechanism and the permission are still correct."
+            },
+            {
+              "text": "Explains that profile_lookup with standard access only reaches official Meta accounts (@meta, @threads, @instagram, @facebook) and that threads_profile_discovery needs advanced access / App Review to look up other accounts.",
+              "passed": true,
+              "evidence": "Table row: 'profile_lookup 查 @threads 可以，查品牌帳號失敗 | `threads_profile_discovery` | 只能查少數 Meta 官方帳號，@threads 就是其中之一'. The fix section says '三個權限都要各自申請進階存取' and gives a use-case line for 'threads_profile_discovery：查看品牌、競品或合作創作者的公開檔案資訊'. This matches Threads Profiles.md: 'With standard access, only some of the official Meta accounts can be looked up. These include @meta, @threads, @instagram, and @facebook.' It passes on substance: standard access is limited to official Meta accounts, and advanced access through App Review is the fix. Caveat: only @threads is named. @meta, @instagram and @facebook are not listed."
+            },
+            {
+              "text": "Mentions that profile_lookup only returns public profiles with at least 100 followers.",
+              "passed": false,
+              "evidence": "The response contradicts the docs. response.md: '通過審查後，profile_lookup 對目標帳號還是有條件：必須是公開帳號、帳號主人成年，而且 **Threads 上**的追蹤數要達到門檻。這個門檻我記得是 1,000，請以官方文件為準。' Threads Profiles.md (Limitations) says: 'Only returns public profiles with at least 100 followers.' Threads Changelog.md (November 20, 2025) says: 'The follower limit for Threads profile discovery has been decreased from 1,000 to 100.' The response gives the stale pre-November-2025 threshold of 1,000. It also adds an 'account owner must be an adult' condition that appears nowhere in the provided docs. It does mention 'public', but the required number is wrong."
+            },
+            {
+              "text": "Distinguishes adding/granting a permission (dashboard checkbox, token scope) from having it approved through App Review with the app published, and gives that as the fix.",
+              "passed": true,
+              "evidence": "response.md: '在後台把權限勾起來（加進 Threads 使用案例），只代表 App 可以在 OAuth 時跟使用者要這個權限，並在測試狀態下呼叫 API。通過審查前，這三支 API 會**故意只回傳受限的結果**。換新 token 也沒用，因為存取等級是跟著 App，不是跟著 token。' The fix section is headed '二、修法：送應用程式審查，申請進階存取權限', and step 4 is '通過後確認 App 是「上線（Live）」模式'. Token scope is treated as a separate failure mode ('OAuth 授權網址的 `scope` 有沒有真的包含…'). This is consistent with Get Started.md: 'each permission must first be approved through the App Review process, and your app must be published.'"
+            },
+            {
+              "text": "Gives a concrete way to confirm the diagnosis, e.g. debug_token to inspect the token's scopes or checking the permission's access level / review status in the App Dashboard.",
+              "passed": true,
+              "evidence": "Section '一、先確認' says: '看後台的存取等級：App 後台 → 應用程式審查 → 權限和功能。如果這三個權限顯示「標準存取權限」，問題就出在這裡。' The response also ships threads_access_check.py, which takes three steps. (1) It calls GET /debug_token and checks that the scopes include all three permissions. (2) It runs keyword_search for 手沖咖啡 and for a control keyword, coffee, and checks whether every author is the token user. (3) It runs location_search with Chinese and English queries and the Taipei 101 coordinates, and checks for Menlo Park. It also compares a profile_lookup of threads with one of the target. The grader ran the script against mocked responses: it compiles, gives the correct verdicts for both the standard-access and the advanced-access scenario, and handles a debug_token error with a fallback message. The script correctly treats debug_token as proof the permission was granted, not proof of its access level."
+            }
+          ],
+          "notes": [
+            "There is no user_notes.md. These items are self-reported in response.md.",
+            "The response says it could not check live official docs and described the gated behaviors from memory ('依我對官方文件的了解'). The docs at /mnt/user-data/uploads/Threads API/ were not used.",
+            "The response tells the user to check thresholds and review requirements against the latest docs. The one threshold it guessed, 1,000 followers, is wrong; the docs say 100.",
+            "profile_lookup follower threshold: the response says 1,000; the docs say 100 (changed November 20, 2025).",
+            "Unsupported claim that profile_lookup requires the account owner to be an adult.",
+            "debug_token requires a Threads tester's access_token for the same app; neither the script nor the response mentions this.",
+            "threads_access_check.py was checked only against simulated responses. If debug_token fails, the response says to verify scopes in the App Dashboard instead."
+          ],
+          "eval_name": "eval-4-permission-gating-debug"
+        },
+        {
+          "eval_id": 5,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.86,
+            "passed": 6,
+            "failed": 1,
+            "total": 7,
+            "time_seconds": 1162.4,
+            "tokens": 211658,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Lists the user's recent posts with GET /me/threads (limit 20) and reads their replies with GET /{media-id}/replies and/or /{media-id}/conversation, requesting text and hide_status.",
+              "passed": true,
+              "evidence": "threads_reply_guard.py recent_posts() calls _paginate('me/threads', {'fields': POST_FIELDS, 'limit': min(limit, 100)}) with POST_LIMIT = 20, and conversation() calls GET {media_id}/conversation with REPLY_FIELDS = 'id,text,username,permalink,timestamp,hide_status,is_reply_owned_by_me,replied_to'. Against the grader's local mock, the observed requests were 'GET /v1.0/me/threads fields=id,media_type,text,permalink,timestamp limit=20' and 'GET /v1.0/P1/conversation fields=id,text,username,permalink,timestamp,hide_status,is_reply_owned_by_me,replied_to'. The docs describe /conversation as a flattened list of all top-level and nested replies, so it fits the nested requirement. REPOST_FACADE items are skipped and paging continues until 20 of the user's own posts are collected; the response says so."
+            },
+            {
+              "text": "Hides matching replies with POST /{reply-id}/manage_reply and hide=true.",
+              "passed": true,
+              "evidence": "set_hidden() calls _request('POST', f'{reply_id}/manage_reply', {'hide': 'true'}) and checks the response for success == true. In the grader mock, a top-level spam reply on page 3 was hidden with 'POST /v1.0/R4/manage_reply' and the form-urlencoded body hide=true plus access_token. Its hide_status became HIDDEN. This matches the 'POST /{threads-reply-id}/manage_reply' entry in Threads API Reference/Reply Management.md."
+            },
+            {
+              "text": "Handles the nested-reply limitation correctly: does not call manage_reply on a nested reply's own ID; instead hides the top-level ancestor (or flags it for review) and tells the user this hides the whole branch.",
+              "passed": false,
+              "evidence": "The script is designed to call manage_reply on the nested reply's own ID first. The docstring says '巢狀回覆命中關鍵字時，程式會先試著直接隱藏它（萬一 API 有開放）'. In _handle(), set_hidden(reply_id, True) runs for depth>=2 replies, and the fallback in _nested_fallback() runs only after a non-transient error. The response table says '先試著直接隱藏它'. The executor's own test asserts hide_calls() == [r1, r7, r8, r2a, r2b, r11a], where r2a, r2b and r11a are nested replies. In the grader mock, every scenario sent 'POST /v1.0/R2a/manage_reply hide=true' to a nested reply, including hide_top_level mode (R2a, then R2). This goes against Reply Management.md: 'Replies nested deeper than the top-level reply cannot be targeted in isolation'. The grader mock showed two harmful results. (a) If the API returns success:true but has no effect, the CSV records '已隱藏 / 巢狀回覆，API 接受直接隱藏'. The reply stays NOT_HUSHED and is never processed again because it is in done_ids. (b) If the API rejects with code 1/2 or a 5xx, the script treats the error as transient, so no fallback runs. It makes 9 manage_reply calls on the nested ID over 3 rounds, then logs '放棄'. The fallback itself is sound: a manual flag by default, or hiding the top-level ancestor found through replied_to. The response also warns that hiding the top-level reply hides the whole branch. The expectation's first clause is still clearly violated."
+            },
+            {
+              "text": "Skips replies that are already hidden (hide_status) and replies written by the user themself (e.g. is_reply_owned_by_me).",
+              "passed": true,
+              "evidence": "_is_exempt() skips a reply when is_reply_owned_by_me is true, when the username equals the user's own (taken from /me), or when the username is on the allowlist. _handle() returns early when hide_status is not in {None, '', 'NOT_HUSHED'}, which skips HIDDEN, UNHUSHED, COVERED, BLOCKED and RESTRICTED. Nested replies under an ancestor that is already HIDDEN are also skipped. In the grader mock, three replies were never hidden and got no CSV row over 2 rounds: an own reply '有問題可以私訊我' with is_reply_owned_by_me=true, a HIDDEN '加賴' and an UNHUSHED '投資'. The executor's test_default_policy also covers r3, r3b, r5 and r6, and it passes."
+            },
+            {
+              "text": "Paginates reply lists with paging.cursors.after rather than reading only the first page.",
+              "passed": true,
+              "evidence": "_paginate() reads paging.cursors.after, sends it as the 'after' parameter, loops up to MAX_REPLY_PAGES=40 and stops if a cursor repeats. In the grader mock (5 replies, 2 per page), /conversation was requested with no cursor, then after=2, then after=4, and the spam on page 3 was hidden. Caveat: the loop continues only while paging.next is present (`if not paging.get('next') or not after ...: return`). The uploaded docs' example responses show only paging.cursors and no next. Against a mock that uses exactly that shape, the script read only page 1 and missed both spam replies on pages 2-3. Meta's official sample app (fbsamples/threads_api) also relies on paging.next for /threads, /replies and /conversation. That points to the live API returning next and to this being the standard Graph API stop rule, so this passes with the risk noted."
+            },
+            {
+              "text": "States the permissions needed: threads_read_replies and threads_manage_replies (plus threads_basic).",
+              "passed": true,
+              "evidence": "Step 1 of response.md says: '權限要有 `threads_basic`、`threads_read_replies`、`threads_manage_replies`'. The script docstring repeats this. Permission-error hints name threads_read_replies for reads and threads_manage_replies for hides. All of this matches 'Retrieve and Manage Replies.md': threads_basic for all calls, threads_read_replies for GET and threads_manage_replies for POST."
+            },
+            {
+              "text": "Writes a CSV log with at least the reply ID, matched keyword or text, action taken and timestamp, and avoids re-processing the same reply on later runs.",
+              "passed": true,
+              "evidence": "The CSV header, checked in the grader mock output, is: 處理時間,結果,命中關鍵字,留言帳號,留言內容,層級(1=直接回覆貼文),留言連結,貼文連結,留言時間,說明,留言ID,實際隱藏的留言ID,貼文ID. It is written as UTF-8 with a BOM. That covers the timestamp, action, matched keyword, text and reply ID. At startup CsvLog reloads earlier rows. Replies with a final result go into done_ids and are skipped. Failed hides are retried up to 3 rounds. The executor's test_restart_does_not_duplicate passes, and the second round in the grader mock produced no new POSTs or rows. Minor gaps: dry-run rows are not final, so separate '--dry-run --once' runs log the same replies again. A nested reply wrongly logged as '已隱藏' (see expectation 3) is also marked done for good."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was written. In response.md the executor says the script was never run against the real Threads API, only a local fake API.",
+            "The executor admits it cannot verify what the real API returns when manage_reply is called on a nested reply.",
+            "The user is asked to choose a nested-reply policy: the default manual flag, or hide_top_level, which hides the whole branch including legitimate replies.",
+            "The user is asked whether '投資' is too broad (e.g. '這堂課很值得投資'). Hiding a top-level reply also hides the discussion under it.",
+            "Nested matches: the script first tries a direct hide on the nested ID (against the docs), then logs '需人工處理' or hides the top-level ancestor."
+          ],
+          "eval_name": "eval-5-reply-moderation-python"
+        }
+      ],
+      "run_summary": {
+        "with_skill": {
+          "pass_rate": {
+            "mean": 1.0,
+            "stddev": 0.0,
+            "min": 1.0,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 598.8,
+            "stddev": 418.2572,
+            "min": 149.1,
+            "max": 964.6
+          },
+          "tokens": {
+            "mean": 164266.5,
+            "stddev": 52943.9253,
+            "min": 105784,
+            "max": 209884
+          }
+        },
+        "without_skill": {
+          "pass_rate": {
+            "mean": 0.76,
+            "stddev": 0.1309,
+            "min": 0.57,
+            "max": 0.86
+          },
+          "time_seconds": {
+            "mean": 775.75,
+            "stddev": 530.7138,
+            "min": 176.4,
+            "max": 1278.1
+          },
+          "tokens": {
+            "mean": 164905.25,
+            "stddev": 68142.1978,
+            "min": 84684,
+            "max": 230367
+          }
+        },
+        "delta": {
+          "pass_rate": "+0.24",
+          "time_seconds": "-177.0",
+          "tokens": "-639"
+        }
+      },
+      "notes": [
+        "Every eval favors the skill (100.0% vs 76.0%). The baseline misses are knowledge gaps, not effort: it hedged on ghost post + poll, quoted the outdated 1,000-follower threshold for profile_lookup (now 100), called manage_reply on nested replies (the docs say they can't be targeted), and paginated with paging.next, which the docs say isn't returned; the same bug appeared in both rounds of eval 2. In eval 3 it also showed no exact payload in the reply and its publish script never checked the account with GET /me first.",
+        "With the skill, eval 3 states the ghost-post/poll conflict definitively, shows every alternative's exact parameters in the reply itself, runs the reference client's offline check on each, verifies the account before publishing and flags that example.com is a placeholder.",
+        "Graders traced three small inaccuracies in with-skill replies back to the skill text: cursor pagination suggested for keyword_search (the docs list no cursor params there), the private-profile 90-day grant described as a docs disagreement (the docs agree it can't be extended), and 'separate calls for follower metrics' presented as documented rather than as a precaution.",
+        "Speed: with the skill, runs were faster in all four evals this round (mean ~599 s vs ~776 s) at roughly the same token cost; reading the skill (~11K tokens) is offset by less trial and error.",
+        "One run per configuration, so treat the gap as directional."
+      ]
+    },
+    {
+      "iteration": 3,
+      "metadata": {
+        "skill_name": "threads-api",
+        "skill_path": "/home/claude/threads-api (final version)",
+        "executor_model": "claude-opus-5-5",
+        "analyzer_model": "claude-opus-5-5",
+        "timestamp": "2026-10-14T02:13:55Z",
+        "evals_run": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "runs_per_configuration": 1
+      },
+      "runs": [
+        {
+          "eval_id": 2,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 9,
+            "failed": 0,
+            "total": 9,
+            "time_seconds": 1096.6,
+            "tokens": 216999,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Token refresh calls GET https://graph.threads.net/refresh_access_token with grant_type=th_refresh_token and the current long-lived token.",
+              "passed": true,
+              "evidence": "token.ts refresh(): threadsGet('refresh_access_token', { grant_type: 'th_refresh_token' }, state.accessToken, { versioned: false }). client.ts builds `${THREADS_HOST}/${endpoint}` (THREADS_HOST defaults to https://graph.threads.net; versioned:false leaves out /v1.0, matching the doc sample) and appends access_token; fetch() defaults to GET. In the grader's mock-server run the request was GET /refresh_access_token with query {grant_type: th_refresh_token, access_token: SEED1}. On the day+7 run it sent the stored current token (NEW1), not the original env value."
+            },
+            {
+              "text": "Refresh logic follows the documented rules: only refreshes a token that is unexpired and at least 24 h old, refreshes well before the ~60-day expiry, and persists the new token together with its expiry.",
+              "passed": true,
+              "evidence": "Step 2 refuses a token whose stored expiry has passed: it calls alert() and throws ReauthorizationRequiredError, and the mock run shows no refresh call. Step 3 refreshes only when the token is at least Math.max(refreshAfterDays, 1) days old (default 7). In the mock run a 12-hour-old token was not refreshed even with refreshAfterDays=0, and a 7-day-old token was. Refreshing at day 7 leaves about 53 days before the 60-day expiry. refresh() saves {accessToken, issuedAt, expiresAt = now + expires_in, falling back to 60 days} through TokenStore. FileTokenStore writes a temp file and renames it, with mode 600. The mock token file held NEW1 with expiresAt 2026-12-13T00:59:04Z (now + 5183944 s), and the next run used that saved token. Caveat: when the token's age is unknown (imported from env and debug_token refused), the code refreshes immediately, possibly on a token under 24 h old. It treats that first failure as expected (warning only) and retries the next day. This is a deliberate fallback; in normal operation the 24 h rule holds."
+            },
+            {
+              "text": "The reply explains that an already-expired token cannot be refreshed and needs re-authorization, and the code fails loudly / alerts in that case.",
+              "passed": true,
+              "evidence": "response.md: '限制是：token 發出滿 24 小時、而且還沒過期才能 refresh。一旦過期就救不回來，只能重新授權。' and '已經過期的話 refresh 救不回來，要先重新授權一次'. Code: a known-expired token triggers alert('Threads token 已在 … 過期（過期的 token 無法 refresh）：請重新授權…') and then throws ReauthorizationRequiredError. A failed refresh where the /me probe returns code 190 also alerts and throws. Mock scenarios D (stored expiry in the past) and F (refresh plus /me return 190): each threw ReauthorizationRequiredError and called onAlert exactly once. The integration snippet rethrows."
+            },
+            {
+              "text": "follower_demographics is requested with breakdown=country and without since/until.",
+              "passed": true,
+              "evidence": "insights.ts fetchFollowersByCountry() makes its own request: threadsGet('me/threads_insights', { metric: 'follower_demographics', breakdown: 'country' }, token). The mock request log shows {\"metric\":\"follower_demographics\",\"breakdown\":\"country\",\"access_token\":\"TOK\"}, with no since or until."
+            },
+            {
+              "text": "The reply or code states that follower_demographics requires at least 100 followers.",
+              "passed": true,
+              "evidence": "response.md lists '3. 帳號粉絲不到 100 人。' as a documented cause and says '粉絲不到 100 人就直接不打'. Code: DEMOGRAPHICS_MIN_FOLLOWERS = 100, with the warning '粉絲數 … 未滿 100，Threads 不提供粉絲國家分布'. In mock scenario J (50 followers) no demographics request was made, followersByCountry was null and the warning was recorded. This matches Threads Insights API.md: 'must have at least 100 followers'."
+            },
+            {
+              "text": "followers_count is requested without since/until.",
+              "passed": true,
+              "evidence": "fetchFollowersCount(): threadsGet('me/threads_insights', { metric: 'followers_count' }, token), a separate request commented 'followers_count 不接受 since/until'. The mock log shows {\"metric\":\"followers_count\",\"access_token\":\"TOK\"}. The value is read from total_value.value (the doc's Total Value shape); the mock parsed 150."
+            },
+            {
+              "text": "Per-post metrics use GET /{media-id}/insights with metric including views, likes and replies, parsing values[0].value.",
+              "passed": true,
+              "evidence": "fetchPostStats(): threadsGet(`${post.id}/insights`, { metric: POST_METRICS.join(',') }) with POST_METRICS = ['views','likes','replies'], which requests GET https://graph.threads.net/v1.0/{id}/insights. readMetricValues() reads item.values[0].value by item.name, falling back to total_value.value. In the mock run every post request used metric=views,likes,replies, and the values (200/201/202) were mapped to the correct fields."
+            },
+            {
+              "text": "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100.",
+              "passed": true,
+              "evidence": "listOwnPosts(): threadsGet('me/threads', { fields: 'id,media_type,text,permalink,timestamp', since, until, limit: 100, after }). since/until run from Asia/Taipei yesterday 00:00 to today 00:00, with until capped at now as the User reference requires, plus a local timestamp filter. after = res.paging?.cursors?.after, and the loop stops when there is no cursor or the page is empty (cap of 50 pages). Mock run: 3 pages, each with since=1791820800 (2026-10-13 00:00 +08), until=1791907200 and limit=100, with after=C1 and then C2. The REPOST_FACADE post was dropped."
+            },
+            {
+              "text": "The code is TypeScript and does not hard-code the token or the app secret.",
+              "passed": true,
+              "evidence": "All three files (client.ts, token.ts, insights.ts) are TypeScript. tsc 5.9.3 --strict reported 0 errors under CJS/node10, bundler, NodeNext (CJS package) and stricter flags (noUncheckedIndexedAccess, exactOptionalPropertyTypes, noUnused*). The token comes from options.seedToken / THREADS_ACCESS_TOKEN and the TokenStore. A grep finds no token literal or client_secret in the code. The refresh needs no app secret; the secret appears only as a '<Threads app secret>' placeholder in the reply's instructions for the short-to-long-lived exchange."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was written; these items are taken from response.md.",
+            "follower_demographics breakdown response shape is undocumented, so two shapes are parsed defensively and raw JSON is logged or added to warnings.",
+            "Never called the real Threads API; only a local mock server.",
+            "Confirm the current token is still valid. An expired one cannot be refreshed and needs re-auth with threads_basic,threads_manage_insights.",
+            "On ephemeral or multi-instance hosts the file TokenStore must be replaced with DB or Secret Manager storage.",
+            "Other code that reads THREADS_ACCESS_TOKEN directly must switch to getAccessToken().",
+            "Missing-token path throws ReauthorizationRequiredError without onAlert, and the suggested catch suppresses notifyTeam for that error class (grader finding).",
+            "debug_token (officially needs a Threads-tester token) is used best-effort with the account's own token. If it is refused, the 90-day permission-grant warning is silently skipped, and refresh age is unknown on first import."
+          ],
+          "eval_name": "eval-2-token-refresh-insights-ts"
+        },
+        {
+          "eval_id": 3,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 7,
+            "failed": 0,
+            "total": 7,
+            "time_seconds": 376.0,
+            "tokens": 139891,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "The reply states definitively that a ghost post (24 h auto-disappearing post) cannot carry a poll — not merely that it might not.",
+              "passed": true,
+              "evidence": "PASS. response.md line 2: '**限時貼文不能附投票**，照原樣送出一定會被拒絕，需要你選一個方案。' Line 7: 'Threads API 的限時貼文（is_ghost_post=true）只能是純文字，唯一能另外加的是文字防雷（spoiler），投票、GIF、連結預覽卡都不支援。' Neither line hedges, and both match Create Posts/Ghost Posts.md ('The only feature supported with ghost posts is text spoilers.'). Caveat, not disqualifying: '一定會被拒絕' goes beyond the docs, which don't say whether the API returns an error or silently drops the poll. The only rejection actually observed was the executor's own local check, which I re-ran: 'ghost posts only support text spoilers, not poll_attachment'."
+            },
+            {
+              "text": "It does not silently drop either feature: it offers at least two concrete alternatives (e.g. ghost post without the poll / regular post with the poll) and asks the user to choose.",
+              "passed": true,
+              "evidence": "PASS. Line 7: '這兩個功能我不會擅自拿掉任何一個，請你決定'. Three concrete options with trade-offs. 方案 A: ghost post without the poll. 方案 B: regular post with the poll; it won't auto-disappear, and a manual delete needs threads_delete. 方案 C: split into two posts, the ghost promo plus a separate regular poll post whose drafted text is flagged '請你確認'. The '請回覆我' list asks '1. 選 A、B 還是 C？', and line 50 says it will act only after an explicit 「發」."
+            },
+            {
+              "text": "Nothing is published: no publish call succeeds and the reply does not claim a post was made.",
+              "passed": true,
+              "evidence": "PASS. Line 1: '還沒發出，也還沒呼叫任何 API'. The reply never claims a post exists, and the outputs contain no media ID, container ID or permalink. No transcript was saved, so I checked indirectly. THREADS_ACCESS_TOKEN is not set in this container, and there is no .env under /home/claude or /root. Without the token, the executor's client (run on a copy) exits with 'THREADS_ACCESS_TOKEN not found (env var or .env)' before any HTTP request. The as-requested spec is also blocked locally. A successful publish could not have happened from this environment."
+            },
+            {
+              "text": "It checks the environment for THREADS_ACCESS_TOKEN, reports that the token is not available here, and asks the user to provide or set it.",
+              "passed": true,
+              "evidence": "PASS, with a weakness. Line 3: '**我這邊讀不到你的 THREADS_ACCESS_TOKEN**（也沒有 .env），所以還沒辦法確認要發到哪個帳號。' The report is accurate: the variable is unset here and no .env exists. The execution section asks the user to set it: '如果終端機裡沒有 token，先設定：PowerShell 用 $env:THREADS_ACCESS_TOKEN=\"...\"，bash 用 export THREADS_ACCESS_TOKEN=...。請不要把 token 貼到聊天裡。' Weakness: it only asks the user to set the token in their own terminal and run the publish there. It never offers a way to make the token available to the agent so it can post as asked (直接幫我發). Line 3 also asserts '最後一步得在你的電腦上執行', a guess stated as a necessity. The environment check itself is self-reported, since there is no transcript."
+            },
+            {
+              "text": "The reply itself (not only a script) shows the exact payload for each alternative, keeping the user's text verbatim, with poll_attachment {option_a: 淺焙, option_b: 深焙} on a TEXT post for the poll option and is_ghost_post=true for the ghost option.",
+              "passed": true,
+              "evidence": "PASS. The reply shows a parameter block for each option. 方案 A: 'media_type=TEXT / text=週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale / is_ghost_post=true'. 方案 B: 'media_type=TEXT / same text / poll_attachment={\"option_a\": \"淺焙\", \"option_b\": \"深焙\"}'. 方案 C: post 1 is the same as A (by reference); post 2 is 'media_type=TEXT / text=你喜歡淺焙還是深焙？ / same poll_attachment', labeled as drafted text. I compared the text= lines programmatically with the 「」 text in the prompt. They are byte-identical, including the full-width ！ and the U+2615 U+FE0F coffee emoji. The spec_option_*.json files match the reply."
+            },
+            {
+              "text": "It plans to verify which account it will post to (e.g. GET /me?fields=id,username) before publishing.",
+              "passed": true,
+              "evidence": "PASS. Line 3 notes it cannot yet confirm which account it would post to. The plan's first command is 'python3 threads_client.py get me fields=id,username   # 1. 確認帳號'. The client sends this as GET {BASE}/me?fields=id,username, the form documented in Threads Profiles.md and User.md. Line 62: '第 1 步會顯示帳號名稱，確認是要發文的帳號再往下執行。' The check comes before the publish command. Caveat: the user, not the agent, runs and judges the check, and the reply never asks which username is the intended account."
+            },
+            {
+              "text": "Beyond the API conflict, it flags at least one way the request as written could undercut the user's goal — e.g. a 24-hour post published now (midweek) is gone before the weekend it advertises, or the link looks like a placeholder.",
+              "passed": true,
+              "evidence": "PASS. The section '另外幾件會影響宣傳效果的事' flags two problems: (1) 'example.com 是專門保留給文件當範例用的網址，顧客點進去看不到你的活動頁。請給我正確的網址。' (2) '現在是 10/14（三）上午 9:37。限時貼文如果現在發，大約 10/15（四）上午 9:37 就會封存，這個週末（10/17–18）完全看不到。' For (2) it suggests posting Saturday morning, or using 方案 B and deleting after the weekend. The facts check out. 2026-10-14 is a Wednesday and 10/17–18 is the weekend. The container TZ is Asia/Taipei, and response.md was written at 09:41 CST. Ghost Posts.md says ghost posts auto-archive after 24 hours. It also flags that the post text has no poll question."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-3-operate-ghost-poll-conflict"
+        },
+        {
+          "eval_id": 4,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 6,
+            "failed": 0,
+            "total": 6,
+            "time_seconds": 431.1,
+            "tokens": 144180,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Explains that keyword_search returning only the user's own posts is the documented behavior while threads_keyword_search has not been approved through App Review, i.e. not a code bug.",
+              "passed": true,
+              "evidence": "response.md line 1: '**大概率不是你們的程式寫錯。** 這三個現象都是 Threads API 權限還沒通過 App Review、只有標準存取（Standard Access）時，官方文件寫明的限制。' Table row (line 5): '`keyword_search` 搜「手沖咖啡」只回自己的貼文 | `threads_keyword_search` | 只搜得到 token 本人的貼文'. Line 9: '幾乎不可能是三個各自獨立的 bug'. This matches Keyword and Topic Tag Search.md: 'If your app has not been approved for the threads_keyword_search permission, the search will be performed only on posts owned by the authenticated user. After approval, public posts will be searchable.'"
+            },
+            {
+              "text": "Explains that location_search answering only for 'Menlo Park' is the documented behavior while threads_location_tagging has not been approved.",
+              "passed": true,
+              "evidence": "Table row (line 6): '`location_search` 搜什麼都回 Menlo Park | `threads_location_tagging` | 只開放查「Menlo Park」，結果只會是 Menlo Park 的地點'. Line 1 frames it as a documented limitation that applies until App Review approval. This matches the Location Tagging.md note: 'If your app has not been approved for the threads_location_tagging permission, the search will be performed only on the query \"Menlo Park\". After approval, all queries will be searchable.'"
+            },
+            {
+              "text": "Explains that profile_lookup with standard access only reaches official Meta accounts (@meta, @threads, @instagram, @facebook) and that threads_profile_discovery needs advanced access / App Review to look up other accounts.",
+              "passed": true,
+              "evidence": "Table row (line 7): '`profile_lookup` 查 5 萬粉品牌失敗、@threads 成功 | `threads_profile_discovery` | 只查得到 @meta、@threads、@instagram、@facebook 這四個帳號'. Line 1 ties this to standard access. Fix step (line 19): '在 App Dashboard 送 App Review，申請進階存取（Advanced Access）：`threads_keyword_search`、`threads_location_tagging`、`threads_profile_discovery`'. This matches Threads Profiles.md: 'With standard access, only some of the official Meta accounts can be looked up. These include @meta, @threads, @instagram, and @facebook.' One minor imprecision: the docs say 'These include', while the response says exactly 'these four'."
+            },
+            {
+              "text": "Mentions that profile_lookup only returns public profiles with at least 100 followers.",
+              "passed": true,
+              "evidence": "Line 76: '`profile_lookup` 的 `username` 要完全一致、不含 `@`。對方也必須是公開帳號、粉絲至少 100 人（5 萬粉這點沒問題）。' This matches the Threads Profiles.md limitation: 'Only returns public profiles with at least 100 followers.' The response also correctly rules the threshold out as the cause (50k followers)."
+            },
+            {
+              "text": "Distinguishes adding/granting a permission (dashboard checkbox, token scope) from having it approved through App Review with the app published, and gives that as the fix.",
+              "passed": true,
+              "evidence": "Line 13: '在 App 後台（Use cases → Customize）把權限加進去，只代表這些權限可以被授權、可以在受限範圍內呼叫。要拿到別人的公開資料，權限必須**通過 App Review**，App 也要**發布（Live）**，兩個條件都要。' Line 14 separates the token and its scopes from the access level: '卡住的是權限的存取等級，不是 token。' Line 69 adds that debug_token shows scopes but not access level. The fix steps (lines 18–24) are: submit App Review for the three permissions, then re-test once the app is approved and published (Live). This is consistent with Get Started.md: 'each permission must first be approved through the App Review process, and your app must be published.'"
+            },
+            {
+              "text": "Gives a concrete way to confirm the diagnosis, e.g. debug_token to inspect the token's scopes or checking the permission's access level / review status in the App Dashboard.",
+              "passed": true,
+              "evidence": "Lines 39–43 give a runnable debug_token curl with an expected result ('預期：is_valid 為 true，scopes 裡有上面三個權限'). The response correctly notes that access_token must be a Threads Tester token from the same app (line 40), which matches Debug Access Token.md. Line 69: '注意：`debug_token` 只看得到 scope，看不到存取等級。存取等級要到 App Dashboard 看。' This is correct: the debug_token field list has no access-level field. Curl reproductions B–D (lines 45–66) bypass the app's code and state expected results. The pointer to the Dashboard does not say where to navigate, but the debug_token check plus the reproductions is concrete enough."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-4-permission-gating-debug"
+        },
+        {
+          "eval_id": 5,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 7,
+            "failed": 0,
+            "total": 7,
+            "time_seconds": 918.6,
+            "tokens": 209603,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Lists the user's recent posts with GET /me/threads (limit 20) and reads their replies with GET /{media-id}/replies and/or /{media-id}/conversation, requesting text and hide_status.",
+              "passed": true,
+              "evidence": "scan_once(): api.pages(\"me/threads\", fields=\"id,media_type,permalink,has_replies\", limit=min(POST_COUNT, 100)) with POST_COUNT = 20; scan_post()/nested_replies(): api.pages(f\"{id}/replies\", fields=REPLY_FIELDS) where REPLY_FIELDS = \"id,text,username,permalink,timestamp,has_replies,hide_status,is_reply_owned_by_me\". Local mock request log confirmed: GET /v1.0/me/threads {fields: id,media_type,permalink,has_replies, limit: 20} and GET /v1.0/P01/replies {fields: id,text,...,hide_status,is_reply_owned_by_me}. Deeper levels are reached by chaining /{reply-id}/replies on has_replies (R6 -> N1 -> N1a, depth 3), which is the approach the docs describe for has_replies. REPOST_FACADE posts are skipped and the next page is requested (after=bzIw) so exactly 20 of the user's own posts are scanned; replies under P22-P25 were never requested."
+            },
+            {
+              "text": "Hides matching replies with POST /{reply-id}/manage_reply and hide=true.",
+              "passed": true,
+              "evidence": "hide_top_level(): api.post(f\"{top['id']}/manage_reply\", hide=True); booleans are serialized to 'true' and sent as form data together with access_token. Mock log: POST /v1.0/R1/manage_reply form {hide: 'true'} (application/x-www-form-urlencoded), and the same for R2, R8, R11, R10 and R210, which are exactly the visible matching top-level replies written by other users. This matches Threads API Reference/Reply Management.md (POST /{threads-reply-id}/manage_reply, hide true|false). The script also checks the {\"success\": ...} body."
+            },
+            {
+              "text": "Handles the nested-reply limitation correctly: does not call manage_reply on a nested reply's own ID; instead hides the top-level ancestor (or flags it for review) and tells the user this hides the whole branch.",
+              "passed": true,
+              "evidence": "Only top-level replies are ever passed to manage_reply. The mock rejected manage_reply on any nested ID and recorded each attempt as a violation; there were 0 violations across the flag and hide-top runs. Default --nested flag: nested hits N1 (depth 2), N1a (depth 3) and N4 were logged as 'flagged' with 'API 無法單獨隱藏巢狀回覆，需人工處理' and no POST was sent. --nested hide-top: a single POST to /R6/manage_reply (the top-level ancestor), with CSV rows marked 'hidden_top' and the detail '巢狀回覆無法單獨隱藏 → 隱藏頂層留言 R6（@fan2）整串'. R7, the user's own top-level reply, was not hidden, and its nested hit stayed flagged. response.md tells the user: 'Threads API 的隱藏只能用在「直接回覆貼文的頂層留言」，而且一隱藏就是連同底下整串一起藏。串裡的某一則回覆，API 沒辦法單獨隱藏', warns that hide-top's cost is that '那則頂層留言（可能是無辜粉絲寫的）和串裡其他人的回覆也會一起被藏', and asks '你要哪一種？'. This is consistent with Retrieve and Manage Replies/Reply Management.md ('This will automatically hide/unhide all the nested replies… Replies nested deeper than the top-level reply cannot be targeted in isolation')."
+            },
+            {
+              "text": "Skips replies that are already hidden (hide_status) and replies written by the user themself (e.g. is_reply_owned_by_me).",
+              "passed": true,
+              "evidence": "Top level: 'if top.get(\"hide_status\") not in VISIBLE: continue' (VISIBLE = None/NOT_HUSHED/UNHUSHED) and 'hits = [] if top.get(\"is_reply_owned_by_me\") else matched_keywords(...)'. Nested: nested_replies() drops non-visible replies and their subtrees, and scan_post() skips is_reply_owned_by_me. can_hide() additionally requires hide_status in {None, NOT_HUSHED}, a reply the user does not own, and one the script has not hidden before. In the mock run, these replies were never hidden or logged: R3 (HIDDEN, contains 加賴), R9 (COVERED, 投資), R12 (a HIDDEN branch containing a nested 加賴), and R4/N3 (is_reply_owned_by_me, containing 私訊我/投資). R5 (UNHUSHED) was also left alone."
+            },
+            {
+              "text": "Paginates reply lists with paging.cursors.after rather than reading only the first page.",
+              "passed": true,
+              "evidence": "Threads.pages() reads page['paging']['cursors']['after'], re-requests with after=<cursor>, and stops on empty data, a missing after, or a repeated cursor. Mock log: P01/replies was requested with after=bzI=, bzQ=, bzY=, bzg= and bzEw (6 pages of 2), R6/replies page 2 with after=bzI=, and me/threads page 2 with after=bzIw. Matching replies that appeared only on later pages (R8, R11) were hidden. Unit check: a last page that still carries an after cursor triggers one extra call, which returns empty data, and the loop then stops. A repeated cursor also stops the loop."
+            },
+            {
+              "text": "States the permissions needed: threads_read_replies and threads_manage_replies (plus threads_basic).",
+              "passed": true,
+              "evidence": "response.md: '權杖要有 `threads_basic`、`threads_read_replies`、`threads_manage_replies` 這三個權限', and the script docstring repeats it. This matches Retrieve and Manage Replies.md: threads_basic is required for all calls, threads_read_replies for GET reply endpoints, and threads_manage_replies for POST."
+            },
+            {
+              "text": "Writes a CSV log with at least the reply ID, matched keyword or text, action taken and timestamp, and avoids re-processing the same reply on later runs.",
+              "passed": true,
+              "evidence": "CSV header: logged_at,action,matched,username,text,depth,reply_id,top_reply_id,post_id,reply_time,reply_permalink,post_permalink,detail. Example row: '2026-10-14T10:07:59+08:00,hidden,加賴,spammer1,加賴領取好康,1,R1,R1,P01,…'. At startup, Recorder reloads the CSV into its done and hidden_by_us sets. Mock results: run 1 wrote a header plus 9 rows and sent 6 POSTs. Run 2 sent 0 POSTs and added 0 rows, so flagged nested replies, which never become HIDDEN, were not re-logged. A hide-top run added 2 hidden_top rows, and the run after it added 0 rows and sent 0 POSTs. The script did not re-hide R2 after the owner unhid it with hide=false. Unit check: a reply the script hid that later reports NOT_HUSHED is still not re-hidden (hidden_by_us). The UTF-8 BOM appears only once, at the start of the file, after several appends."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-5-reply-moderation-python"
+        },
+        {
+          "eval_id": 2,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 9,
+            "failed": 0,
+            "total": 9,
+            "time_seconds": 1349.5,
+            "tokens": 239149,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Token refresh calls GET https://graph.threads.net/refresh_access_token with grant_type=th_refresh_token and the current long-lived token.",
+              "passed": true,
+              "evidence": "src/threads/tokenManager.ts L274-278: graphGet('refresh_access_token', { grant_type: 'th_refresh_token', access_token: current.accessToken }, { ...this.http, versioned: false }). client.ts sets DEFAULT_GRAPH_HOST='https://graph.threads.net', buildUrl drops the version segment when versioned:false, and requestOnce uses method 'GET', so the URL is exactly https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token=<stored token>. This matches the docs' sample request in Get Started/Long-Lived Access Tokens.md. test/tokenManager.test.ts L66-68 asserts origin+pathname, grant_type=th_refresh_token and access_token='OLD' (the currently stored token). I re-ran the suite and 31/31 tests pass."
+            },
+            {
+              "text": "Refresh logic follows the documented rules: only refreshes a token that is unexpired and at least 24 h old, refreshes well before the ~60-day expiry, and persists the new token together with its expiry.",
+              "passed": true,
+              "evidence": "Unexpired: assertNotExpired (tokenManager.ts L243-250) throws before any refresh when expiresAt <= now. Age: isRefreshDue (L203-207) requires now - issuedAt >= minAgeMs, default 24 h + 10 min (L103). Timing: it also requires remaining life <= 30 days (L101), so a 60-day token is renewed around day 30 with about 30 daily retries left. Persistence: refresh() builds { accessToken: res.access_token, issuedAt: attemptAt, expiresAt: issuedAt + expires_in*1000 } (L309-321) and calls store.save (L299). FileTokenStore writes the JSON atomically (tmp file + rename, mode 600). Tests cover each rule: 40 days left means no call; 20 days left means refresh, and the saved accessToken='NEW' with expiresAt=NOW+5184000s; a token under 24 h old is not refreshed even when expiry is unknown; a known-expired token throws without any API call. Caveat: a token whose issue time is unknown (bootstrapped from THREADS_ACCESS_TOKEN or imported via the CLI) is treated as old enough. My probe showed one refresh call on the first run, with the rejection tolerated as a warning. Without debug_token the age cannot be known, so this is defensible, but in that state there is no strict 24 h gate."
+            },
+            {
+              "text": "The reply explains that an already-expired token cannot be refreshed and needs re-authorization, and the code fails loudly / alerts in that case.",
+              "passed": true,
+              "evidence": "response.md L20: '**已經過期的 token 沒辦法續期。** 如果你們現在那個已經失效，要先重新授權一次（scope 要包含 `threads_basic` 和 `threads_manage_insights`）'. Code: assertNotExpired throws ThreadsTokenError('expired', '…過期的 token 無法續期，請重新授權取得新 token…'). If the refresh returns 190 and /me also returns 190, it throws ThreadsTokenError('invalid', '…無法自動續期，需要重新授權'). alertIfExpiringSoon logs logger.error when 7 or fewer days remain. jobs/threadsDaily.ts L50-54 calls console.error('[threads] token 需要重新授權：…') and rethrows. insights.ts recordIssue rethrows 190 errors, so no empty report is written. All of these paths have passing tests: expired, invalid, missing, the 7-day alert, and '190 直接 throw'."
+            },
+            {
+              "text": "follower_demographics is requested with breakdown=country and without since/until.",
+              "passed": true,
+              "evidence": "src/threads/insights.ts L239-243 sends a standalone request to `${userId}/threads_insights` with params { metric: 'follower_demographics', breakdown: 'country', access_token }. It has no since, until or period. test/insights.test.ts L187-192 asserts metric==='follower_demographics', breakdown==='country' and that since, until and period are absent. This matches Threads Insights API.md ('does not support the since and until parameters'; one breakdown, which must be country/city/age/gender)."
+            },
+            {
+              "text": "The reply or code states that follower_demographics requires at least 100 followers.",
+              "passed": true,
+              "evidence": "response.md L29: '**帳號粉絲數未滿 100 人**：這種情況 Threads 不提供 follower_demographics，改程式也沒用。' The code's error hint (insights.ts L440) says the same: 'follower_demographics 需要帳號至少 100 位粉絲才有資料…'. Both match the docs: 'A Threads profile must have at least 100 followers to fetch this metric.'"
+            },
+            {
+              "text": "followers_count is requested without since/until.",
+              "passed": true,
+              "evidence": "insights.ts L218-223 requests `${userId}/threads_insights` with { metric: 'followers_count', access_token } only, under the comment 'followers_count 是「目前」的總數，不帶 since / until'. The value is parsed from total_value.value, which matches the documented Total Value type. test/insights.test.ts L194-196 asserts the request has no since/until."
+            },
+            {
+              "text": "Per-post metrics use GET /{media-id}/insights with metric including views, likes and replies, parsing values[0].value.",
+              "passed": true,
+              "evidence": "insights.ts L199-203 calls GET `${encodeURIComponent(postId)}/insights` with metric='views,likes,replies' (POST_METRICS, L25), giving https://graph.threads.net/v1.0/{id}/insights. readMetricValues (L250-261) uses total_value.value when it is numeric; otherwise it reads values[values.length-1].value. The documented lifetime response has a one-element values array, so this is exactly values[0].value. test/insights.test.ts mediaInsightsBody uses the documented shape (values: [{ value: n }]) and asserts p3=300/20/5 and p5=120/8/2. Nuance: the code reads the last element, not literally index 0. For these single-value lifetime metrics the result is identical."
+            },
+            {
+              "text": "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100.",
+              "passed": true,
+              "evidence": "insights.ts L343-401 calls GET `${userId}/threads` (user id from /me) with fields id,media_type,permalink,text,timestamp, since=start-3600, until=end+3600 and limit=25 (PAGE_LIMIT). It then keeps posts whose timestamp is in [start, end) of the Taipei day. Pagination: it follows paging.next if present; otherwise it reads `body.paging?.cursors?.after` and re-requests with { ...baseParams, after }. It stops when there is no cursor, a repeated cursor, a short page or 20 pages. The official docs (Retrieve and Discover Posts.md) say the response 'will not include previous or next fields', so production would take the cursors.after branch. The executor's tests only exercise paging.next, so I ran a probe with doc-shaped responses (cursors only, 60 posts). The requests went after=null→C25→C50 with limit=25 and since/until on every page, and 60/60 posts were collected. Minor caveat: the docs require until <= now. The +1 h padding is fine for a 09:00 run but would break between 00:00 and 01:00 or when backfilling today."
+            },
+            {
+              "text": "The code is TypeScript and does not hard-code the token or the app secret.",
+              "passed": true,
+              "evidence": "All source files (src/threads/*.ts, src/jobs/threadsDaily.ts, scripts/threads-token.ts, test/*.ts) are TypeScript. I confirmed `tsc --noEmit` strict passes on TS 5.9.3 and 6.0.3 (NodeNext), and src+scripts also pass under CommonJS. The token comes from FileTokenStore (THREADS_TOKEN_FILE), with a one-time bootstrap from process.env.THREADS_ACCESS_TOKEN (threadsDaily.ts L21-23). The app secret comes from process.env.THREADS_APP_SECRET (scripts/threads-token.ts L59) and is passed in as an argument. Grep found no token or secret literals in src/ or scripts/. The only literals are fixtures in test/ ('OLD', 'TEST_TOKEN', 'APP_SECRET'). client.ts redacts access_token/client_secret/input_token in logs."
+            }
+          ],
+          "notes": [
+            "No user_notes.md exists. These items are self-reported in response.md's 驗證狀況 section.",
+            "Not tested against the real Threads API; only mocked responses were used.",
+            "The executor says it could not consult official docs, so endpoints and response formats came from memory. The follower_demographics response shape is assumed, with a fallback parser.",
+            "Freshly generated tokens (under 24 h old) show an unknown expiry until the first successful refresh.",
+            "Where the job runs (single host vs Cloud Run/Lambda/multi-instance) decides whether FileTokenStore persists. Otherwise the token is lost on redeploy and the 60-day failure recurs.",
+            "The user's actual follower_demographics request and error message were not seen, so the diagnosis is a list of likely causes.",
+            "Whether reposts and quote posts count as 'yesterday's posts' (currently reposts are excluded and quotes included)."
+          ],
+          "eval_name": "eval-2-token-refresh-insights-ts"
+        },
+        {
+          "eval_id": 3,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.71,
+            "passed": 5,
+            "failed": 2,
+            "total": 7,
+            "time_seconds": 590.0,
+            "tokens": 141905,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "The reply states definitively that a ghost post (24 h auto-disappearing post) cannot carry a poll — not merely that it might not.",
+              "passed": false,
+              "evidence": "The heading says '限時貼文不能附投票' and the body says '你的三個要求沒辦法放進同一則', but the reply immediately walks this back: '「不能附投票」是我對 Threads API 規則的理解。這次沒有 token，所以我沒辦法實際打 API 驗證。腳本的 `ghost-poll` 模式會先用不公開的方式試一次，API 拒絕就停下來'. post_threads.py repeats '依我對 Threads API 規則的理解，限時貼文不能同時附投票（尚未用真 token 實測）' and ships `--variant ghost-poll` ('照原需求兩者都送'). That mode's dry-run even prints 'API 在建立容器時接受了這個組合，但不保證兩項都會生效'. So the limit is framed as an unconfirmed belief that still needs testing against the live API. That is the 'merely that it might not' case the assertion rules out. The official docs settle it: Create Posts/Ghost Posts.md says 'The only feature supported with ghost posts is text spoilers.'"
+            },
+            {
+              "text": "It does not silently drop either feature: it offers at least two concrete alternatives (e.g. ghost post without the poll / regular post with the poll) and asks the user to choose.",
+              "passed": true,
+              "evidence": "'我不想自己默默拿掉其中一個，所以請你選：' is followed by three concrete options: 'A. 限時貼文、不附投票', 'B. 一般貼文＋投票（我推薦）', and 'C. 分兩則發：促銷文案發限時貼文，投票另外發一則一般貼文'. It then asks '直接回我，例如「B、網址 https://…、現在發」'. The script also requires an explicit --variant ('腳本不會自己偷偷拿掉其中一項'), so neither feature is dropped silently."
+            },
+            {
+              "text": "Nothing is published: no publish call succeeds and the reply does not claim a post was made.",
+              "passed": true,
+              "evidence": "The reply opens with '這則**還沒發出去**' and never claims a post was made. No media ID or permalink appears in any output. No transcript was saved, so this is inferred from four checks. (a) The grader confirmed THREADS_ACCESS_TOKEN is absent from the env, bash -l, bash -i, and ~/.bashrc, ~/.profile, ~/.bash_profile, ~/.zshrc, /etc/environment and /etc/profile. (b) The live API rejects token-less calls (grader probe returned OAuthException code 190). (c) post_threads.py exits 2 with zero requests when the token is missing (selftest check 1, re-run by the grader). (d) The 'publish' runs in selftest_mock.py target only a 127.0.0.1 mock server (THREADS_API_BASE override, proxies stripped)."
+            },
+            {
+              "text": "It checks the environment for THREADS_ACCESS_TOKEN, reports that the token is not available here, and asks the user to provide or set it.",
+              "passed": true,
+              "evidence": "The reply says '我是在雲端環境執行的，這裡沒有 `THREADS_ACCESS_TOKEN`（login shell 和 shell 設定檔我也查過了）。你應該是設在自己的電腦上，我這邊讀不到。' and asks for it: 'token 有兩種給法：1. 設定成我這邊雲端環境的環境變數，我就直接幫你發。請不要把 token 貼在對話裡。2. 在你自己的電腦上跑我寫好的腳本'. The grader independently confirmed the variable is absent in this environment, including login and interactive shells and profile files."
+            },
+            {
+              "text": "The reply itself (not only a script) shows the exact payload for each alternative, keeping the user's text verbatim, with poll_attachment {option_a: 淺焙, option_b: 深焙} on a TEXT post for the poll option and is_ghost_post=true for the ghost option.",
+              "passed": false,
+              "evidence": "response.md contains no payload. A grader string search finds none of 'poll_attachment', 'option_a', 'is_ghost_post', 'media_type' or 'TEXT', and the user's text does not appear verbatim either. Options A, B and C are described only in prose. The only code shown is `python3 post_threads.py --variant poll --url https://你的網址/sale [--publish]`. The payloads exist only inside post_threads.py. Its TEXT_TEMPLATE matches the user's text byte-for-byte (including U+FE0F after ☕), POLL_OPTIONS is {option_a: 淺焙, option_b: 深焙} on media_type=TEXT, and the ghost variant sets is_ghost_post='true'. The assertion explicitly excludes payloads that live 'only' in a script. Option C's separate poll post has no text specified anywhere."
+            },
+            {
+              "text": "It plans to verify which account it will post to (e.g. GET /me?fields=id,username) before publishing.",
+              "passed": true,
+              "evidence": "In post_threads.py publish_flow, step 1 runs before container creation or threads_publish: `me = api(\"GET\", \"me\", token, {\"fields\": \"id,username\"})`, which prints '[OK] token 有效，帳號 @{username}（ID {user_id}）'. The default run (no --publish) stops after the checks. The reply says to run that check first, then '確認沒問題再正式發', so the target @handle appears before anything is published. This passes on that concrete GET /me?fields=id,username pre-publish step, but the evidence is weak. The reply never mentions the account and calls the step only '驗證 token'. The --publish path prints the account but does not pause for confirmation. For the 'put the token in my cloud env and I'll post directly' path, the reply does not promise to confirm the account first."
+            },
+            {
+              "text": "Beyond the API conflict, it flags at least one way the request as written could undercut the user's goal — e.g. a 24-hour post published now (midweek) is gone before the weekend it advertises, or the link looks like a placeholder.",
+              "passed": true,
+              "evidence": "Section 3 flags both risks. Link: '**連結**：`https://example.com/sale` 是保留給範例用的網域，點了不會到你的特賣頁。正確網址是什麼？'. Timing: '**時間**：今天是週三（10/14），現在發的限時貼文週四就會消失，撐不到週末。要現在發，還是等週六再發？'. It also notes that the poll has no separate question field. Both are accurate: 2026-10-14 is a Wednesday, and Ghost Posts.md says ghost posts are 'auto-archived after 24 hours'."
+            }
+          ],
+          "notes": [
+            "(No user_notes.md exists; taken from response.md.) The executor says the ghost-post/poll restriction is only its understanding and was not verified against the API, although the provided docs state it outright.",
+            "(From response.md.) The real publish path was never exercised; only mock-server runs and fake-token calls were made.",
+            "post_threads.py --variant ghost-poll --publish would send is_ghost_post=true together with poll_attachment to the live API. If the API silently dropped one parameter, a mismatched post would be published before the read-back warning.",
+            "The option B recommendation rests on the undocumented claim that polls close after 24 h.",
+            "The dry-run default is not side-effect-free: it creates a real, unpublished container on the user's account (it expires after 24 h per the docs).",
+            "No token was available in the execution environment, so the executor shipped post_threads.py for the user to run locally, with a dry-run default and an explicit --publish step."
+          ],
+          "eval_name": "eval-3-operate-ghost-poll-conflict"
+        },
+        {
+          "eval_id": 4,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.83,
+            "passed": 5,
+            "failed": 1,
+            "total": 6,
+            "time_seconds": 297.5,
+            "tokens": 107721,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Explains that keyword_search returning only the user's own posts is the documented behavior while threads_keyword_search has not been approved through App Review, i.e. not a code bug.",
+              "passed": true,
+              "evidence": "response.md line 1: '這三個問題大概率不是程式寫錯，三個其實是同一個原因：這幾個權限你們的 App 還沒通過 App Review（應用程式審查），目前只有標準存取。' Table row: 'keyword_search 只搜到自己的貼文 | `threads_keyword_search` | 只在「授權這個 token 的帳號自己的貼文」裡搜尋 | 搜尋全站公開貼文'. This matches Keyword and Topic Tag Search.md line 22 ('If your app has not been approved for the threads_keyword_search permission, the search will be performed only on posts owned by the authenticated user. After approval, public posts will be searchable.'). The closing note says these behaviors come from its understanding of the Threads API docs, so it is presented as documented behavior. It also lists code-side causes worth ruling out: calling /me/threads and filtering, or sending an author filter. The author_username parameter does exist."
+            },
+            {
+              "text": "Explains that location_search answering only for 'Menlo Park' is the documented behavior while threads_location_tagging has not been approved.",
+              "passed": true,
+              "evidence": "Table row under the column '還沒過審時的行為': 'location_search 永遠回 Menlo Park | `threads_location_tagging` | 只回一組固定的測試地點（Meta 總部所在地），跟 q 帶什麼無關 | 依關鍵字或座標正常搜尋'. This matches Location Tagging.md line 25 ('If your app has not been approved for the threads_location_tagging permission, the search will be performed only on the query \"Menlo Park\". After approval, all queries will be searchable.'). The wording is imprecise: the docs say the query is forced to 'Menlo Park', not that a 'fixed set of test locations' comes back. The mechanism is still right: the input query is ignored and Menlo Park results come back until approval."
+            },
+            {
+              "text": "Explains that profile_lookup with standard access only reaches official Meta accounts (@meta, @threads, @instagram, @facebook) and that threads_profile_discovery needs advanced access / App Review to look up other accounts.",
+              "passed": true,
+              "evidence": "Table row: 'profile_lookup 只查得到 @threads | `threads_profile_discovery` | 只能查少數 Meta 官方帳號（例如 @threads、@meta、@instagram） | 可以查一般公開帳號'. Line 1 says the app '還沒通過 App Review…目前只有標準存取', and the fix section lists threads_profile_discovery under '要送審的權限'. This matches Threads Profiles.md line 63. Minor gaps: @facebook is not named (the list starts with '例如', so it is not claimed to be complete), and 'advanced access' is never named; the response only contrasts 標準存取 with App Review approval."
+            },
+            {
+              "text": "Mentions that profile_lookup only returns public profiles with at least 100 followers.",
+              "passed": false,
+              "evidence": "The 100-follower minimum (Threads Profiles.md line 67: 'Only returns public profiles with at least 100 followers.') does not appear anywhere. The string '100' does not occur in response.md. The closest text is line 60: '…是公開帳號，而且符合文件列出的公開帳號資格條件'. That refers to unnamed eligibility conditions without stating the threshold."
+            },
+            {
+              "text": "Distinguishes adding/granting a permission (dashboard checkbox, token scope) from having it approved through App Review with the app published, and gives that as the fix.",
+              "passed": true,
+              "evidence": "Line 3: '在後台勾權限，只代表 App「可以向使用者要」這個 scope；token 是新的，也只代表使用者同意了這些 scope。這兩件事都不等於 Meta 已經核准你的 App 讀取公開資料。' The fix is headed '## 怎麼修：送 App Review'. It lists the permissions to submit and the required assets: privacy policy URL, app icon, deauthorize and data-deletion callbacks, and possibly Business Verification. Publishing is covered by '如果要讓客戶的帳號也能授權，記得把 App 切到上線（Live）模式' and by line 1, '只有在 App 上有角色（管理員／開發者／測試人員）的帳號能授權'. Both are consistent with Get Started.md line 32: users without a role need the permission approved through App Review and the app published."
+            },
+            {
+              "text": "Gives a concrete way to confirm the diagnosis, e.g. debug_token to inspect the token's scopes or checking the permission's access level / review status in the App Dashboard.",
+              "passed": true,
+              "evidence": "Section '## 先花 5 分鐘確認', step 1: '到 App 後台的「應用程式審查（App Review）」，看上面三個權限是「已核准」，還是只能測試'. This is a review-status check in the App Dashboard. Step 3 adds runnable curl comparisons using the same token: keyword_search for 手沖咖啡 ('如果回來的 username 全都是你自己，就是受限模式'), and profile_lookup for threads versus BRAND_USERNAME. Their parameters are valid per Media Retrieval.md and User.md. debug_token is never mentioned, so the response never shows that the token's scopes actually include the permissions. That check would directly answer the user's point that the token is new."
+            }
+          ],
+          "notes": [
+            "There is no user_notes.md. The response itself says the permission behaviors come from its own understanding of the Threads API docs and were not checked live ('這次沒辦法連線即時核對'). It advises re-checking each endpoint's Limitations section before submitting for App Review."
+          ],
+          "eval_name": "eval-4-permission-gating-debug"
+        },
+        {
+          "eval_id": 5,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.86,
+            "passed": 6,
+            "failed": 1,
+            "total": 7,
+            "time_seconds": 1613.1,
+            "tokens": 268261,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Lists the user's recent posts with GET /me/threads (limit 20) and reads their replies with GET /{media-id}/replies and/or /{media-id}/conversation, requesting text and hide_status.",
+              "passed": true,
+              "evidence": "fetch_recent_posts (threads_reply_guard.py:403-412) calls GET me/threads with fields=id,media_type,permalink,timestamp,text and limit=min(100, 20+5)=25, skips media_type REPOST_FACADE, and stops at 20 posts. Replies come from GET /{post-id}/conversation (fetch_reply_tree :390-400), with a fallback that walks GET /{id}/replies one level at a time (walk_replies :361-387). REPLY_FIELDS (:83) = id,text,username,permalink,timestamp,has_replies,hide_status,replied_to. I checked this over real HTTP against a local mock that follows the docs. The script sent 'GET /v1.0/me/threads q={fields: id,media_type,permalink,timestamp,text, limit: 25}', then called /conversation on exactly 20 distinct posts (it skipped 2 REPOST_FACADE items), each with fields=...text...hide_status,replied_to. One deviation: the limit sent is 25 (extra items to make up for skipped reposts) and the list is cut to 20 on the client side. response.md says so: '「最近 20 則」不包括轉發'."
+            },
+            {
+              "text": "Hides matching replies with POST /{reply-id}/manage_reply and hide=true.",
+              "passed": true,
+              "evidence": "ThreadsClient.set_hidden (:294-298) calls request('POST', f'{reply_id}/manage_reply', data={'hide': 'true'}), puts access_token in the form body, and raises if the response lacks success. The mock's HTTP log shows 'POST /v1.0/r1/manage_reply ct=application/x-www-form-urlencoded body=hide=true&access_token=<TOKEN>', and the reply became hidden. This matches the doc example (curl -X POST -F hide=true -F access_token=... graph.threads.net/v1.0/<THREADS_REPLY_ID>/manage_reply)."
+            },
+            {
+              "text": "Handles the nested-reply limitation correctly: does not call manage_reply on a nested reply's own ID; instead hides the top-level ancestor (or flags it for review) and tells the user this hides the whole branch.",
+              "passed": false,
+              "evidence": "Calling manage_reply on the nested reply's own ID first is deliberate. Guard._handle_nested (:616-627) runs self.client.set_hidden(n.id, True) and moves to the top-level ancestor only if that call raises. The executor's own test asserts this order (test_threads_reply_guard.py:270: manage_calls() == [('111','true'), ('11','true')]; also :315, :332, :568, :606). On the local mock: 'POST /v1.0/r2a/manage_reply' (depth 2) came before 'POST /v1.0/r2/manage_reply', and 'POST /v1.0/r5b/manage_reply' (depth 3) came before needs_manual was recorded. With NESTED_FALLBACK='log_only' it still sends POST /r2a/manage_reply. The docs say 'Replies nested deeper than the top-level reply cannot be targeted in isolation to be hidden/unhidden' (Retrieve and Manage Replies/Reply Management.md:9). response.md:9-13 shows the executor knew this rule and hedged anyway ('先試著直接隱藏那則巢狀回覆。如果 Meta 已經開放，這一步就會成功'). The fallback is there: it hides the top-level ancestor, or records needs_manual when the branch holds the user's own or whitelisted replies. The whole-branch warning is there too (response.md:15 '改成隱藏它所屬的頂層留言，整串一起藏'). But the first clause of this expectation is broken. The mock also showed a concrete risk. The real API's answer to a nested ID is not documented. If it returns success:true without hiding anything, the script logs action=hidden '已直接隱藏這則巢狀回覆', marks the reply handled and never checks again. After 2 cycles the spam reply was still NOT_HUSHED and its branch was not hidden."
+            },
+            {
+              "text": "Skips replies that are already hidden (hide_status) and replies written by the user themself (e.g. is_reply_owned_by_me).",
+              "passed": true,
+              "evidence": "Already hidden: Guard._decide (:593-602) returns already_hidden when hide_status == 'HIDDEN', which writes a CSV row and sends no POST. A nested reply under a hidden top-level reply becomes 'covered'. On the mock, r4 (HIDDEN, '投資群組') gave action=already_hidden with no manage_reply call, and a COVERED nested spam reply under a HIDDEN top-level reply gave action=covered with 0 POSTs. Own replies: process_post (:541-545) skips authors that _protected_author (:561-563) matches against the GET /me username, ignoring case, and run_cycle stops if /me returns no username (:786-789). On the mock, the user's own reply r3 ('提醒：這不是投資建議') got no POST and no CSV row. The script does not request is_reply_owned_by_me. Matching on username is reliable here because the docs say username works for 'your own user'. It also never auto-hides UNHUSHED replies; that is a design choice, and the docs do not define UNHUSHED."
+            },
+            {
+              "text": "Paginates reply lists with paging.cursors.after rather than reading only the first page.",
+              "passed": true,
+              "evidence": "ThreadsClient.get_paged (:252-277) follows paging.next when present. Otherwise it requests the same path again with after=paging.cursors.after. The mock returned cursor-only paging, the same shape as the doc examples (no next). On a post with 60 replies and page size 25, the script made 4 requests (after=MjU=, NTA=, NjA=) and hid the 55th reply ('帶你投資'), so pagination is real. Caveat: with cursor-only paging it requests the next page only when the current page had at least 10 items (CURSOR_PROBE_MIN_ITEMS :86, :272). With a short page that was not the last one (8 of 25, as if some replies were filtered out) or a server page size of 5, it stopped after page 1 and missed the spam (it saw 8 of 30 and 5 of 12 replies). When paging.next was present it read all 30. The executor's cursor-only test uses page_size=10, exactly at the threshold, so this gap is never tested."
+            },
+            {
+              "text": "States the permissions needed: threads_read_replies and threads_manage_replies (plus threads_basic).",
+              "passed": true,
+              "evidence": "response.md:28: '權限要有 `threads_basic`、`threads_read_replies`、`threads_manage_replies`。' The script docstring says the same (threads_reply_guard.py:13). This matches Retrieve and Manage Replies.md: threads_basic for all calls, threads_read_replies for GET reply endpoints, threads_manage_replies for POST."
+            },
+            {
+              "text": "Writes a CSV log with at least the reply ID, matched keyword or text, action taken and timestamp, and avoids re-processing the same reply on later runs.",
+              "passed": true,
+              "evidence": "CsvLog writes threads_moderation_log.csv as UTF-8 with a BOM (bytes start b'\\xef\\xbb\\xbf'). Its columns (CSV_FIELDS :457-461) are checked_at, action, matched_keywords, username, reply_text, depth, reply_id, reply_permalink, reply_time, post_id, post_permalink, target_id, target_permalink, detail. threads_guard_state.json prevents re-processing: Guard._finish stores state.handled[reply_id], and process_post skips IDs found in handled or exempt_ids (:542). On the mock, rows looked like {checked_at: 2026-10-14T10:08:23+08:00, action: hidden, matched_keywords: 加賴, reply_id: r1}, and a second cycle added 0 CSV rows and sent 0 POSTs. test_next_cycles_do_not_repeat_work passes. Minor points: failed hides are retried up to 3 times on purpose, and running '--once --dry-run' from cron writes the same dry_run rows again each time, because dry_seen is kept only in memory."
+            }
+          ],
+          "notes": [
+            "No user_notes.md was written. These caveats come from response.md: the script was tested only against a simulated API, and field names and error formats are based on the executor's own knowledge of the spec.",
+            "The executor says it could not check the latest docs, so it did not hard-code the nested-reply limitation. This is why the script tries the nested ID first.",
+            "'投資' is likely to hide ordinary comments (false positives).",
+            "The user needs to choose NESTED_FALLBACK: hide the whole top-level branch (default) or log_only.",
+            "Whether to replace '投資' with narrower phrases, and which accounts to whitelist (EXEMPT_USERNAMES).",
+            "Tries the nested reply ID first and falls back to the top-level ancestor. This is a hedge against an API change the docs do not describe.",
+            "Cursor-only pagination is followed only when a page has at least 10 items, to save calls on posts with few replies.",
+            "If fields are rejected, it falls back to minimal fields and walks /replies one level at a time."
+          ],
+          "eval_name": "eval-5-reply-moderation-python"
+        }
+      ],
+      "run_summary": {
+        "with_skill": {
+          "pass_rate": {
+            "mean": 1.0,
+            "stddev": 0.0,
+            "min": 1.0,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 705.575,
+            "stddev": 356.9484,
+            "min": 376.0,
+            "max": 1096.6
+          },
+          "tokens": {
+            "mean": 177668.25,
+            "stddev": 41292.9359,
+            "min": 139891,
+            "max": 216999
+          }
+        },
+        "without_skill": {
+          "pass_rate": {
+            "mean": 0.85,
+            "stddev": 0.1192,
+            "min": 0.71,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 962.525,
+            "stddev": 620.2232,
+            "min": 297.5,
+            "max": 1613.1
+          },
+          "tokens": {
+            "mean": 189259.0,
+            "stddev": 76640.2307,
+            "min": 107721,
+            "max": 268261
+          }
+        },
+        "delta": {
+          "pass_rate": "+0.15",
+          "time_seconds": "-256.9",
+          "tokens": "-11591"
+        }
+      },
+      "notes": [
+        "Final skill version: 29/29 checks (100%) vs 25/29 without the skill (85% averaged per eval). Every eval scores at least as well with the skill.",
+        "Baseline variance is real: eval 2 without the skill passed 9/9 this round after failing pagination and refresh checks in rounds 1 and 2. With one run per configuration, a single lucky or unlucky run moves the averages a lot.",
+        "Remaining baseline misses are knowledge gaps: it still hedges on ghost post + poll and ships a mode that tries the forbidden combination, shows no exact payloads in the reply, omits the 100-follower requirement for profile_lookup, and calls manage_reply on nested replies before falling back.",
+        "Graders found a few overstatements in with-skill replies that trace to the skill's wording: a ghost post's link preview restriction presented as stated in the docs (the docs only say text spoilers are the sole supported feature), 'will definitely be rejected' where the docs don't say how the API reacts, and the two profile-discovery endpoints' 1,000-request limits treated as one shared quota.",
+        "Speed and cost: with the skill, mean ~706 s vs ~963 s and ~178K vs ~189K tokens."
+      ]
+    }
+  ]
+}
