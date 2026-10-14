@@ -1,0 +1,82 @@
+{
+  "skill_name": "threads-api",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我在寫一個 Python 腳本，要自動在 Threads 發一則輪播貼文：兩張 JPG 加一支直式 MP4 影片（都已經放在公司 S3 的公開網址），內文要附活動頁連結 https://example.com/event，主題標籤用「攝影展」，而且只讓我追蹤的人回覆。影片有時候很大、處理比較久。幫我寫一個完整的發文函式，要能處理影片還在處理中或處理失敗的情況，最後印出貼文網址。",
+      "expected_output": "A Python publishing function implementing the 3-step carousel flow (item containers with is_carousel_item=true -> CAROUSEL container with comma-separated children -> threads_publish), status polling with ERROR/EXPIRED handling and timeout, topic_tag and reply_control=accounts_you_follow on the parent, correct handling of the link (link_attachment is TEXT-only), and permalink lookup by media ID.",
+      "files": [],
+      "expectations": [
+        "Each carousel item container is created with is_carousel_item=true and an explicit media_type of IMAGE or VIDEO.",
+        "The parent container is created with media_type=CAROUSEL and `children` as a comma-separated list of the item container IDs.",
+        "Before publishing, the code polls GET /{container-id}?fields=status (with error_message) and only proceeds once the containers (at least the video) report FINISHED.",
+        "The code handles a container in ERROR (surfacing error_message), EXPIRED, and a polling timeout without publishing.",
+        "topic_tag=攝影展 is sent as the topic_tag parameter and reply_control=accounts_you_follow is set, both on the carousel parent container.",
+        "The link is not sent as link_attachment on the carousel, and the reply explains that link preview cards only work on text-only posts (the link stays plain text).",
+        "It publishes via POST /{user}/threads_publish with creation_id=<carousel container id>, then fetches the permalink with the returned media ID (GET /{media-id}?fields=permalink) and prints it.",
+        "The access token comes from the environment/config (not hard-coded) and requests go to graph.threads.net/v1.0 (or graph.threads.com/v1.0)."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我們的 Node.js + TypeScript 後台有個排程，每天早上 9 點抓 Threads 數據寫進 Google Sheet：前一天發的每篇貼文的瀏覽數、按讚數、回覆數，還有帳號的粉絲總數跟粉絲國家分布。現在有兩個問題：一是 token 大概兩個月就失效，排程就整個掛掉；二是抓 follower_demographics 一直回錯誤。請幫我寫 token 自動續期和數據抓取這兩個模組（寫入 Google Sheet 的部分我們已經有了，不用寫）。",
+      "expected_output": "TypeScript modules: token refresh via GET /refresh_access_token?grant_type=th_refresh_token respecting the >=24h/unexpired rules and persisting the new token; insights fetching with media insights (views, likes, replies) for yesterday's posts via paginated /me/threads, followers_count without since/until, and follower_demographics with breakdown=country (no since/until, >=100 followers).",
+      "files": [],
+      "expectations": [
+        "Token refresh calls GET https://graph.threads.net/refresh_access_token with grant_type=th_refresh_token and the current long-lived token.",
+        "Refresh logic follows the documented rules: only refreshes a token that is unexpired and at least 24 h old, refreshes well before the ~60-day expiry, and persists the new token together with its expiry.",
+        "The reply explains that an already-expired token cannot be refreshed and needs re-authorization, and the code fails loudly / alerts in that case.",
+        "follower_demographics is requested with breakdown=country and without since/until.",
+        "The reply or code states that follower_demographics requires at least 100 followers.",
+        "followers_count is requested without since/until.",
+        "Per-post metrics use GET /{media-id}/insights with metric including views, likes and replies, parsing values[0].value.",
+        "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100.",
+        "The code is TypeScript and does not hard-code the token or the app secret."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "幫我發一則 Threads：「週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale」，附一個投票問大家喜歡「淺焙」還是「深焙」，然後設成 24 小時後自動消失的限時貼文。token 我已經放在環境變數 THREADS_ACCESS_TOKEN 了，直接幫我發。",
+      "expected_output": "Does not publish. Detects that ghost posts can't carry a poll, explains it and offers concrete alternatives for the user to choose; checks the token (it is not present in this environment) and reports it; shows the exact payload it would send after confirmation.",
+      "files": [],
+      "expectations": [
+        "The reply states definitively that a ghost post (24 h auto-disappearing post) cannot carry a poll — not merely that it might not.",
+        "It does not silently drop either feature: it offers at least two concrete alternatives (e.g. ghost post without the poll / regular post with the poll) and asks the user to choose.",
+        "Nothing is published: no publish call succeeds and the reply does not claim a post was made.",
+        "It checks the environment for THREADS_ACCESS_TOKEN, reports that the token is not available here, and asks the user to provide or set it.",
+        "The reply itself (not only a script) shows the exact payload for each alternative, keeping the user's text verbatim, with poll_attachment {option_a: 淺焙, option_b: 深焙} on a TEXT post for the poll option and is_ghost_post=true for the ghost option.",
+        "It plans to verify which account it will post to (e.g. GET /me?fields=id,username) before publishing.",
+        "Beyond the API conflict, it flags at least one way the request as written could undercut the user's goal — e.g. a 24-hour post published now (midweek) is gone before the weekend it advertises, or the link looks like a placeholder."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "我們的 App 用 Threads API 做品牌監測，現在卡了三個怪問題：(1) 用 keyword_search 搜「手沖咖啡」只會回傳我自己帳號的貼文，別人的都搜不到；(2) location_search 不管搜「台北 101」還是「信義區」，回來的都是美國 Menlo Park 的地點；(3) 用 profile_lookup 查一個有 5 萬粉絲的咖啡品牌帳號一直失敗，但查 @threads 就查得到。權限我在 App 後台都有勾，token 也是新的。是我們程式寫錯了嗎？要怎麼修？",
+      "expected_output": "Not a code bug: each symptom is the documented behavior of a permission that hasn't been approved (keyword search → own posts only; location search → 'Menlo Park' only; profile discovery standard access → only @meta/@threads/@instagram/@facebook, public profiles with >=100 followers). Fix: App Review / advanced access and a published app; a way to confirm the diagnosis.",
+      "files": [],
+      "expectations": [
+        "Explains that keyword_search returning only the user's own posts is the documented behavior while threads_keyword_search has not been approved through App Review, i.e. not a code bug.",
+        "Explains that location_search answering only for 'Menlo Park' is the documented behavior while threads_location_tagging has not been approved.",
+        "Explains that profile_lookup with standard access only reaches official Meta accounts (@meta, @threads, @instagram, @facebook) and that threads_profile_discovery needs advanced access / App Review to look up other accounts.",
+        "Mentions that profile_lookup only returns public profiles with at least 100 followers.",
+        "Distinguishes adding/granting a permission (dashboard checkbox, token scope) from having it approved through App Review with the app published, and gives that as the fix.",
+        "Gives a concrete way to confirm the diagnosis, e.g. debug_token to inspect the token's scopes or checking the permission's access level / review status in the App Dashboard."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "幫我寫一個 Python 腳本，每 10 分鐘掃一次我最近 20 則 Threads 貼文底下的留言，只要留言裡有「加賴」「私訊我」「投資」這些字就自動隱藏，處理紀錄寫進 CSV。留言底下的回覆（巢狀回覆）出現這些字也要處理。",
+      "expected_output": "A Python script that lists the 20 latest posts, reads replies (replies/conversation with cursor pagination), hides matches with POST /{reply-id}/manage_reply hide=true, handles the fact that nested replies can't be hidden individually (hide the top-level ancestor or flag it, explaining the trade-off), skips hidden/own replies, logs to CSV without reprocessing, and states the needed permissions.",
+      "files": [],
+      "expectations": [
+        "Lists the user's recent posts with GET /me/threads (limit 20) and reads their replies with GET /{media-id}/replies and/or /{media-id}/conversation, requesting text and hide_status.",
+        "Hides matching replies with POST /{reply-id}/manage_reply and hide=true.",
+        "Handles the nested-reply limitation correctly: does not call manage_reply on a nested reply's own ID; instead hides the top-level ancestor (or flags it for review) and tells the user this hides the whole branch.",
+        "Skips replies that are already hidden (hide_status) and replies written by the user themself (e.g. is_reply_owned_by_me).",
+        "Paginates reply lists with paging.cursors.after rather than reading only the first page.",
+        "States the permissions needed: threads_read_replies and threads_manage_replies (plus threads_basic).",
+        "Writes a CSV log with at least the reply ID, matched keyword or text, action taken and timestamp, and avoids re-processing the same reply on later runs."
+      ]
+    }
+  ]
+}
