@@ -1559,6 +1559,208 @@
         "Graders found a few overstatements in with-skill replies that trace to the skill's wording: a ghost post's link preview restriction presented as stated in the docs (the docs only say text spoilers are the sole supported feature), 'will definitely be rejected' where the docs don't say how the API reacts, and the two profile-discovery endpoints' 1,000-request limits treated as one shared quota.",
         "Speed and cost: with the skill, mean ~706 s vs ~963 s and ~178K vs ~189K tokens."
       ]
+    },
+    {
+      "iteration": 4,
+      "metadata": {
+        "skill_name": "threads-api",
+        "skill_path": "/home/claude/threads-api (adds the embedding section, §11)",
+        "executor_model": "claude-opus-5-5",
+        "analyzer_model": "claude-opus-5-5",
+        "timestamp": "2026-10-14T07:23:57Z",
+        "evals_run": [
+          6
+        ],
+        "runs_per_configuration": 1
+      },
+      "runs": [
+        {
+          "eval_id": 6,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 964.4,
+            "tokens": 193358,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Identifies that <script> tags inserted via innerHTML never execute, and loads embed.js once, then triggers re-processing of newly inserted embeds with window.instgrm.Embeds.process().",
+              "passed": true,
+              "evidence": "response.md cause 1: '用 innerHTML 塞進去的 `<script>` 不會執行。每段嵌入碼最後的 `<script async src=\".../embed.js\">` 根本沒跑'. threads-wall.js: loadEmbedJs() is called once from init(), returns early if window.instgrm.Embeds.process already exists, otherwise appends a single <script src=https://www.threads.com/embed.js>; embedOne() adds class text-post-media to the newly built blockquote and calls window.instgrm.Embeds.process() (line 339). Cards are built with DOM APIs, no innerHTML anywhere."
+            },
+            {
+              "text": "Says the page's CSP must allow https://www.threads.com in both script-src (embed.js) and frame-src (the embed iframes).",
+              "passed": true,
+              "evidence": "response.md cause 3: '`script-src` 和 `frame-src` 都要放行 `https://www.threads.com`', and the CSP snippet lists 'script-src … https://www.threads.com / frame-src … https://www.threads.com / connect-src … 'self''. featured.html meta CSP: script-src 'self' https://www.threads.com; frame-src https://www.threads.com; connect-src 'self'. Also explains threads.net permalinks create threads.net iframes that a threads.com-only CSP blocks (consistent with embed.js building <permalink>/embed/), and the code normalizes all URLs to www.threads.com."
+            },
+            {
+              "text": "Attributes 'the first few load, then the rest stall' to rate limiting from loading too many embeds, and paces loading (pagination, lazy-loading near the viewport, or gating a few/one at a time with delays) instead of letting all 60 process at once.",
+              "passed": true,
+              "evidence": "response.md cause 2 heading: '「偶爾前幾則有出來，後面整排卡住」是限流' — 60 queued (3 concurrent), dozens in a row get rate-limited (429), blocked iframes never report height (hedged as undocumented/observed). Code: cards start without class text-post-media so embed.js ignores them; run() releases one item at a time, waits for success/12 s timeout, then sleep(gap=3600 ms); nextItem() only picks cards flagged near by an IntersectionObserver with rootMargin 600px. All 60 never process at once."
+            },
+            {
+              "text": "Detects failed embeds by outcome with a timeout (e.g. the blockquote is never replaced or the iframe never gets a height), shows a fallback card linking to the post, and backs off when failures repeat.",
+              "passed": true,
+              "evidence": "waitForEmbed(): success only when '!bq.isConnected && iframe && iframe.getBoundingClientRect().height > 120'; otherwise fails after successTimeoutMs=12000 of visible-tab time. On failure renderFallback() shows '這則貼文暫時無法在這裡顯示' with an <a href=item.permalink> to the post, possible reasons, and a retry button. After failStreakForPause=3 consecutive failures, rateLimitPause() waits 60 s × 1.5^n (max 5 min), raises gap ×1.5 (max 15 s), and re-queues the streak items once. embed.js load failure also yields fallback cards for all."
+            },
+            {
+              "text": "Implements the weekly deleted-post check with the oEmbed endpoint (graph.threads.net/v1.0/oembed), not by scraping threads.com pages, and runs it outside the visitor's browser (e.g. a scheduled GitHub Actions job or script).",
+              "passed": true,
+              "evidence": "scripts/check-threads-posts.mjs calls `${API_BASE}/oembed?url=…` with API_BASE default 'https://graph.threads.net/v1.0'; no threads.com page fetches. .github/workflows/check-threads-posts.yml runs it on cron '17 1 * * 1' (Monday 01:17 UTC = 09:17 Taiwan) plus workflow_dispatch, then commits posts.json/posts-removed.json. response.md explicitly contrasts with scraping ('而不是去抓 threads.com 的網頁'). Verified with a local mock oEmbed server: requests hit /v1.0/oembed."
+            },
+            {
+              "text": "Correctly states that the oEmbed endpoint can be called without an access token (changelog 2026-03-03), so no app, token or app secret is needed for the check — and never puts an app secret in browser code.",
+              "passed": true,
+              "evidence": "response.md: '官方從 2026-03-03 起就不需要 token 了'; script header: 'oEmbed 自 2026-03-03 起不需要 token' (matches Threads Changelog March 3, 2026). Default path sends no token (mock server never saw access_token). An optional fallback reads THREADS_APP_ID/THREADS_APP_SECRET only from Actions secrets/env, with the warning '這組只能放在 Actions 裡，不能寫進網頁的 JS'; secret is redacted from logs. threads-wall.js/featured.html contain no token or secret."
+            },
+            {
+              "text": "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
+              "passed": true,
+              "evidence": "classify(): err.code === 24 → 'gone' (only status that is removed); code 100/subcode 2207047 → 'bad-url' (kept, listed for manual review); code 100 + HTTP 500 → 'error' (kept); 190/401/403 → 'auth' (kept); everything else incl. network exceptions → 'transient' (retried at 5 s/15 s, kept). Mock run: GONE (400 code 24 subcode 4279056) moved to removed.json; HTTP 500, code-4 rate limit, code-100 invalid param and a dropped connection all stayed in posts.json. Extra guards: abort without writing if all checks fail or removals exceed max(3, 20%). It keys on code 24 alone, not is_transient, which is acceptable since code 24 is the definitive not-found error."
+            },
+            {
+              "text": "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL.",
+              "passed": true,
+              "evidence": "No code creates an iframe; threads-wall.js only builds blockquotes with data-text-post-permalink and lets embed.js create the /embed/ iframe. grep finds 'iframe' only in comments and the success check (querySelector('iframe')). Passes, but trivially (see eval_feedback)."
+            }
+          ],
+          "notes": [
+            "Not tested against real Threads (no network); embed.js internals (3 concurrent, postMessage height, instgrm.Embeds.process) are undocumented and may change",
+            "Assumed posts.json field names url/embed (also accepts link/href/permalink, embedCode/html, {posts:[...]})",
+            "Open DevTools Console/Network after first deploy",
+            "Run the workflow manually once after pushing",
+            "Custom Actions-based Pages deploy needs a workflow_run trigger",
+            "Optional THREADS_APP_ID/THREADS_APP_SECRET fallback in case oEmbed starts requiring a token again"
+          ],
+          "eval_name": "eval-6-embed-wall"
+        },
+        {
+          "eval_id": 6,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.25,
+            "passed": 2,
+            "failed": 6,
+            "total": 8,
+            "time_seconds": 1367.0,
+            "tokens": 184227,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Identifies that <script> tags inserted via innerHTML never execute, and loads embed.js once, then triggers re-processing of newly inserted embeds with window.instgrm.Embeds.process().",
+              "passed": false,
+              "evidence": "First part is met: response.md item 1 says scripts inserted with innerHTML never run and shows the createElement fix. The rest is not. embed.js is not loaded once. threads-embed.js appends a new embed.js <script> in every per-post same-origin iframe, so up to 60 separate instances run. window.instgrm.Embeds.process() appears nowhere in the response or code. Worse, response.md item 2 and the threads-embed.js header comment say embed.js 'only scans at load time; later-inserted blockquotes are not processed'. That ignores process(), which exists to re-scan the page, and the design works around that wrong premise."
+            },
+            {
+              "text": "Says the page's CSP must allow https://www.threads.com in both script-src (embed.js) and frame-src (the embed iframes).",
+              "passed": true,
+              "evidence": "In this design embed.js runs only inside threads-embed.html, and that page ships its own meta CSP: \"script-src 'self' https://www.threads.com https://www.threads.net; frame-src https://www.threads.com https://www.threads.net; ...\". The nested threads.com /embed/ iframe is created by that child document, so the child's frame-src governs it, not the parent's. The main page correctly needs only frame-src 'self' and connect-src 'self'. response.md item 4 also explains that a CSP allowing only www.threads.net will block both the script and the iframe once they redirect to www.threads.com. Wherever embed.js actually runs, the guidance covers threads.com in both script-src and frame-src. The prose never names both directives in one sentence for the user's own page, but the delivered CSP and explanation are correct."
+            },
+            {
+              "text": "Attributes 'the first few load, then the rest stall' to rate limiting from loading too many embeds, and paces loading (pagination, lazy-loading near the viewport, or gating a few/one at a time with delays) instead of letting all 60 process at once.",
+              "passed": false,
+              "evidence": "Pacing is implemented. threads-wall.js has IntersectionObserver lazy-loading (rootMargin 800px) and MAX_CONCURRENT = 3, though with no delays or backoff. The attribution is wrong, though. response.md item 2 says explicitly '時序問題，這是「偶爾前幾則有出來」的原因' (a timing guess: embed.js loaded elsewhere and processed only the posts already in the DOM). Rate limiting appears only in item 3, as a general extra load concern ('比較容易被 Threads 限流'). It is not given as the cause of the symptom. The expectation requires rate limiting as the cause."
+            },
+            {
+              "text": "Detects failed embeds by outcome with a timeout (e.g. the blockquote is never replaced or the iframe never gets a height), shows a fallback card linking to the post, and backs off when failures repeat.",
+              "passed": false,
+              "evidence": "Timeouts exist: 12 s in threads-embed.js and 20 s in threads-wall.js. A fallback card with an '在 Threads 查看 ↗' link and a manual '重新載入' button exists. Success is not detected by outcome, though. threads-embed.js settles 'rendered' on the Threads iframe's 'load' event, and if any iframe exists at 12 s it settles 'rendered' with reason 'slow-load'. Real embed.js inserts the /embed/ iframe right away at height 0 and removes the blockquote only after the height postMessage. So a rate-limited or broken embed whose page loads but never sends a height is reported as success, the slot is freed, and no fallback card is shown. The 'not-processed' path fires only if embed.js never creates an iframe at all. Nothing backs off on repeated failures: a failure releases the slot and pump() starts the next post immediately."
+            },
+            {
+              "text": "Implements the weekly deleted-post check with the oEmbed endpoint (graph.threads.net/v1.0/oembed), not by scraping threads.com pages, and runs it outside the visitor's browser (e.g. a scheduled GitHub Actions job or script).",
+              "passed": false,
+              "evidence": "It runs outside the browser: .github/workflows/threads-weekly-check.yml uses cron '17 1 * * 1' and runs node scripts/threads-posts.mjs check. But the check scrapes threads.com. fetchSignals() GETs the post page (or `${post.url}/embed`) with a browser User-Agent, parses <title> and og: meta tags, and compares a fingerprint with responses for randomly made-up post codes. graph.threads.net and oEmbed are never used anywhere."
+            },
+            {
+              "text": "Correctly states that the oEmbed endpoint can be called without an access token (changelog 2026-03-03), so no app, token or app secret is needed for the check — and never puts an app secret in browser code.",
+              "passed": false,
+              "evidence": "The response never mentions oEmbed or the 2026-03-03 change that made it tokenless. It says only that its page-scraping method needs no login or token. In '想跟你確認' item 1 it says an accurate check needs the official API with a Meta developer app and a token renewed about every 60 days, and limits that to the user's own posts. That misses the tokenless oEmbed route for any public post. No app secret is put in browser code, but the main claim is absent."
+            },
+            {
+              "text": "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
+              "passed": false,
+              "evidence": "classify() in scripts/threads-posts.mjs marks a post 'gone' on HTTP 404/410 from the scraped page, or when its fingerprint (status, final URL path, title, og:title) matches the response for a made-up URL. After 2 consecutive weekly 'gone' results the post is removed. 429, 5xx and timeouts are treated as 'unknown', and there is a 20% mass-removal abort. But removal never depends on oEmbed error code 24 / 'Media Not Found' / is_transient=false. It depends on a heuristic over scraped HTML, which can mark a post gone because of login walls or other generic pages."
+            },
+            {
+              "text": "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL.",
+              "passed": true,
+              "evidence": "The only iframe the code creates directly is the same-origin threads-embed.html?u=..&c=.. (threads-wall.js createCard/start). Inside it, the Threads iframe is created by embed.js from the blockquote, which uses <permalink>/embed/. No code sets an iframe src to a threads.com post permalink. The checker fetches pages with fetch(); it does not frame them."
+            }
+          ],
+          "notes": [
+            "Executor says it never tested against real Threads; whether real embed.js needs other origins, and whether Threads responses to deleted posts can be told apart from GitHub runners, are unknown.",
+            "The 'first few appear' explanation is labeled as an inference from symptoms, without seeing the user's code.",
+            "The weekly check scrapes threads.com pages with a browser User-Agent; it should use the tokenless oEmbed endpoint and its code-24 'Media Not Found' signal.",
+            "Success detection in threads-embed.js (iframe load event or iframe existing) does not match how real embed.js signals a rendered post (height postMessage, then blockquote removal).",
+            "Wraps each post in its own same-origin iframe that loads its own copy of embed.js, instead of loading embed.js once and calling window.instgrm.Embeds.process()."
+          ],
+          "eval_name": "eval-6-embed-wall"
+        }
+      ],
+      "run_summary": {
+        "with_skill": {
+          "pass_rate": {
+            "mean": 1.0,
+            "stddev": 0.0,
+            "min": 1.0,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 964.4,
+            "stddev": 0.0,
+            "min": 964.4,
+            "max": 964.4
+          },
+          "tokens": {
+            "mean": 193358.0,
+            "stddev": 0.0,
+            "min": 193358,
+            "max": 193358
+          }
+        },
+        "without_skill": {
+          "pass_rate": {
+            "mean": 0.25,
+            "stddev": 0.0,
+            "min": 0.25,
+            "max": 0.25
+          },
+          "time_seconds": {
+            "mean": 1367.0,
+            "stddev": 0.0,
+            "min": 1367.0,
+            "max": 1367.0
+          },
+          "tokens": {
+            "mean": 184227.0,
+            "stddev": 0.0,
+            "min": 184227,
+            "max": 184227
+          }
+        },
+        "delta": {
+          "pass_rate": "+0.75",
+          "time_seconds": "-402.6",
+          "tokens": "+9131"
+        }
+      },
+      "notes": [
+        "Round 4 adds §11 (embedding posts) to the skill and a new eval 6: a 60-post Threads wall that only shows 'View on Threads' links, plus a weekly check for deleted posts. Only eval 6 was run; the rest of the skill is unchanged from round 3.",
+        "With the skill: 8/8. It explained that scripts inserted via innerHTML never run and re-triggered embed.js with window.instgrm.Embeds.process(), named the CSP directives, paced loading to avoid rate limits, detected failures by outcome with fallback cards and backoff, and checked deletions with token-less oEmbed, removing a post only on code 24.",
+        "Without the skill: 2/8. It diagnosed the innerHTML problem but believed embed.js only scans the page once, so it wrapped every post in its own iframe page; it treated the iframe load event as success; and it built the deletion check by scraping threads.com pages because it thought an accurate check needed a Meta app and token (oEmbed has worked without a token since 2026-03-03).",
+        "Facts not in the docs were checked live on 2026-10-14 and given to the graders as ground truth: embed.js exposes instgrm.Embeds.process(), loads at most 3 embeds at a time and removes each blockquote once its iframe reports a height; post pages send X-Frame-Options: DENY while /embed/ pages can be framed; oEmbed works without a token and returns code 24 (subcode 4279056) for missing posts.",
+        "Grader feedback folded into the skill: build the embed markup from a validated URL instead of injecting stored HTML (XSS), and note that old threads.net links produce threads.net iframes, so rewrite them or allow both hosts in the CSP. Graders also flagged assertion 8 (no iframe of the permalink page) as non-discriminating.",
+        "Speed and cost: with the skill 964 s and ~193K tokens vs 1,367 s and ~184K without. One run per configuration, so treat the gap as directional."
+      ]
     }
   ]
 }

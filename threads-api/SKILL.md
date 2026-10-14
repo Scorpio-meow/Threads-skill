@@ -1,6 +1,6 @@
 ---
 name: threads-api
-description: "Use for anything involving Meta's Threads API: code that posts, reads, searches, moderates replies, pulls insights or handles tokens/webhooks, and posting, replying or pulling stats for the user."
+description: "Use for Meta's Threads API and embedding Threads posts: code that posts, reads, searches, moderates, pulls insights or handles tokens/webhooks, and posting, replying or pulling stats for the user."
 ---
 
 # Threads API
@@ -12,7 +12,7 @@ Playbook for Meta's Threads API, distilled from the official docs (snapshot cove
 
 Statements are from the docs unless tagged *(practice)*, which marks engineering advice. If the API behaves differently from what's written here, or the user asks about something newer than the snapshot, check the live changelog (https://developers.facebook.com/documentation/threads/changelog), or the user's local copy of the docs if one is available. Threads ads live in the Marketing API and are out of scope.
 
-Contents: 1 Core facts · 2 Build mode · 3 Operate mode · 4 Publishing · 5 Reading & search · 6 Replies & moderation · 7 Insights · 8 Auth & permissions · 9 Quotas · 10 Webhooks · 11 oEmbed & Web Intents · 12 Troubleshooting · 13 Doc examples not to copy · 14 Reference client
+Contents: 1 Core facts · 2 Build mode · 3 Operate mode · 4 Publishing · 5 Reading & search · 6 Replies & moderation · 7 Insights · 8 Auth & permissions · 9 Quotas · 10 Webhooks · 11 Embedding, oEmbed & Web Intents · 12 Troubleshooting · 13 Doc examples not to copy · 14 Reference client
 
 ## 1. Core facts (most bugs come from missing one of these)
 
@@ -201,7 +201,7 @@ Here `since`/`until` must be Unix timestamps ≥ `1712991600` (2024-04-13); the 
 
 ## 9. Quotas and rate limits
 
-Per profile, rolling 24 h: **250 posts** (enforced at `threads_publish`), **1,000 replies**, **100 deletes**, **500 location searches**; keyword search 2,200 queries; `profile_lookup` and `profile_posts` 1,000 requests each per their pages (whether shared isn't stated). oEmbed: 1,000 requests/hour.
+Per profile, rolling 24 h: **250 posts** (enforced at `threads_publish`), **1,000 replies**, **100 deletes**, **500 location searches**; keyword search 2,200 queries; `profile_lookup` and `profile_posts` 1,000 requests each per their pages (whether shared isn't stated). oEmbed: 1,000 requests/hour (loading embeds on a page has no documented limit; see §11.3).
 
 `GET /me/threads_publishing_limit?fields=quota_usage,config,reply_quota_usage,reply_config,delete_quota_usage,delete_config,location_search_quota_usage,location_search_config` → `data[0]` holds each `*_usage` plus a `{quota_total, quota_duration: 86400}` config. Permissions depend on the fields: post fields need `threads_basic` + `threads_content_publish`; reply fields add `threads_manage_replies`; delete fields need `threads_basic` + `threads_delete`; location-search fields need `threads_basic` + `threads_location_tagging`.
 
@@ -215,9 +215,54 @@ App-level, per app–user pair, rolling 24 h: calls ≤ 4800 × impressions (imp
 - Payload (flat, not the `entry[].changes[]` shape of other Meta webhooks): `{"app_id","topic","target_id","time","subscription_id","has_uid_field","values":{"value":{…media fields…},"field":"replies|mentions|delete|publish"}}`. `target_id` is the media ID for `replies` and `delete`, but the mentioned user's ID for `mentions`. Delete payloads carry `deleted_at`.
 - *(general Meta webhooks behavior, outside this doc set)* Answer the GET verification by echoing `hub.challenge` when `hub.verify_token` matches; verify each POST's `X-Hub-Signature-256` (HMAC-SHA256 of the raw body with the app secret); return 200 quickly and process asynchronously.
 
-## 11. oEmbed and Web Intents
+## 11. Embedding posts, oEmbed and Web Intents
 
-- **oEmbed**: `GET https://graph.threads.net/v1.0/oembed?url=<post URL>&maxwidth=<320–658>`, no token needed (since 2026-03-03). URL forms: `https://www.threads.com/@{username}/post/{shortcode}` or `https://www.threads.com/t/{shortcode}`. Returns `{type: "rich", version: "1.0", html, provider_name, provider_url, width}`; the HTML loads `https://www.threads.com/embed.js`. 1,000 requests/hour. Not available for private, inactive, age-restricted or geo-gated posts, and only for displaying the post (no analytics on, or storage of, the returned data).
+### 11.1 Getting the embed HTML
+
+- **oEmbed**: `GET https://graph.threads.net/v1.0/oembed?url=<URL-encoded post URL>&maxwidth=<320–658>` → `{type: "rich", version: "1.0", html, provider_name, provider_url, width}`. Works for text, image, video and carousel posts, but not for posts from private, inactive or age-restricted accounts or geo-gated posts. 1,000 requests/hour. There's no `maxheight`: the embed is responsive, so its height follows the width and the content. Documented URL forms: `https://www.threads.com/@{username}/post/{shortcode}` and `https://www.threads.com/t/{shortcode}` *(observed 2026-10: `threads.net` hosts, trailing slashes and query strings are accepted too)*.
+- **Token**: none since 2026-03-03, per the changelog *(observed 2026-10: token-less calls succeed)*. The App Access Tokens page still says oEmbed needs an app token; if a token-less call is ever refused, call it server-side with one (§8.4), never from browser code.
+- **Errors** *(observed 2026-10)*:
+  - Missing or non-embeddable post → HTTP 400, `code 24`, `error_subcode 4279056` ("Media Not Found", `is_transient: false`).
+  - Not a Threads post URL → 400, `code 100`, subcode `2207047`.
+  - `maxwidth` outside 320–658 → HTTP **500**, `code 100` ("Param maxwidth must be…"). It's a validation error, so don't retry it.
+- **By hand**: on threads.com, open the post's share menu and choose **Get embed code**. The link text is in the viewer's UI language; oEmbed's is English.
+- **Terms**: the HTML, content and metadata may only be used to show the post. The docs rule out consuming, manipulating, extracting or persisting them for anything else, analytics included. *(practice: keep the permalink as your record and fetch the HTML when you render or build the page; don't derive search indexes, stats or datasets from it. Scraping threads.com pages instead is outside the API, and Meta's terms restrict automated collection.)*
+
+### 11.2 How the embed renders
+
+Everything in this subsection was observed in embed.js in 2026-10. It's undocumented and may change.
+
+- **Markup**: the HTML is `<blockquote class="text-post-media" data-text-post-permalink="<permalink>" data-text-post-version="0" id="ig-tp-<shortcode>">` around a plain "View on Threads" link, then `<script async src="https://www.threads.com/embed.js">`.
+- **Lifecycle**:
+  - embed.js turns each `blockquote.text-post-media` into an iframe of `<permalink minus query>/embed/<query>`, inserted before the blockquote at height 0.
+  - It loads **at most 3 at a time**. A slot frees when an iframe reports its height or after 10 s.
+  - The height arrives as a bare number via `postMessage` from `https://www.threads.com`. embed.js then sizes the iframe and removes the blockquote.
+  - An embed that never reports keeps a 0-px iframe, and the blockquote's link stays visible as the fallback.
+- **Dynamic pages**: `window.instgrm.Embeds.process()` re-scans the page for new blockquotes. A `<script>` inserted through `innerHTML` never runs, so in SPAs or after adding posts dynamically, load embed.js once and call `window.instgrm?.Embeds?.process()` after each insert. embed.js only needs `<blockquote class="text-post-media" data-text-post-permalink="<permalink>">` with a fallback link inside. *(practice: when the HTML is stored or comes from elsewhere, build that markup with DOM methods from a validated threads.com URL instead of injecting stored HTML through `innerHTML`, which is an XSS risk.)*
+- **Theme**: `data-theme="dark"` or `"auto"` on the blockquote adds `?theme=…` to the iframe URL and makes its background transparent.
+- **Raw iframe**: don't iframe the permalink itself, because post pages send `X-Frame-Options: DENY`. Where scripts can't load (a strict CSP, Chrome extension pages), iframe `<permalink>/embed/` directly and set its height from that `postMessage`. Check `event.origin`, and match `event.source` to the iframe's `contentWindow`.
+- **Site policies**: allow `https://www.threads.com` in `script-src` and `frame-src`. The iframe's host follows the permalink, so old `threads.net` links produce `www.threads.net` iframes: either rewrite them to `www.threads.com` or allow both hosts. The embed page sends `Cross-Origin-Resource-Policy: same-origin`, so a page with `Cross-Origin-Embedder-Policy: require-corp` can't show it.
+
+### 11.3 Pages with many embeds
+
+These are *(practice)* items from a production gallery of hundreds of posts.
+
+- **The problem**: even with embed.js's 3-at-a-time cap, loading dozens of embeds in a row gets rate-limited (HTTP 429), and the remaining posts stay as plain links. Meta documents no limit for these loads; the oEmbed quota covers API calls only.
+- **Pacing**:
+  - Show about 10 per page, or only process cards near the viewport.
+  - Render the blockquotes without the `text-post-media` class (mark them, e.g. `data-embed-pending`).
+  - Add the class to one blockquote at a time and call `instgrm.Embeds.process()`.
+  - Wait until that embed finishes or times out, then a few seconds more before the next (that gallery uses ≥ 3.6 s).
+  - Remove the class from an embed that failed, or the next `process()` call picks it up again.
+- **Detecting failure**: the page can't see a cross-origin iframe's HTTP status, and fetch/XHR wrappers never see these loads, so judge by outcome.
+  - Success means the blockquote was removed and the iframe is taller than ~120 px within ~12 s.
+  - After a few failures in a row, assume a rate limit: pause (that gallery uses 60 s × 1.5ⁿ, capped at 5 min), then resume more slowly.
+  - Hidden tabs throttle timers and layout, so don't mark an embed failed while `document.hidden`; re-check once the tab is visible.
+- **Fallback card**: for a failed embed, link to the post (allow only threads.com/threads.net URLs) and list the likely causes: deleted post; private, inactive or age-restricted account; geo-gating; rate limiting; a content or tracking blocker.
+- **Is a saved post still there?** Ask oEmbed (≤ 1,000/hour) rather than loading threads.com pages. `code 24` means it can no longer be embedded; treat other errors as transient and retry later.
+
+### 11.4 Web Intents
+
 - **Web Intents** (no app or token): `https://www.threads.com/intent/post?text=…&url=…&tag=…&reply_control=everyone|accounts_you_follow|mentioned_only|followers_only&reply_post_shortcode=…&quote_post_shortcode=…` and `https://www.threads.com/intent/follow?username=…`; percent-encode values. The right tool for "share to Threads" buttons, where visitors post from their own accounts.
 
 ## 12. Troubleshooting
@@ -242,6 +287,9 @@ App-level, per app–user pair, rolling 24 h: calls ≤ 4800 × impressions (imp
 | `follower_demographics` errors | Missing or multiple `breakdown`, `since`/`until` sent, or < 100 followers |
 | Quota errors | Check `threads_publishing_limit`; spread posts out |
 | No webhooks arrive | App not Live / no Advanced Access, business unverified, permission missing, or private account |
+| Embed stays a plain "View on Threads" link | Post not embeddable (oEmbed `code 24`); embed.js never ran (inserted via `innerHTML` → call `instgrm.Embeds.process()`); blocked by CSP, COEP or a content blocker; rate-limited after many embeds (§11.2–11.3) |
+| "Refused to display … X-Frame-Options 'deny'" | Iframing the post page → use embed.js or `<permalink>/embed/` |
+| oEmbed HTTP 500, `code 100`, "Param maxwidth…" | `maxwidth` outside 320–658 |
 
 ## 13. Doc examples not to copy verbatim
 
@@ -251,6 +299,7 @@ Several official examples are broken; write correct requests instead:
 - The carousel-item example omits `media_type`, which the parameter table requires.
 - Some examples omit `/v1.0` (mentions, pagination); include it.
 - JSON params appear unescaped inside shell quotes; JSON-encode them (`json.dumps`, `JSON.stringify`) and URL-encode the form.
+- oEmbed: the example has a stray backslash and an un-encoded post URL; use `curl -G --data-urlencode "url=<post URL>" https://graph.threads.net/v1.0/oembed`.
 - Location search: the guide uses `q`, the reference lists `query`. Send `q`; if results ignore the query, try `query`.
 
 ## 14. Reference client (Python 3.8+, standard library only)

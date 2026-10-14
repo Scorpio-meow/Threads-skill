@@ -77,6 +77,22 @@
         "States the permissions needed: threads_read_replies and threads_manage_replies (plus threads_basic).",
         "Writes a CSV log with at least the reply ID, matched keyword or text, action taken and timestamp, and avoids re-processing the same reply on later runs."
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "我的個人網站（純 HTML + 原生 JS，放在 GitHub Pages，<head> 有設 CSP）想做一面「精選 Threads 貼文」牆，大概 60 則。posts.json 裡存了每則的網址（有些是舊的 threads.net 連結）和從 Threads「取得內嵌程式碼」複製來的嵌入碼。我現在用 fetch 讀 JSON，再把嵌入碼用 innerHTML 塞進頁面，結果大部分都只顯示一個「在 Threads 查看」的連結框，沒變成貼文卡片；偶爾前幾則有出來，後面就整排卡住。幫我看問題在哪，寫一個能穩定載入的版本。另外我想每週自動檢查一次哪些貼文已經被刪掉，從清單拿掉。",
+      "expected_output": "Diagnosis: innerHTML scripts don't run (load embed.js once, call instgrm.Embeds.process()), CSP must allow www.threads.com for script and frame, too many embeds at once get rate-limited (pace them, detect failures by outcome, fallback cards). Weekly check via token-less oEmbed in a scheduled job; delete only on code 24.",
+      "files": [],
+      "expectations": [
+        "Identifies that <script> tags inserted via innerHTML never execute, and loads embed.js once, then triggers re-processing of newly inserted embeds with window.instgrm.Embeds.process().",
+        "Says the page's CSP must allow https://www.threads.com in both script-src (embed.js) and frame-src (the embed iframes).",
+        "Attributes 'the first few load, then the rest stall' to rate limiting from loading too many embeds, and paces loading (pagination, lazy-loading near the viewport, or gating a few/one at a time with delays) instead of letting all 60 process at once.",
+        "Detects failed embeds by outcome with a timeout (e.g. the blockquote is never replaced or the iframe never gets a height), shows a fallback card linking to the post, and backs off when failures repeat.",
+        "Implements the weekly deleted-post check with the oEmbed endpoint (graph.threads.net/v1.0/oembed), not by scraping threads.com pages, and runs it outside the visitor's browser (e.g. a scheduled GitHub Actions job or script).",
+        "Correctly states that the oEmbed endpoint can be called without an access token (changelog 2026-03-03), so no app, token or app secret is needed for the check — and never puts an app secret in browser code.",
+        "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
+        "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL."
+      ]
     }
   ]
 }

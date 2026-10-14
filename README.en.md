@@ -2,10 +2,10 @@
 
 [繁體中文](README.md) | **English** | [日本語](README.ja.md) | [한국어](README.ko.md)
 
-A skill that teaches AI assistants the Meta Threads API: it helps you write, review, and debug integration code, and can also use your token to post, reply, and pull insights directly.
+A skill that teaches AI assistants the Meta Threads API: it helps you write, review, and debug integration code, can also use your token to post, reply, and pull insights directly, and helps you embed Threads posts on your website.
 
 - Built in the [Agent Skills](https://agentskills.io) format (one folder plus a `SKILL.md`), so it installs in Claude Code, the Claude apps, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, Windsurf, and OpenCode.
-- Distilled from Meta's official documentation, covering the changelog through 2026-08-12.
+- Distilled from Meta's official documentation, covering the changelog through 2026-08-12. The embedding section also draws on the live embed.js code and tests run in October 2026.
 - The skill itself is written in English; the assistant replies in whatever language you use. The examples below use Claude.
 - Not an official Meta project.
 
@@ -109,6 +109,20 @@ Claude works through these steps:
 
 Operate mode needs Python 3.8 or later on your machine. By default, the code execution environment in the Claude apps can only reach package registries, not the Threads API, so when you use Operate mode in the app, Claude prepares the commands and parameters for you to run on your own machine.
 
+### Embedding: put Threads posts on your website
+
+- "I insert the Threads embed code with innerHTML, but every post only shows a 'View on Threads' link box. How do I fix it?"
+- "Build me a wall of 60 featured posts, and check every week which ones have been deleted."
+
+Claude will:
+
+- Get the embed code from oEmbed (no token needed since March 2026), or build the embed markup from a validated post URL, instead of injecting stored HTML with innerHTML.
+- Load embed.js once per page and call `window.instgrm.Embeds.process()` after adding posts; it also reminds you that your CSP must allow `https://www.threads.com` for scripts and iframes.
+- Paginate, or load posts one after another, when a page has many of them, so Threads doesn't rate-limit you; judge success by what actually rendered, swap failed posts for a fallback card that links to the original, and pause for a while after repeated failures.
+- Use oEmbed for periodic checks on whether posts still exist, removing a post only on `code 24` (Media Not Found) and treating every other error as temporary.
+
+How embed.js loads embeds isn't documented. This part comes from reading the live embed.js code in October 2026 and from experience with a post gallery running in production, so Meta may change it.
+
 ### What difference does the skill make
 
 Claude already knows the basics of the Threads API, but plenty of rules are buried in documentation details or recent changelog entries. In testing, Claude without the skill made each of the following mistakes; none of them showed up with the skill installed:
@@ -118,6 +132,8 @@ Claude already knows the basics of the Threads API, but plenty of rules are buri
 - It tried to hide a nested reply directly and only moved on to the parent reply after that failed. The API can only hide top-level replies, and hiding one hides the entire thread beneath it.
 - It paginated using only `paging.next`. The docs state that post list responses don't include that field, so by the docs' own account this only ever fetches the first page.
 - When refreshing a token, it didn't check the documented conditions: the token must be at least 24 hours old and not yet expired.
+- It assumed embed.js scans the page only once when it loads, so it wrapped every post in its own iframe page. In fact, calling `window.instgrm.Embeds.process()` after adding posts makes embed.js scan the page again.
+- It thought checking for deleted posts required a Meta app and token, so it scraped threads.com pages instead. oEmbed has needed no token since March 2026 and returns a clear `code 24` when a post is gone.
 
 The skill also points out mistakes in the official examples that shouldn't be copied as is (such as sending a GET request with `curl -F`), and where the docs are unclear or contradict themselves, it says so plainly instead of guessing.
 
@@ -175,12 +191,13 @@ The skill itself is [`threads-api/SKILL.md`](threads-api/SKILL.md), organized in
 | 7 | Insights: per-post and account-level metrics |
 | 8 | Permissions, App Review, OAuth, token refresh |
 | 9 | Quotas and rate limits |
-| 10–11 | Webhooks, oEmbed, Web Intents |
+| 10 | Webhooks |
+| 11 | Embedding posts: oEmbed, how embed.js loads embeds, pacing and failure handling for many embeds; Web Intents |
 | 12 | Troubleshooting: causes and fixes for common errors |
 | 13 | Mistakes in the official examples that shouldn't be copied |
 | 14 | Reference client `threads_client.py` |
 
-Apart from the engineering advice marked *(practice)*, everything comes from the official documentation.
+Apart from the engineering advice marked *(practice)* and the live test results marked *(observed)*, everything comes from the official documentation.
 
 ### Reference client
 
@@ -201,18 +218,19 @@ python3 threads_client.py delete <media-id>           # Delete a post; cannot be
 
 ## Test results
 
-We compared "with skill" and "without skill" using the same model: each task ran once under each setup, and a grader that took no part in answering checked every result against a predefined checklist, item by item. The skill was revised between rounds based on the grader's feedback, for three rounds in total. The tasks and checklists are in [`evals/evals.json`](evals/evals.json).
+We compared "with skill" and "without skill" using the same model: each task ran once under each setup, and a grader that took no part in answering checked every result against a predefined checklist, item by item. The skill was revised between rounds based on the grader's feedback, for four rounds in total; round 4 ran only the new task 6, after the skill gained the embedding section. The tasks and checklists are in [`evals/evals.json`](evals/evals.json).
 
 Each cell shows the number of checklist items passed, formatted as "with skill vs without skill":
 
-| Task | Round 1 | Round 2 | Round 3 |
-|---|---|---|---|
-| 1. Python carousel post (two images + one video) | 8/8 vs 8/8 | — | — |
-| 2. TypeScript daily insights job with token refresh | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 |
-| 3. Publishing a ghost post with a poll on the user's behalf | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 |
-| 4. Diagnosing unexpected search, location, and profile lookup results | — | 6/6 vs 5/6 | 6/6 vs 5/6 |
-| 5. Auto-hiding replies that contain keywords | — | 7/7 vs 6/7 | 7/7 vs 6/7 |
-| **Average pass rate** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** |
+| Task | Round 1 | Round 2 | Round 3 | Round 4 |
+|---|---|---|---|---|
+| 1. Python carousel post (two images + one video) | 8/8 vs 8/8 | — | — | — |
+| 2. TypeScript daily insights job with token refresh | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — |
+| 3. Publishing a ghost post with a poll on the user's behalf | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — |
+| 4. Diagnosing unexpected search, location, and profile lookup results | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — |
+| 5. Auto-hiding replies that contain keywords | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — |
+| 6. A 60-post Threads wall plus a weekly check for deleted posts | — | — | — | 8/8 vs 2/8 |
+| **Average pass rate** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** |
 
 - The average pass rate is the mean of the per-task pass rates. Task 1 scored full marks on both sides and didn't separate them, so rounds 2 onward use tasks 2–5; task 3 gained one checklist item starting in round 2.
 - Each task ran only once per setup, so the sample is tiny and the numbers only indicate direction. For example, the without-skill version of task 2 lost points on pagination and token refresh in the first two rounds, then scored full marks in round 3.
@@ -226,6 +244,7 @@ For each round's eval setup, time and token usage, and the reason behind every l
 - Tests have only been run on Claude. Other tools should work through the same flow, but this hasn't been verified.
 - The Claude apps can't reach the Threads API by default, so Operate mode has to run on your own machine. Operate mode also requires a tool that can run terminal commands.
 - The official docs contradict themselves or are unclear in a few places, such as whether location search uses `q` or `query`, whether the API errors out or silently ignores unsupported features on a ghost post, and whether webhooks require App Review. The skill says so plainly when these come up instead of guessing.
+- embed.js's loading behavior (at most 3 embeds at a time, `instgrm.Embeds.process()`, `data-theme`, and so on) isn't documented; it was observed in October 2026, and Meta may change it at any time.
 - The documentation snapshot is from 2026-08-12; for later changes, defer to the [official changelog](https://developers.facebook.com/documentation/threads/changelog).
 - Threads ads (part of the Marketing API) are not covered.
 
