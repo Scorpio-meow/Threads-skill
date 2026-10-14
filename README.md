@@ -1,5 +1,7 @@
 # Threads API Skill
 
+**繁體中文** | [English](README.en.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
+
 讓 AI 助理熟悉 Meta Threads API 的技能（skill）：幫你寫、檢查、除錯串接程式，也能用你的 token 直接發文、回覆、查數據。
 
 - 採用 [Agent Skills](https://agentskills.io) 格式（一個資料夾加一份 `SKILL.md`），Claude Code、Claude 應用程式、OpenAI Codex、Gemini CLI、GitHub Copilot、Cursor、Windsurf、OpenCode 都能安裝。
@@ -232,6 +234,7 @@ python3 threads_client.py delete <media-id>           # 刪文，無法復原
 - 規則有誤或官方文件更新時，直接修改 `threads-api/SKILL.md`。出自官方文件的內容照原意寫；文件沒寫、屬於工程經驗的建議，標成 *(practice)*。
 - 修改後，用 Anthropic 的 skill-creator 技能照 `evals/evals.json` 重跑「有技能 vs 沒技能」的比較，確認沒有退步，再更新 evals/BENCHMARK.md 和 evals/benchmark.json。
 - 發現新的易錯點時，可以在 `evals/evals.json` 加一題，附上可以逐條判定的檢查項目。
+- README 和 benchmark 摘要有繁體中文、英文、日文、韓文四個版本，修改時請一併更新。
 
 ## 授權
 
