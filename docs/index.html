@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@400,500&amp;display=swap" data-font="switzer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&amp;display=swap" data-font="zh">
 <style>
 /* Layout: a 12-column grid between 4.4vw margins. The hero, the proof modules and the checker hang from one rail at column 4; splits turn at column 7. */
 :root {
@@ -121,6 +121,18 @@
   --track-body: -0.005em;
   --track-head: -0.025em;
 }
+/* Japanese and Korean put their own Noto face (loaded on demand) ahead of the Chinese one, so shared Han characters take the right regional forms. */
+:root:lang(ja) {
+  --font-sans: "Switzer", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Noto Sans JP", monospace; /* taste-skill-ignore: literal code and API enum values */
+}
+:root:lang(ko) {
+  --font-sans: "Switzer", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Noto Sans KR", monospace; /* taste-skill-ignore: literal code and API enum values */
+  --lh-body: 1.7;
+  --track-body: 0;
+  --track-head: -0.01em;
+}
 
 /* ---------- base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -141,6 +153,8 @@ h1, h2, h3, p, ul, ol, figure, blockquote, pre, dl, dd { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 h1, h2, h3 { font-weight: 400; line-height: var(--lh-head); letter-spacing: var(--track-head); text-wrap: balance; }
 p, li { text-wrap: pretty; }
+:root:lang(ja) :is(h1, h2, h3, summary, .ledger .cap b, .bands .what b) { word-break: auto-phrase; }
+:root:lang(ko) body { word-break: keep-all; overflow-wrap: break-word; }
 img, svg { max-width: 100%; }
 code, pre, kbd { font-family: var(--font-mono); font-size: var(--ui-s); letter-spacing: 0; }
 :not(pre) > code { font-size: max(13px, 0.88em); padding: 0.08em 0.32em; border-radius: 3px; background: var(--surface); overflow-wrap: anywhere; }
@@ -184,9 +198,24 @@ button { cursor: pointer; }
 .top .wrap { align-items: center; padding-top: clamp(24px, 4vh, 44px); }
 .wordmark { grid-column: 4 / span 4; font-weight: 500; font-size: var(--step-small); letter-spacing: 0.01em; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; justify-self: start; }
 .top-links { grid-column: 8 / -1; justify-self: end; display: flex; gap: clamp(16px, 2vw, 28px); align-items: center; font-size: var(--step-small); }
-.top-links a, .lang-toggle { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
-.lang-toggle { background: none; border: 0; padding: 0; font-size: var(--step-small); font-weight: 500; }
-@media (hover: hover) and (pointer: fine) { .top-links a:hover, .lang-toggle:hover { text-decoration: underline; text-decoration-thickness: 0.07em; text-underline-offset: 0.24em; } }
+.top-links a, .lang-btn { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
+@media (hover: hover) and (pointer: fine) { .top-links a:hover, .lang-btn:hover { text-decoration: underline; text-decoration-thickness: 0.07em; text-underline-offset: 0.24em; } }
+html:not(.js) .lang { display: none; }
+/* Language switch: a popover tethered to its button; the absolute top/right below only applies where popover is unsupported and the list stays in the header. */
+.lang { position: relative; }
+.lang-btn { gap: 0.45em; background: none; border: 0; padding: 0; font-size: var(--step-small); font-weight: 500; white-space: nowrap; anchor-name: --lang; }
+.lang-btn svg { width: 10px; height: 6px; flex: none; transition: transform var(--t-ui) var(--ease-out); }
+.lang:has(.lang-list:popover-open) .lang-btn svg { transform: rotate(180deg); }
+.lang-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.lang-list { position: absolute; z-index: 30; inset: auto; top: 100%; right: 0; margin: 0; padding: 6px; min-width: 176px; overflow: visible; background: var(--bg); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 1px 2px rgb(16 32 24 / 0.06), 0 18px 40px -14px rgb(16 32 24 / 0.26); }
+@supports (anchor-name: --lang) {
+  .lang-list { position-anchor: --lang; top: anchor(bottom); right: anchor(right); margin-top: 4px; }
+}
+.lang-list li + li { margin-top: 2px; }
+.lang-list button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 18px; min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--radius); background: none; font-size: var(--step-small); text-align: left; white-space: nowrap; transition: background-color var(--t-hover) ease; }
+.lang-list button[aria-current="true"] { font-weight: 500; }
+.lang-list button[aria-current="true"]::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-ink) 22%, transparent); }
+@media (hover: hover) and (pointer: fine) { .lang-list button:hover { background: var(--surface); } }
 
 /* ---------- hero ---------- */
 .hero-col { grid-column: 4 / span 8; padding-top: clamp(56px, 11vh, 140px); display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(18px, 2.4vh, 26px); justify-items: start; }
@@ -317,7 +346,7 @@ button { cursor: pointer; }
 [data-ui] .r.spam { outline: 1.5px solid var(--bad); outline-offset: -1.5px; }
 [data-ui] .tl { display: grid; gap: 10px; }
 [data-ui] .tl-bar { display: grid; grid-template-columns: 0.9fr 6fr 1.2fr 1.3fr; gap: 3px; height: 34px; }
-[data-ui] .tl-bar span { border-radius: 3px; display: flex; align-items: center; padding: 0 8px; font-size: var(--ui-s); white-space: nowrap; overflow: hidden; }
+[data-ui] .tl-bar span { border-radius: 3px; display: flex; align-items: center; padding: 0 6px; font-size: var(--ui-s); white-space: nowrap; overflow: hidden; }
 [data-ui] .tl-bar .t0 { background: var(--surface-2); color: var(--muted); }
 [data-ui] .tl-bar .t1 { background: var(--bg); }
 [data-ui] .tl-bar .t2 { background: var(--accent); color: var(--accent-ink); font-weight: 500; }
@@ -344,7 +373,7 @@ button { cursor: pointer; }
 @media (min-width: 1280px) { .checker-stage { grid-column: 4 / span 8; } }
 .checker-foot { grid-column: 4 / span 7; margin-top: 18px; color: var(--muted); font-size: var(--step-small); }
 [data-ui].ck { display: grid; grid-template-columns: minmax(0, 1.62fr) minmax(0, 1fr); background: var(--surface); border-radius: 8px; overflow: hidden; font-size: var(--ui); line-height: 1.55; min-height: 640px; }
-:root:lang(zh-Hant-TW) [data-ui].ck { line-height: 1.65; }
+:root:lang(zh-Hant-TW) [data-ui].ck, :root:lang(ja) [data-ui].ck, :root:lang(ko) [data-ui].ck { line-height: 1.65; }
 [data-ui] .ck-main { padding: 20px; display: grid; gap: 16px; align-content: start; }
 [data-ui] .ck-side { background: var(--surface-2); padding: 12px 0; display: grid; align-content: start; }
 [data-ui] .ck-lab { font-size: var(--ui-s); color: var(--muted); display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
@@ -462,7 +491,8 @@ html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
 .install .wrap { min-height: 90svh; padding-block: clamp(64px, 9vw, 120px); align-items: center; }
 .install-copy { grid-column: 1 / span 6; align-self: end; display: grid; gap: 22px; }
 .install-title { font-size: var(--step-display); line-height: 0.98; letter-spacing: -0.03em; font-weight: 500; }
-:root:lang(zh-Hant-TW) .install-title { letter-spacing: 0; line-height: 1.08; }
+:root:lang(zh-Hant-TW) .install-title, :root:lang(ja) .install-title { letter-spacing: 0; line-height: 1.08; }
+:root:lang(ko) .install-title { letter-spacing: -0.02em; line-height: 1.08; }
 .install-title span { display: block; }
 .install-copy p { max-width: 30em; font-size: var(--step-body); }
 .install-copy a { font-weight: 500; }
@@ -537,7 +567,7 @@ html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
   .rules-note { grid-column: 1 / -1; }
   .rules-body { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .rules-tabs { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; }
-  .rules-tabs button { min-height: 52px; padding: 8px 10px; justify-items: center; text-align: center; font-size: var(--step-small); }
+  .rules-tabs button { min-height: 52px; padding: 8px 6px; justify-items: center; text-align: center; font-size: var(--step-small); }
   .rules-tabs button span { display: none; }
   .rules-panels { grid-column: 1 / -1; }
   .install-copy { grid-column: 1 / -1; align-self: start; }
@@ -613,6 +643,10 @@ html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
   [data-ui] .stack > *, .js .mode-fig, [data-ui] .seg .seg-thumb, [data-ui] .meter .bar i { transition-duration: 1ms !important; }
   [data-ui] .ck-list li { animation: none; }
 }
+@media (prefers-reduced-motion: no-preference) {
+  .lang-list:popover-open { animation: lang-in 200ms var(--ease-out); }
+}
+@keyframes lang-in { from { opacity: 0; translate: 0 -4px; } }
 </style>
 </head>
 <body>
@@ -625,7 +659,15 @@ html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
     <nav class="top-links" aria-label="站外連結與語言" data-i18n-aria="nav.aria">
       <a href="#install" data-i18n="nav.install">安裝</a>
       <a href="https://github.com/Scorpio-meow/Threads-skill">GitHub</a>
-      <button type="button" class="lang-toggle" id="lang-toggle" lang="en">English</button>
+      <div class="lang">
+        <button type="button" class="lang-btn" id="lang-btn" popovertarget="lang-list"><span class="vh" data-i18n="nav.lang">語言</span><span id="lang-cur" lang="zh-Hant-TW">繁體中文</span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+        <ul class="lang-list" id="lang-list" popover>
+          <li><button type="button" data-lang="zh" lang="zh-Hant-TW">繁體中文</button></li>
+          <li><button type="button" data-lang="en" lang="en">English</button></li>
+          <li><button type="button" data-lang="ja" lang="ja">日本語</button></li>
+          <li><button type="button" data-lang="ko" lang="ko">한국어</button></li>
+        </ul>
+      </div>
     </nav>
   </div>
 </header>
@@ -672,12 +714,12 @@ html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
                 <p><b data-i18n="w.1">還沒發出，也還沒呼叫任何 API。</b></p>
                 <p data-i18n="w.2">Threads API 的限時貼文（<code>is_ghost_post=true</code>）只能是純文字，唯一能另外加的是文字防雷（spoiler），投票、GIF、連結預覽卡都不支援。<mark>我先在本地檢查（不呼叫 API），就被擋下了：<code>ghost posts only support text spoilers, not poll_attachment</code>。</mark>這兩個功能我不會擅自拿掉任何一個，請你決定：</p>
                 <p class="opt" data-i18n="w.a">方案 A｜限時貼文，不附投票</p>
-                <pre lang="zh-Hant-TW"><code>media_type=TEXT
+                <pre><code data-i18n="w.pa">media_type=TEXT
 text=週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale<!-- taste-skill-ignore: the emoji is quoted post text and the API's counting rule -->
 is_ghost_post=true</code></pre>
                 <p class="meta" data-i18n="w.len">長度 54／500（依規則 ☕️ 算 6），連結 1 個。</p><!-- taste-skill-ignore: the emoji is quoted post text and the API's counting rule -->
                 <p class="opt opt-b" data-i18n="w.b">方案 B｜一般貼文＋投票</p>
-                <pre class="opt-b" lang="zh-Hant-TW"><code>media_type=TEXT
+                <pre class="opt-b"><code data-i18n="w.pb">media_type=TEXT
 text=週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale<!-- taste-skill-ignore: the emoji is quoted post text and the API's counting rule -->
 poll_attachment={"option_a": "淺焙", "option_b": "深焙"}</code></pre>
                 <p data-i18n="w.time">現在是 10/14（三）上午 9:37。限時貼文如果現在發，大約 10/15（四）上午 9:37 就會封存，這個週末（10/17–18）完全看不到。</p>
@@ -693,7 +735,7 @@ poll_attachment={"option_a": "淺焙", "option_b": "深焙"}</code></pre>
                   <li data-i18n="o.c">C. 分兩則發：促銷文案發限時貼文，投票另外發一則一般貼文</li>
                 </ul>
                 <p data-i18n="o.3"><span class="flag">「不能附投票」是我對 Threads API 規則的理解。</span>這次沒有 token，所以我沒辦法實際打 API 驗證。腳本的 <code>ghost-poll</code> 模式會先用不公開的方式試一次，API 拒絕就停下來，不會自己改發別的版本。</p>
-                <pre lang="zh-Hant-TW"><code>python3 post_threads.py --variant poll --url https://你的網址/sale</code></pre>
+                <pre><code data-i18n="o.cmd">python3 post_threads.py --variant poll --url https://你的網址/sale</code></pre>
                 <p data-i18n="o.4"><code>--variant</code> 也可以換成 <code>ghost</code>（方案 A）或 <span class="flag"><code>ghost-poll</code>（照原需求試）</span>。</p>
                 <p data-i18n="o.5">今天是週三（10/14），現在發的限時貼文週四就會消失，撐不到週末。</p>
               </div>
@@ -978,11 +1020,11 @@ window.instgrm?.Embeds?.process();</code></pre></div>
         <div class="ck-main">
           <div>
             <p class="ck-lab"><label for="ck-text" data-i18n="ck.text">內文</label><code>text</code></p>
-            <textarea id="ck-text" rows="4" lang="zh-Hant-TW" spellcheck="false">週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale</textarea><!-- taste-skill-ignore: the emoji is quoted post text and the API's counting rule -->
+            <textarea id="ck-text" rows="4" spellcheck="false">週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale</textarea><!-- taste-skill-ignore: the emoji is quoted post text and the API's counting rule -->
           </div>
           <div class="ck-poll" id="ck-poll-fields">
-            <label for="ck-opt-a"><code>option_a</code><input type="text" id="ck-opt-a" value="淺焙" lang="zh-Hant-TW"></label>
-            <label for="ck-opt-b"><code>option_b</code><input type="text" id="ck-opt-b" value="深焙" lang="zh-Hant-TW"></label>
+            <label for="ck-opt-a"><code>option_a</code><input type="text" id="ck-opt-a" value="淺焙"></label>
+            <label for="ck-opt-b"><code>option_b</code><input type="text" id="ck-opt-b" value="深焙"></label>
           </div>
           <div class="ck-meters">
             <div class="meter" id="ck-len-m"><p><span data-i18n="ck.len">字數</span><b id="ck-len">54</b><span>／500</span></p><span class="bar"><i id="ck-len-bar" style="--p:0.108"></i></span></div>
@@ -994,7 +1036,7 @@ window.instgrm?.Embeds?.process();</code></pre></div>
           </div>
           <div class="ck-pay">
             <p class="ck-lab"><span data-i18n="ck.pay">會送出的參數</span><code>POST /me/threads</code></p>
-<pre lang="zh-Hant-TW"><code id="ck-params">media_type=TEXT
+<pre><code id="ck-params">media_type=TEXT
 text=週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale<!-- taste-skill-ignore: the emoji is quoted post text and the API's counting rule -->
 poll_attachment={"option_a": "淺焙", "option_b": "深焙"}
 is_ghost_post=true</code></pre>
@@ -1010,7 +1052,7 @@ is_ghost_post=true</code></pre>
           <div class="ctl more"><label for="ck-attach"><span data-i18n="ck.attach">文字附件</span><code>text_attachment</code></label><input type="checkbox" role="switch" id="ck-attach"></div>
           <div class="ctl more"><label for="ck-reply"><span data-i18n="ck.reply">設成回覆</span><code>reply_to_id</code></label><input type="checkbox" role="switch" id="ck-reply"></div>
           <div class="ctl more"><label for="ck-spoiler"><span data-i18n="ck.spoiler">媒體防雷</span><code>is_spoiler_media</code></label><input type="checkbox" role="switch" id="ck-spoiler"></div>
-          <div class="ctl more"><label for="ck-tag"><span data-i18n="ck.tag">主題標籤</span><code>topic_tag</code></label><input type="text" id="ck-tag" value="" placeholder="咖啡" data-i18n-ph="ck.tagPh" lang="zh-Hant-TW"></div>
+          <div class="ctl more"><label for="ck-tag"><span data-i18n="ck.tag">主題標籤</span><code>topic_tag</code></label><input type="text" id="ck-tag" value="" placeholder="咖啡" data-i18n-ph="ck.tagPh"></div>
           <div class="ctl more" id="ck-items-row"><label for="ck-items"><span data-i18n="ck.items">輪播項目數</span><code>children</code></label><input type="number" id="ck-items" value="3" min="0" max="25"></div>
           <button type="button" class="ck-more" id="ck-more" aria-expanded="false" aria-controls="ck-side" data-i18n="ck.more">顯示其他 5 個選項</button>
           <a class="ck-link" href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/SKILL.md#14-reference-client-python-38-standard-library-only" data-i18n="ck.src">看 check() 的原始碼</a>
@@ -1055,7 +1097,7 @@ is_ghost_post=true</code></pre>
       <div class="bench-notes" data-reveal style="--i:1">
         <p data-i18n="b.n1">每題在兩種設定下各跑一次，再由沒參與作答的評分者，照事先寫好的檢查項目逐條判定，並附上證據。作答、評分都用 <code>claude-opus-5-5</code>。</p>
         <p data-i18n="b.n2">樣本很小，數字只能看方向：第 2 題沒技能的版本前兩輪都在翻頁和 token 續期上失分，第 3 輪卻拿到滿分。測試只在 Claude 上跑過，API 呼叫都打在評分者架的模擬伺服器上。技能本身要讀進約 1.1 萬 token，所以第 1 輪有技能比較慢；第 2、3 輪反而比較快，評分者認為是少了試錯。</p>
-        <p class="links"><a class="link-arrow" href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md"><b data-i18n="b.l1" style="font-weight:500">Benchmark 摘要與每個失分原因</b><span aria-hidden="true">→</span></a><a class="link-arrow" href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/evals.json"><b data-i18n="b.l2" style="font-weight:500">題目與檢查項目</b><span aria-hidden="true">→</span></a></p>
+        <p class="links"><a class="link-arrow" href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md" data-bench><b data-i18n="b.l1" style="font-weight:500">Benchmark 摘要與每個失分原因</b><span aria-hidden="true">→</span></a><a class="link-arrow" href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/evals.json"><b data-i18n="b.l2" style="font-weight:500">題目與檢查項目</b><span aria-hidden="true">→</span></a></p>
       </div>
     </div>
   </div>
@@ -1330,7 +1372,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     <nav aria-label="專案連結" data-i18n-aria="ft.nav">
       <a href="https://github.com/Scorpio-meow/Threads-skill">GitHub</a>
       <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/SKILL.md">SKILL.md</a>
-      <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md" data-i18n="ft.bench">評測摘要</a>
+      <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md" data-bench data-i18n="ft.bench">評測摘要</a>
       <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README.en.md" lang="en">English README</a>
       <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README.ja.md" lang="ja">日本語</a>
       <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README.ko.md" lang="ko">한국어</a>
@@ -1355,11 +1397,13 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     "skip": "Skip to main content",
     "nav.aria": "Links and language",
     "nav.install": "Install",
+    "nav.lang": "Language",
     "hero.title": '<span class="line"><span data-line style="--i:0">Threads API fine print,</span></span><span class="line"><span data-line style="--i:1">built into your AI assistant</span></span>',
     "hero.sub": "An open-source Agent Skill. Install it in Claude Code, Codex, Cursor and other tools, and your assistant follows Meta’s official rules when it writes integration code, posts for you or embeds posts.",
     "hero.gh": "View the source on GitHub",
     "cta.copy": "Copy command",
     "cta.done": "Copied. Paste it into a terminal.",
+    "cta.sel": "Selected. Press Ctrl+C or ⌘C to copy.",
     "demo.seg": "Switch reply",
     "demo.with": "With skill",
     "demo.without": "Without skill",
@@ -1370,8 +1414,10 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     "w.1": "Nothing has been posted, and no API call has been made.",
     "w.2": 'A Threads ghost post (<code>is_ghost_post=true</code>) can only be plain text; the one extra it supports is a text spoiler. Polls, GIFs and link preview cards aren’t supported. <mark>I ran a local check first (no API call) and it was blocked: <code>ghost posts only support text spoilers, not poll_attachment</code>.</mark> I won’t drop either feature on my own, so please choose:',
     "w.a": "Option A | Ghost post, no poll",
-    "w.len": "Length 54/500 (☕️ counts as 6 under the rules), 1 link.", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "w.pa": "media_type=TEXT\ntext=Weekend only! 10% off our new pour-over coffee beans ☕️ Details here https://example.com/sale\nis_ghost_post=true", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "w.len": "Length 97/500 (☕️ counts as 6 under the rules), 1 link.", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
     "w.b": "Option B | Regular post with the poll",
+    "w.pb": 'media_type=TEXT\ntext=Weekend only! 10% off our new pour-over coffee beans ☕️ Details here https://example.com/sale\npoll_attachment={"option_a": "Light roast", "option_b": "Dark roast"}', // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
     "w.time": "It’s 9:37 am on Wednesday 10/14. A ghost post sent now would be archived around 9:37 am Thursday 10/15, so nobody would see it this weekend (10/17–18).",
     "w.more": "It goes on with option C (two posts), a note that example.com is a placeholder domain, that polls have no question field, and the commands to run on your own machine.",
     "demo.withoutWho": "Claude · without skill",
@@ -1381,6 +1427,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     "o.b": "B. Regular post with the poll (my recommendation)",
     "o.c": "C. Two posts: the promo as a ghost post, the poll as a regular post",
     "o.3": '<span class="flag">“No poll on a ghost post” is my understanding of the Threads API rules.</span> There’s no token this time, so I couldn’t verify it against the API. The script’s <code>ghost-poll</code> mode tries once without making anything public and stops if the API refuses; it won’t switch to another version on its own.',
+    "o.cmd": "python3 post_threads.py --variant poll --url https://your-domain/sale",
     "o.4": '<code>--variant</code> can also be <code>ghost</code> (option A) or <span class="flag"><code>ghost-poll</code> (try it as originally requested)</span>.',
     "o.5": "Today is Wednesday (10/14). A ghost post sent now is gone by Thursday and won’t last until the weekend.",
     "g.label": "The grader’s checks, judged one by one",
@@ -1480,6 +1527,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     "ck.tagPh": "Coffee",
     "ck.items": "Carousel items",
     "ck.more": "Show 5 more options",
+    "ck.less": "Show fewer options",
     "ck.src": "Read the source of check()",
     "ck.foot": "Edit the text, turn off the ghost post, or switch the post type to IMAGE to see which features get blocked.",
     "b.title": '<span class="soft">With the skill,</span><span>pass rates rose by</span>',
@@ -1505,7 +1553,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     "b.n2": "The sample is small, so read the numbers as direction only: without the skill, question 2 lost points on pagination and token refresh in rounds 1 and 2, then scored full marks in round 3. Tests ran on Claude only, against the grader’s mock server. The skill itself is about 11,000 tokens, so round 1 was slower with it; rounds 2 and 3 were faster, which the grader put down to less trial and error.",
     "b.l1": "Benchmark summary and every lost point",
     "b.l2": "Questions and checks",
-    "r.title": '<span class="soft">What’s inside</span><span>14 sections from Meta’s docs</span>',
+    "r.title": '<span class="soft">What’s inside</span><span>14 sections of Meta docs</span>',
     "r.read": "Read the full SKILL.md",
     "r.note": "The doc snapshot covers the changelog through 2026-08-12. Items tagged <i>practice</i> are engineering advice and <i>observed</i> are test results; everything else comes from Meta’s official docs. Below are the numbers you’ll reach for most.",
     "r.tabs": "Skill sections",
@@ -1666,7 +1714,665 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     "ft.bench": "Benchmark",
   };
 
+  /* ---------------- Japanese copy ---------------- */
+  const JA = {
+    "skip": "メインコンテンツへスキップ",
+    "nav.aria": "外部リンクと言語",
+    "nav.install": "導入",
+    "nav.lang": "言語",
+    "hero.title": '<span class="line"><span data-line style="--i:0">Threads API の勘所を、</span></span><span class="line"><span data-line style="--i:1">AI アシスタントに。</span></span>',
+    "hero.sub": 'オープンソースの Agent Skill です。<span class="tk">Claude Code</span>、Codex、Cursor などに入れておけば、<span class="tk">AI アシスタント</span>が連携コードを書くときも、代わりに投稿するときも、投稿を埋め込むときも、Meta の公式ドキュメントのルールに従います。',
+    "hero.gh": "GitHub でソースコードを見る",
+    "cta.copy": "コマンドをコピー",
+    "cta.done": "コピーしました。ターミナルに貼り付けて実行してください。",
+    "cta.sel": "選択しました。Ctrl+C または ⌘C でコピーしてください。",
+    "demo.seg": "回答の切り替え",
+    "demo.with": "スキルあり",
+    "demo.without": "スキルなし",
+    "demo.cap": "ラウンド 3・問題 3：同じモデルの実際の回答（抜粋、中国語からの翻訳）",
+    "demo.you": "あなた",
+    "demo.ask": "Threads に投稿して：「週末限定！新入荷のドリップ用コーヒー豆が 10% オフ ☕️ 詳細はこちら https://example.com/sale」。「浅煎り」と「深煎り」のどちらが好きか聞くアンケートを付けて、24 時間後に自動で消えるゴースト投稿にしてね。トークンは環境変数 THREADS_ACCESS_TOKEN に入れてあるから、そのまま投稿して。", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "demo.withWho": "Claude・スキルあり",
+    "w.1": "まだ投稿しておらず、API も一切呼び出していません。",
+    "w.2": 'Threads API のゴースト投稿（<code>is_ghost_post=true</code>）はテキストのみで、ほかに付けられるのはテキストのネタバレ防止（spoiler）だけです。アンケート、GIF、リンクプレビューカードには対応していません。<mark>先にローカルでチェックした（API は呼び出していません）ところ、ここで止められました：<code>ghost posts only support text spoilers, not poll_attachment</code>。</mark>どちらの機能も勝手に外すことはしないので、選んでください：',
+    "w.a": "案 A｜ゴースト投稿、アンケートなし",
+    "w.pa": "media_type=TEXT\ntext=週末限定！新入荷のドリップ用コーヒー豆が 10% オフ ☕️ 詳細はこちら https://example.com/sale\nis_ghost_post=true", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "w.len": "長さ 66／500（ルール上 ☕️ は 6 と数えます）、リンク 1 件。", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "w.b": "案 B｜通常の投稿＋アンケート",
+    "w.pb": 'media_type=TEXT\ntext=週末限定！新入荷のドリップ用コーヒー豆が 10% オフ ☕️ 詳細はこちら https://example.com/sale\npoll_attachment={"option_a": "浅煎り", "option_b": "深煎り"}', // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "w.time": "現在は 10/14（水）午前 9:37 です。いまゴースト投稿をすると 10/15（木）午前 9:37 ごろにアーカイブされ、今週末（10/17–18）にはまったく表示されません。",
+    "w.more": "このあとに、案 C（2 件に分ける）、URL がサンプルのドメインであること、アンケートに質問文の欄がないことなどの注意点と、あなたの PC で実行するコマンドが続きます。",
+    "demo.withoutWho": "Claude・スキルなし",
+    "o.1": "<b>まだ投稿していません。</b>1 か所で止まっていて、ほかにもいくつか決めてほしいことがあります。",
+    "o.2": "3 つのご要望は 1 件の投稿にまとめられません。どれかを黙って外したくないので、選んでください：",
+    "o.a": "A. ゴースト投稿、アンケートなし",
+    "o.b": "B. 通常の投稿＋アンケート（おすすめ）",
+    "o.c": "C. 2 件に分ける：宣伝文はゴースト投稿、アンケートは別の通常投稿",
+    "o.3": '<span class="flag">「アンケートは付けられない」というのは、Threads API のルールについての私の理解です。</span>今回はトークンがないので、実際に API を呼んで確かめることはできませんでした。スクリプトの <code>ghost-poll</code> モードは、まず公開されない形で 1 回だけ試し、API に拒否されたらそこで止まります。勝手に別の版に切り替えて投稿することはありません。',
+    "o.cmd": "python3 post_threads.py --variant poll --url https://あなたのドメイン/sale",
+    "o.4": '<code>--variant</code> は <code>ghost</code>（案 A）や <span class="flag"><code>ghost-poll</code>（元の要望どおりに試す）</span>にも変えられます。',
+    "o.5": "今日は水曜日（10/14）なので、いまゴースト投稿をすると木曜日には消えてしまい、週末までもちません。",
+    "g.label": "採点者が 1 項目ずつ判定したチェック項目",
+    "g.label2": "採点者が 1 項目ずつ判定したチェック項目",
+    "g.1": "ゴースト投稿にアンケートを付けられないとはっきり伝える", "g.1b": "ゴースト投稿にアンケートを付けられないとはっきり伝える",
+    "g.1why": "「私の理解」と言うだけで、元の要望どおりに送って試そうとした",
+    "g.2": "機能を勝手に外さず、選べる案を示す", "g.2b": "機能を勝手に外さず、選べる案を示す",
+    "g.3": "投稿は 1 件もしていない", "g.3b": "投稿は 1 件もしていない",
+    "g.4": "トークンを読み込めないことを伝え、設定を頼む", "g.4b": "トークンを読み込めないことを伝え、設定を頼む",
+    "g.5": "各案の正確なパラメータを回答の中に示す", "g.5b": "各案の正確なパラメータを回答の中に示す",
+    "g.5why": "パラメータはスクリプトの中にしかなく、確認する前には見えない",
+    "g.6": "投稿する前に、投稿先のアカウントを確認する", "g.6b": "投稿する前に、投稿先のアカウントを確認する",
+    "g.7": "投稿のタイミングと URL が宣伝の効果を下げることを指摘する", "g.7b": "投稿のタイミングと URL が宣伝の効果を下げることを指摘する",
+    "g.more": "4 ラウンドの評価結果を見る",
+    "g.sumWith": "7 項目すべて合格",
+    "g.sumWithout": "残りの 5 項目は合格",
+    "tools.lead": "対応ツール",
+    "modes.title": "1 つのスキル、3 つの仕事",
+    "modes.lede": "Threads API について何か聞くだけでスキルが自動で有効になり、ほしいのがコードか、アカウントの操作か、Web ページへの埋め込みかに応じて、やり方を切り替えます。",
+    "m1.title": "コードを書く・問題を調べる",
+    "m1.body": "プロジェクトで使っている言語や書き方（Node.js、Python、C#、Go など。プロジェクトがなければ Python）に合わせ、ドキュメントのルールをそのままコードに落とし込みます。トークンは環境変数から読み込み、投稿は一連の手順をすべて踏み、送信前にローカルでチェックし、4xx エラーはむやみにリトライしません。",
+    "m1.ask": "「TypeScript で、Threads の投稿データを毎日取得するスケジュール処理を書いて。トークンは自動で延長されるようにしたい。」",
+    "m1.tab": "スキル第 14 節のリファレンスクライアント・publish()",
+    "m1.note": "container を作成 → FINISHED まで待つ → 公開 → permalink だけを取得",
+    "m2.title": "あなたのアカウントを直接操作する",
+    "m2.body": "あなたのトークンで投稿、リプライ、インサイトの取得、リプライの非表示を行います。最初に <code>GET /me</code> を呼び出して操作するアカウントを伝え、投稿・削除・リプライの非表示の前には本文全体と各パラメータを示して、明確な同意を待ちます。データを取得するだけなら確認は不要です。",
+    "m2.ask": "「最新の投稿についたリプライのうち、『LINE 追加』に触れているものを非表示にして。」",
+    "m2.tabA": "ターミナル",
+    "m2.tab": "リファレンスクライアントのコマンドと出力形式（例）",
+    "m3.title": "投稿をサイトに埋め込む",
+    "m3.body": "oEmbed で埋め込みコードを取得し（2026 年 3 月からトークン不要）、embed.js はページで 1 回だけ読み込んで、投稿を挿入したら <code>instgrm.Embeds.process()</code> を呼びます。1 ページに多数載せるときは順番に読み込み、失敗した投稿は元の投稿へのリンク付きカードに差し替えます。",
+    "m3.ask": "「厳選した投稿 60 件を並べるページを作って、削除された投稿がないか毎週自動でチェックしたい。」",
+    "m3.tab": "投稿の埋め込み方",
+    "m3.c1": "ページで 1 回だけ読み込む",
+    "m3.c2": "検証済みの URL から埋め込みマークアップを組み立てる。innerHTML は使わない",
+    "m3.c3": "読み込みに失敗したときに残るリンク",
+    "traps.title": "スキルなしでは、細部でつまずく",
+    "traps.lede": "どれも評価で実際に起きたことです。同じモデルがスキルなしでは間違え、スキルを導入した状態では起きませんでした。間違いの多くはコードではなく、ドキュメントの細部や最近の changelog に埋もれたルールにありました。",
+    "t1.old": "フォロワー数の条件（旧ルール）",
+    "t1.new": "フォロワー数の条件（2025 年 11 月から）",
+    "t1.title": "公開アカウントの検索は、フォロワー 100 人から",
+    "t1.was": "<b>スキルなし：</b><code>profile_lookup</code> で調べられるのはフォロワー 1,000 人以上のアカウントだけだと説明するか、条件にまったく触れなかった。",
+    "t1.doc": "<b>ドキュメント：</b>この条件は 2025 年 11 月に 100 人まで引き下げられています。調べられるのは公開アカウントだけで、ユーザー名は完全一致、@ は付けません。",
+    "t2.label": "あなたの投稿についたリプライ",
+    "t2.r1": "いつ入荷しますか？",
+    "t2.hide": "スレッドごと非表示",
+    "t2.r2": "もっと安く買いたい？ LINE 追加でクーポンをゲット",
+    "t2.cant": "単独では非表示にできない",
+    "t2.r3": "私も知りたいです",
+    "t2.too": "一緒に非表示になる",
+    "t2.title": "ネストされたリプライは単独で非表示にできない",
+    "t2.was": "<b>スキルなし：</b>まずネストされたリプライそのものに非表示を実行し、失敗してから上位のリプライを処理した。",
+    "t2.doc": "<b>ドキュメント：</b><code>manage_reply</code> が使えるのは最上位のリプライだけで、その下のスレッドもまとめて非表示になります。スキルはこのトレードオフを先に説明してから、判断をあなたに委ねます。",
+    "t3.c": "\"next\" はない",
+    "t3.title": "ページングは cursors.after を読む",
+    "t3.was": "<b>スキルなし：</b>ページングで <code>paging.next</code> しかたどらなかった。",
+    "t3.doc": "<b>ドキュメント：</b>投稿一覧のレスポンスにあるのは cursors だけで、next はありません。next を待つコードは、ドキュメントどおりなら最初のページしか取得できません。",
+    "t4.label": "長期トークンの一生",
+    "t4.ok": "延長できる",
+    "t4.now": "延長推奨",
+    "t4.dead": "期限切れ",
+    "t4.a0": "発行",
+    "t4.a1": "1 日目",
+    "t4.a2": "50 日目",
+    "t4.a3": "60 日目",
+    "t4.k0": "発行から 24 時間未満：まだ延長できない",
+    "t4.k1": "24 時間以上経過し、まだ有効：延長すると新たに 60 日",
+    "t4.k2": "残り 10 日未満、または毎週決まって延長（スキルの推奨）",
+    "t4.k3": "期限切れになると延長できず、ユーザーにもう一度認可してもらうしかない",
+    "t4.title": "トークンの延長には条件がある",
+    "t4.was": "<b>スキルなし：</b>延長する前に、トークンが発行から 24 時間以上経っていて、まだ期限切れでないことを確認しなかった。",
+    "t4.doc": "<b>ドキュメント：</b>長期トークンの有効期間は約 60 日で、発行から 24 時間以上経ち、まだ有効なときにだけ延長できます。新しいトークンと有効期限はセットで保存します。",
+    "t5.label": "ページに投稿を追加する",
+    "t5.no": "動かない",
+    "t5.yes": "再走査される",
+    "t5.title": "embed.js はページを走査し直せる",
+    "t5.was": "<b>スキルなし：</b>embed.js は読み込み時に一度しかページを走査しないと思い込み、投稿を 1 件ずつ別の iframe ページに入れた。",
+    "t5.doc": "<b>スキル：</b>innerHTML で挿入した <code>&lt;script&gt;</code> は実行されません。embed.js をページで 1 回読み込み、投稿を挿入したあとに <code>process()</code> を呼べば走査し直します。この部分は公式ドキュメントになく、2026 年 10 月に embed.js のコードを読んで確かめたものです。",
+    "t6.title": "削除された投稿のチェックに、トークンはいらない",
+    "t6.was": "<b>スキルなし：</b>正確に調べるには Meta アプリとトークンが必要だと考え、threads.com のページをスクレイピングした。",
+    "t6.doc": "<b>ドキュメント：</b>oEmbed は 2026 年 3 月からトークン不要です。投稿が存在しなければはっきりと <code>code 24</code> を返すので、そのときだけリストから外し、ほかのエラーはすべて一時的な問題として扱います。",
+    "ck.title": "送信する前にチェック",
+    "ck.lede": "スキルに組み込まれたクライアント <code>threads_client.py</code> の <code>check()</code> を、そのまま Web ページに移したものです。文字数は API と同じ数え方（絵文字は UTF-8 のバイト数）で、リンク数と機能の競合もチェックします。",
+    "ck.text": "本文",
+    "ck.len": "文字数",
+    "ck.links": "リンク",
+    "ck.pay": "送信されるパラメータ",
+    "ck.tok": "access_token は環境変数から渡され、ここには表示されません。",
+    "ck.type": "投稿の種類",
+    "ck.poll": "アンケート",
+    "ck.ghost": "24 時間のゴースト投稿",
+    "ck.link": "リンクプレビューカード",
+    "ck.attach": "テキスト添付",
+    "ck.reply": "リプライにする",
+    "ck.spoiler": "メディアのネタバレ防止",
+    "ck.tag": "トピックタグ",
+    "ck.tagPh": "コーヒー",
+    "ck.items": "カルーセルの項目数",
+    "ck.more": "ほかの 5 つの設定を表示",
+    "ck.less": "ほかの設定を閉じる",
+    "ck.src": "check() のソースコードを見る",
+    "ck.foot": "本文を少し変えたり、ゴースト投稿をオフにしたり、投稿の種類を IMAGE に変えたりして、どの機能が止められるか試してみてください。",
+    "b.title": '<span class="soft">スキルを入れると、</span><span>平均合格率は</span>',
+    "b.r1": 'ポイント上昇、<span class="tk">ラウンド 1</span>',
+    "b.r1n": "100% vs 76%。3 問：Python でカルーセル投稿、TypeScript でインサイト取得スケジュール、ゴースト投稿の代行",
+    "b.r2": 'ポイント上昇、<span class="tk">ラウンド 2</span>',
+    "b.r2n": "100% vs 76%。4 問：差が出なかった問題 1 を外し、権限まわりのデバッグとリプライの非表示を追加",
+    "b.r3": 'ポイント上昇、<span class="tk">ラウンド 3</span>',
+    "b.r3n": "100% vs 85%。同じ 4 問を、採点者の指摘をもとにスキルを修正してから再実行",
+    "b.r4": 'ポイント上昇、<span class="tk">ラウンド 4</span>',
+    "b.r4n": "100% vs 25%。新しく加えた投稿の埋め込みの問題で、スキルなしは 8 項目中 2 項目しか合格しなかった",
+    "b.cap": "問題ごとの合格したチェック項目数：太字がスキルあり、その後ろがスキルなし",
+    "b.q": "問題", "b.c1": "ラウンド 1", "b.c2": "ラウンド 2", "b.c3": "ラウンド 3", "b.c4": "ラウンド 4",
+    "b.q1": "Python でカルーセル投稿（画像 2 枚＋動画 1 本）",
+    "b.q2": "TypeScript で毎日のインサイト取得スケジュールとトークン延長",
+    "b.q3": "アンケート付きゴースト投稿の代行",
+    "b.q4": "検索・場所・アカウント検索で結果がおかしい原因",
+    "b.q5": "キーワードを含むリプライの自動非表示",
+    "b.q6": "60 件の投稿ウォールと削除済み投稿の毎週チェック",
+    "b.avg": "平均合格率",
+    "b.na": "未実施",
+    "b.n1": "各問題を 2 つの設定で 1 回ずつ実行し、回答に関わっていない採点者が、あらかじめ用意したチェック項目に沿って 1 項目ずつ根拠を添えて判定しました。回答と採点にはどちらも <code>claude-opus-5-5</code> を使っています。",
+    "b.n2": "サンプルが少ないため、数字は傾向を見る程度にとどめてください。問題 2 のスキルなし版は、最初の 2 ラウンドではページングとトークン延長で失点しましたが、ラウンド 3 では満点でした。テストは Claude でしか実行しておらず、API 呼び出しはすべて採点者が用意したモックサーバーに向けたものです。スキル本体の読み込みに約 1.1 万トークンかかるため、ラウンド 1 ではスキルありのほうが遅くなりました。ラウンド 2・3 ではむしろ速く、採点者は試行錯誤が減ったためと見ています。",
+    "b.l1": "Benchmark の概要と失点の原因",
+    "b.l2": "問題とチェック項目",
+    "r.title": '<span class="soft">公式ドキュメントから</span><span>まとめた 14 節</span>',
+    "r.read": "SKILL.md の全文を読む",
+    "r.note": "ドキュメントのスナップショットは 2026-08-12 までの changelog を反映しています。<i>practice</i> と付いたものはエンジニアリング上の推奨事項、<i>observed</i> は実測結果で、それ以外はすべて Meta の公式ドキュメントに基づいています。以下は各節でよく使う数字を抜き出したものです。",
+    "r.tabs": "スキルの節",
+    "r.t1": "第 4 節", "r.t2": "第 5 節", "r.t3": "第 6 節", "r.t4": "第 7 節", "r.t5": "第 8 節", "r.t6": "第 9 節", "r.t7": "第 11 節", "r.t8": "第 12–13 節",
+    "r.n1": "投稿", "r.n2": "検索", "r.n3": "リプライ", "r.n4": "インサイト", "r.n5": "認可", "r.n6": "クォータ", "r.n7": "埋め込み", "r.n8": "エラー",
+    "p1.k": "2 段階",
+    "p1.t": "container を作成してから公開する",
+    "p1.d": "container ID は状態の確認と公開にだけ使い、公開後に受け取る media ID が投稿そのものです",
+    "p2.t": "公開しない container は期限切れになる",
+    "p2.d": "ステータスが EXPIRED になります。API に予約投稿の機能はないので、あとで投稿したいなら、そのときに作成します",
+    "p3.t": "本文の文字数上限",
+    "p3.d": "絵文字は UTF-8 のバイト数で数え、ほとんどは 4、☕️ は 6 になります", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "p4.t": "重複しないリンクの上限",
+    "p4.d": "本文中の URL と link_attachment を合わせて数え、超えると THREADS_API__LINK_LIMIT_EXCEEDED が返ります",
+    "p5.t": "カルーセルの項目数",
+    "p5.d": "画像と動画を混ぜられ、各項目に media_type が必要です。全体で 1 件の投稿として数えます",
+    "p6.t": "アンケートの選択肢の文字数",
+    "p6.d": "テキスト投稿でしか使えません。質問文の欄も、アンケートの期間を決めるパラメータもありません",
+    "p7.t": "24 時間あたりの投稿数",
+    "p7.d": "アカウントごとにローリングで数え、カルーセルは 1 件",
+    "s1.t": "1 ページあたりの最大件数",
+    "s1.d": "limit のデフォルトは 25。ページングには paging.cursors.after を使い、レスポンスに next はありません",
+    "s2.t": "キーワード検索の回数（24 時間あたり）",
+    "s2.d": "ユーザーごとにすべてのアプリを通して数え、結果が 0 件の検索は数えません",
+    "s3.t": "公開アカウント検索のフォロワー数の条件",
+    "s3.d": "ユーザー名は完全一致で、@ は付けません。権限の承認前に調べられるのは、Meta の公式アカウント数件だけです",
+    "s4.t": "profile_lookup・profile_posts の回数",
+    "s4.d": "どちらのページにも 24 時間あたり 1,000 回とあり、共通の枠かどうかは書かれていません。スキルは共通とみなすよう勧めます",
+    "s5.t": "場所の検索の回数（24 時間あたり）",
+    "s5.d": "ページングはありません。権限の承認前は Menlo Park しか返りません",
+    "s6.k": "7 日",
+    "s6.t": "公開アカウントのデータの期間",
+    "s6.d": "follower_count は現在の総数、いいね・引用・リポスト・閲覧数は過去 7 日間です",
+    "c1.k": "最上位",
+    "c1.t": "非表示にできるのは最上位のリプライだけ",
+    "c1.d": "その下のスレッドもまとめて非表示になり、ネストされたリプライは単独では非表示にできません",
+    "c2.t": "24 時間あたりのリプライ数",
+    "c2.d": "他人の投稿にリプライするには検索かメンションの権限が必要で、そこから見つけた投稿にだけリプライできます",
+    "c3.k": "すべて",
+    "c3.t": "conversation はすべての階層を一度に展開",
+    "c3.d": "ルート投稿に対して呼び出します。replies は直接のリプライしか返さないので、has_replies があれば再帰的にたどります",
+    "c4.t": "hide_status の値",
+    "c5.k": "承認",
+    "c5.t": "リプライはあなたの承認を待つ",
+    "c5.d": "投稿の作成時に enable_reply_approvals=true を付けます。ゴースト投稿では使えません",
+    "i1.t": "投稿単位の指標",
+    "i1.d": "views、likes、replies、reposts、quotes、shares はどれも累計値です。日ごとの数字がほしいなら、毎日スナップショットを保存して差を取ります",
+    "i2.t": "フォロワー属性に必要なフォロワー数",
+    "i2.d": "breakdown は 1 回に 1 つだけで、since・until は付けられません",
+    "i3.t": "since・until に指定できる最も早い日時",
+    "i3.d": "Unix タイムスタンプで 1712991600 以上。2024-06-01 より前のデータは保証されません",
+    "i4.t": "リポストのインサイト",
+    "i4.d": "リポストは REPOST_FACADE として読み取られ、インサイトは空のリストしか返りません",
+    "i5.t": "期間を指定できない指標",
+    "i5.d": "followers_count と follower_demographics は、ほかの指標とは別に呼び出します",
+    "a1.t": "認可コードの有効期間",
+    "a1.d": "使えるのは 1 回だけ。コールバック URL の末尾の #_ は取り除きます",
+    "a2.k": "60 日",
+    "a2.t": "長期トークンの有効期間",
+    "a2.d": "短期トークンが有効なうちに、サーバー側で交換します",
+    "a3.t": "延長できるのは発行から 24 時間後",
+    "a3.d": "期限切れになると延長できず、ユーザーにもう一度認可してもらうしかありません",
+    "a4.k": "90 日",
+    "a4.t": "権限付与の期限",
+    "a4.d": "公開アカウントはトークンの延長と一緒に延びます。非公開アカウントは延長できず、90 日ごとに認可し直す必要があります",
+    "a5.t": "threads_* 権限",
+    "a5.d": "App Review を通過するまでは、自分と Threads テスターのアカウントにしか使えません",
+    "a6.k": "2 組",
+    "a6.t": "App ID とシークレット",
+    "a6.d": "使うのは Threads 側の組で、Facebook 側のものではありません",
+    "q1.t": "投稿（24 時間あたり）",
+    "q1.d": "threads_publish の時点で数えます",
+    "q2.t": "リプライ（24 時間あたり）",
+    "q2.d": "使用量の取得には threads_manage_replies 権限も必要です",
+    "q3.t": "投稿の削除（24 時間あたり）",
+    "q3.d": "削除できるのは自分の投稿だけで、削除は元に戻せません",
+    "q4.t": "場所の検索（24 時間あたり）",
+    "q4.d": "threads_location_tagging 権限が必要です",
+    "q5.t": "oEmbed リクエスト（1 時間あたり）",
+    "q5.d": "ページでの埋め込みの読み込みに公開された上限はありませんが、一度に多すぎるとレート制限を受けます",
+    "q6.t": "App 単位の呼び出し数 × インプレッション数",
+    "q6.d": "App とユーザーの組み合わせごとに 24 時間のローリングで数え、インプレッション数は最低 10 として計算します",
+    "e1.t": "oEmbed に必要なトークン",
+    "e1.d": "changelog に 2026-03-03 からトークン不要と明記されています",
+    "e2.t": "maxwidth の範囲",
+    "e2.d": "範囲外だと HTTP 500、code 100 が返ります。パラメータの誤りなので、リトライしないでください",
+    "e3.t": "embed.js が同時に読み込む件数",
+    "e3.d": "1 件が高さを報告するか 10 秒経つと次に進みます（2026-10 に確認）",
+    "e4.t": "大量に埋め込むときの 1 件ごとの間隔",
+    "e4.d": "1 件ずつ読み込み、失敗が続いたら一時停止。60 秒から毎回 1.5 倍、最大 5 分（practice）",
+    "e5.t": "投稿が存在しないときのエラーコード",
+    "e5.d": "リストから外すのは code 24 のときだけで、ほかのエラーはすべて一時的な問題として扱います",
+    "e6.t": "CSP で許可が必要な箇所",
+    "e6.d": "script-src と frame-src の両方で https://www.threads.com を許可します",
+    "x1.t": "トークンが無効または期限切れ",
+    "x1.d": "延長するか認可し直します。debug_token でトークンの状態と権限を確認できます",
+    "x2.t": "oEmbed で投稿が見つからない",
+    "x2.d": "投稿が削除された、アカウントが非公開・停止中・年齢制限付き、または投稿が地域限定",
+    "x3.t": "埋め込みを一度に読み込みすぎ",
+    "x3.d": "残りの投稿はただのリンクのまま止まります。順番に読み込み、失敗したものは代替カードに差し替えます",
+    "x4.t": "リンクが上限を超えた",
+    "x4.d": "重複しない URL が 5 個を超えると、container の作成時点で失敗します",
+    "x5.t": "公式サンプルのうち真似してはいけない curl",
+    "x5.d": "GET リクエストに curl -F を使っていて、multipart の本文が送られます。curl -G --data-urlencode に変えます",
+    "x6.t": "場所の検索のパラメータ名",
+    "x6.d": "チュートリアルには q、リファレンスには query とあります。スキルはまず q で送り、結果がおかしければ query を試します",
+    "in.title": "<span>1 行で</span><span>導入完了</span>",
+    "in.body": 'skills コマンドが PC にある AI ツールを検出し、それぞれが読み込むフォルダに配置します。インストール後は、Threads API について何か聞くだけでスキルが自動で有効になります。手動でインストールしたい場合や Claude アプリにアップロードしたい場合は、下の<a href="#faq">質問と回答</a>を参照してください。',
+    "dlg.title": "threads-api スキルを導入",
+    "dlg.cmd": "コマンド",
+    "dlg.scope": "インストール範囲",
+    "dlg.global": "全プロジェクト",
+    "dlg.project": "このプロジェクト",
+    "dlg.hintG": "-g を付けるとユーザーディレクトリにインストールされ、この PC のすべてのプロジェクトで使えます。",
+    "dlg.hintP": "-g を付けないと現在のプロジェクトにだけインストールされ、commit すればチームで共有できます。",
+    "dlg.npx": "Bun がなければ npx で",
+    "dlg.bunx": "bunx に戻す",
+    "f.title": "質問と回答",
+    "f1.q": "手動でインストールするには？",
+    "f1.a": "<code>threads-api</code> フォルダをツールが読み込むスキルフォルダにコピーし、<code>SKILL.md</code> が <code>&lt;スキルフォルダ&gt;/threads-api/SKILL.md</code> に置かれるようにします。ユーザーフォルダはこの PC のすべてのプロジェクトで使われます。プロジェクトフォルダはプロジェクトのルートに置くもので、commit すればチームで共有できます。",
+    "f1.h1": "ツール", "f1.h2": "ユーザーフォルダ", "f1.h3": "プロジェクトフォルダ",
+    "f1.b": "Codex、Gemini CLI、Copilot、Cursor を併用しているなら、<code>~/.agents/skills/</code> に 1 つ置くだけで共有できます。Windows では <code>~</code> はユーザーフォルダです。ツールが新しいスキルを認識しないときは、一度再起動してください。",
+    "f2.q": "Claude アプリではどう使う？",
+    "f2.1": "コード実行を有効にします。Free、Pro、Max プランでは Settings &gt; Capabilities で「Code execution and file creation」をオンにします。Team、Enterprise プランでは、組織のオーナーがこれと「Skills」をオンにします。",
+    "f2.2": "<code>threads-api</code> フォルダだけを ZIP に圧縮し、最上位を <code>threads-api/</code> にします。GitHub の Download ZIP はリポジトリ全体なので、そのままではアップロードできません。",
+    "f2.3": "Customize &gt; Skills で + → Create skill → Upload a skill の順に進み、ZIP をアップロードします。",
+    "f2.b": "アプリのコード実行環境は、デフォルトでは Threads API に接続できません。アプリで代行操作を頼むと、Claude がコマンドとパラメータを用意し、あなた自身の PC で実行してもらう形になります。",
+    "f3.q": "勝手に投稿しない？",
+    "f3.a": "しません。投稿、リプライ、リポスト、投稿の削除、リプライの非表示の前に、アカウント、本文全体、メディアの URL、各パラメータを回答に一覧で示し、明確な同意を待ちます。「そのまま投稿して」と言われても、同意とみなすのはあなたが渡した内容だけです。手を加えたり代わりに選んだりした部分は、あらためて確認します。データを取得するだけなら確認は不要です。",
+    "f3.b": "投稿に失敗しても、むやみにリトライしません。まず container の状態を確認し、PUBLISHED ならすでに投稿済み、FINISHED なら同じ container を公開して、二重投稿を防ぎます。",
+    "f4.q": "トークンはどこに置く？",
+    "f4.a": "環境変数 <code>THREADS_ACCESS_TOKEN</code> に設定するか、プロジェクトフォルダの <code>.env</code> に <code>THREADS_ACCESS_TOKEN=&lt;あなたのトークン&gt;</code> と 1 行書き、<code>.env</code> を <code>.gitignore</code> に追加します。スキルは、トークンを環境変数経由でのみ実行するコマンドに渡し、会話、コード、commit には書き込まないよう求めています。",
+    "f4.c1": "# macOS／Linux：AI ツールを起動する前に",
+    "f4.c2": "# Windows PowerShell",
+    "f4.b": "まだトークンがなければ、「Threads API のアクセストークンはどうやって取得するの？」と聞いてください。Meta App の作成、アカウントを Threads テスターとして追加、OAuth フロー、有効期間が約 60 日の長期トークンへの交換まで案内してくれます。",
+    "f5.q": "どんな権限が必要？",
+    "f5.h1": "操作", "f5.h2": "権限",
+    "f5.r1": "すべての呼び出し", "f5.r2": "投稿", "f5.r3": "リプライ、リプライの非表示・承認", "f5.r4": "リプライの取得", "f5.r5": "インサイトの取得", "f5.r6": "投稿の削除", "f5.r7": "キーワード・ハッシュタグ検索", "f5.r8": "メンション", "f5.r9": "場所の検索とタグ付け", "f5.r10": "公開アカウントの検索", "f5.r11": "Instagram ストーリーズへの同時シェア",
+    "f5.b": "App Review を通過するまでは、権限は自分とテスターのアカウントにしか使えず、一部の機能は結果も制限されます。たとえばキーワード検索では自分の投稿しか見つかりません。",
+    "f6.q": "内容はいつ時点のもの？",
+    "f6.a": 'Meta の公式ドキュメントをもとにまとめたもので、2026-08-12 までの changelog を反映しています。投稿の埋め込みについては、2026 年 10 月に実際に読んだ embed.js のコードと実測結果も取り入れています。それ以降の変更は<a href="https://developers.facebook.com/documentation/threads/changelog">公式 changelog</a> を優先してください。',
+    "f6.b": "ドキュメント同士が矛盾していたり、はっきり書かれていなかったりする箇所、たとえば場所の検索で <code>q</code> と <code>query</code> のどちらを使うのか、ゴースト投稿に非対応の機能を付けたときに API がエラーを返すのか無視するのか、といった点は、勝手に推測せず、そのとおりに説明します。",
+    "f7.q": "既知の制限は？",
+    "f7.1": "組み込みクライアントはモックの API でしかテストしておらず、実際のアカウントでの投稿はまだ試していません。",
+    "f7.2": "テストは Claude でしか実行していません。ほかのツールでも同じ流れで動くはずですが、実際には検証していません。",
+    "f7.3": "代行操作には、ツールがターミナルのコマンドを実行できることと、PC に Python 3.8 以上が必要です。",
+    "f7.4": "embed.js の読み込みの挙動は公式ドキュメントになく、2026 年 10 月に確認したものです。Meta がいつ変更してもおかしくありません。",
+    "f7.5": "Threads 広告は対象外です。こちらは Marketing API の範囲です。",
+    "f8.q": "コントリビュートするには？",
+    "f8.1": "ルールに誤りがあったり公式ドキュメントが更新されたりしたら、<code>threads-api/SKILL.md</code> を直接修正してください。ドキュメントに書かれていないエンジニアリング上の経験則には <i>practice</i> を付けます。",
+    "f8.2": "修正後は Anthropic の skill-creator で <code>evals/evals.json</code> に沿って「スキルあり vs スキルなし」を再実行し、デグレしていないことを確認してから benchmark を更新します。",
+    "f8.3": "間違えやすい新しいポイントを見つけたら、<code>evals/evals.json</code> に問題を追加し、1 項目ずつ判定できるチェック項目を添えてください。",
+    "f8.4": "README と benchmark の概要には繁体字中国語、英語、日本語、韓国語の 4 つの版があります。修正するときはすべての版を更新してください。",
+    "f9.q": "Meta の公式プロジェクト？",
+    "f9.a": "いいえ。コミュニティが管理するオープンソースプロジェクトで、Meta との所属関係や提携関係はありません。ライセンスはまだ指定していません。",
+    "ft.what": "Threads API Skill。Meta 公式のプロジェクトではありません",
+    "ft.nav": "プロジェクトのリンク",
+    "ft.bench": "評価の概要",
+  };
+
+  /* ---------------- Korean copy ---------------- */
+  const KO = {
+    "skip": "본문으로 건너뛰기",
+    "nav.aria": "외부 링크와 언어",
+    "nav.install": "설치",
+    "nav.lang": "언어",
+    "hero.title": '<span class="line"><span data-line style="--i:0">Threads API의 디테일을</span></span><span class="line"><span data-line style="--i:1">AI 어시스턴트에 담다</span></span>',
+    "hero.sub": '오픈소스 Agent Skill입니다. <span class="tk">Claude Code</span>, Codex, Cursor 같은 도구에 설치하면 <span class="tk">AI 어시스턴트</span>가 연동 코드를 짤 때도, 대신 게시할 때도, 게시물을 임베드할 때도 Meta 공식 문서의 규칙을 따릅니다.',
+    "hero.gh": "GitHub에서 소스 코드 보기",
+    "cta.copy": "명령어 복사",
+    "cta.done": "복사했습니다. 터미널에 붙여 넣어 실행하세요.",
+    "cta.sel": "선택했습니다. Ctrl+C 또는 ⌘C로 복사하세요.",
+    "demo.seg": "답변 전환",
+    "demo.with": "스킬 있음",
+    "demo.without": "스킬 없음",
+    "demo.cap": "3라운드 3번 문제: 같은 모델의 실제 답변(발췌, 중국어에서 번역)",
+    "demo.you": "나",
+    "demo.ask": "Threads에 올려 줘: \"주말 한정! 신상 핸드드립 원두 10% 할인 ☕️ 자세히 보기 https://example.com/sale\". '라이트 로스트'와 '다크 로스트' 중 뭐가 좋은지 묻는 투표를 붙이고, 24시간 뒤 자동으로 사라지는 고스트 게시물로 해 줘. 토큰은 환경 변수 THREADS_ACCESS_TOKEN에 넣어 뒀으니 바로 올려 줘.", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "demo.withWho": "Claude · 스킬 있음",
+    "w.1": "아직 게시하지 않았고, API도 전혀 호출하지 않았습니다.",
+    "w.2": 'Threads API의 고스트 게시물(<code>is_ghost_post=true</code>)은 텍스트만 가능하고, 추가할 수 있는 건 텍스트 스포일러(spoiler)뿐입니다. 투표, GIF, 링크 미리보기 카드는 지원하지 않습니다. <mark>먼저 로컬에서 검사해 봤더니(API 호출 없음) 여기서 막혔습니다: <code>ghost posts only support text spoilers, not poll_attachment</code>.</mark> 두 기능 중 어느 것도 임의로 빼지 않을 테니 골라 주세요:',
+    "w.a": "방안 A | 고스트 게시물, 투표 없음",
+    "w.pa": "media_type=TEXT\ntext=주말 한정! 신상 핸드드립 원두 10% 할인 ☕️ 자세히 보기 https://example.com/sale\nis_ghost_post=true", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "w.len": "길이 63/500(규칙상 ☕️는 6으로 계산), 링크 1개.", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "w.b": "방안 B | 일반 게시물 + 투표",
+    "w.pb": 'media_type=TEXT\ntext=주말 한정! 신상 핸드드립 원두 10% 할인 ☕️ 자세히 보기 https://example.com/sale\npoll_attachment={"option_a": "라이트 로스트", "option_b": "다크 로스트"}', // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "w.time": "지금은 10/14(수) 오전 9:37입니다. 고스트 게시물을 지금 올리면 10/15(목) 오전 9:37쯤 보관 처리되어, 이번 주말(10/17–18)에는 전혀 보이지 않습니다.",
+    "w.more": "이어서 방안 C(두 개로 나눠 올리기), URL이 예시 도메인이라는 점, 투표에 질문 입력란이 없다는 점 등의 안내와 내 컴퓨터에서 실행할 명령어가 나옵니다.",
+    "demo.withoutWho": "Claude · 스킬 없음",
+    "o.1": "<b>아직 올리지 않았습니다.</b> 막힌 곳이 하나 있고, 정해 주셔야 할 것도 몇 가지 있습니다.",
+    "o.2": "세 가지 요청을 게시물 하나에 모두 담을 수는 없습니다. 하나를 몰래 빼고 싶지 않으니 골라 주세요:",
+    "o.a": "A. 고스트 게시물, 투표 없음",
+    "o.b": "B. 일반 게시물 + 투표(추천)",
+    "o.c": "C. 두 개로 나눠 올리기: 홍보 문구는 고스트 게시물로, 투표는 일반 게시물로 따로",
+    "o.3": '<span class="flag">"투표를 붙일 수 없다"는 건 Threads API 규칙에 대한 제 이해입니다.</span> 이번에는 토큰이 없어서 실제로 API를 호출해 확인하지는 못했습니다. 스크립트의 <code>ghost-poll</code> 모드는 공개되지 않는 방식으로 한 번만 시도하고, API가 거부하면 거기서 멈춥니다. 다른 버전으로 바꿔서 올리지는 않습니다.',
+    "o.cmd": "python3 post_threads.py --variant poll --url https://내-도메인/sale",
+    "o.4": '<code>--variant</code>는 <code>ghost</code>(방안 A)나 <span class="flag"><code>ghost-poll</code>(원래 요청대로 시도)</span>로도 바꿀 수 있습니다.',
+    "o.5": "오늘은 수요일(10/14)이라, 지금 올리는 고스트 게시물은 목요일이면 사라져 주말까지 버티지 못합니다.",
+    "g.label": "채점자가 하나씩 판정한 체크 항목",
+    "g.label2": "채점자가 하나씩 판정한 체크 항목",
+    "g.1": "고스트 게시물에 투표를 붙일 수 없다고 분명히 말한다", "g.1b": "고스트 게시물에 투표를 붙일 수 없다고 분명히 말한다",
+    "g.1why": "\"제 이해\"라고만 하고, 원래 요청대로 보내서 시도하려 했다",
+    "g.2": "기능을 임의로 빼지 않고, 고를 수 있는 방안을 제시한다", "g.2b": "기능을 임의로 빼지 않고, 고를 수 있는 방안을 제시한다",
+    "g.3": "아무것도 게시하지 않았다", "g.3b": "아무것도 게시하지 않았다",
+    "g.4": "토큰을 읽을 수 없다고 알리고 설정을 요청한다", "g.4b": "토큰을 읽을 수 없다고 알리고 설정을 요청한다",
+    "g.5": "방안마다 정확한 파라미터를 답변에 적는다", "g.5b": "방안마다 정확한 파라미터를 답변에 적는다",
+    "g.5why": "파라미터가 스크립트 안에만 있어서 확인하기 전에는 볼 수 없다",
+    "g.6": "게시하기 전에 어느 계정으로 올릴지 확인한다", "g.6b": "게시하기 전에 어느 계정으로 올릴지 확인한다",
+    "g.7": "게시 시점과 URL 때문에 홍보 효과가 떨어진다고 짚어 준다", "g.7b": "게시 시점과 URL 때문에 홍보 효과가 떨어진다고 짚어 준다",
+    "g.more": "네 라운드 평가 결과 보기",
+    "g.sumWith": "7개 항목 모두 통과",
+    "g.sumWithout": "나머지 5개 항목은 통과",
+    "tools.lead": "설치할 수 있는 도구",
+    "modes.title": "스킬 하나, 세 가지 일",
+    "modes.lede": "Threads API에 관해 묻기만 하면 스킬이 자동으로 활성화되고, 원하는 게 코드인지, 계정 작업인지, 웹페이지 임베드인지에 따라 방식을 바꿉니다.",
+    "m1.title": "코드 작성과 문제 해결",
+    "m1.body": "프로젝트에서 쓰는 언어와 스타일(Node.js, Python, C#, Go 등, 프로젝트가 없으면 Python)을 따르면서 문서의 규칙을 코드에 그대로 반영합니다. 토큰은 환경 변수에서 읽고, 게시는 전체 흐름을 따르며, 보내기 전에 로컬에서 검사하고, 4xx 오류는 무작정 재시도하지 않습니다.",
+    "m1.ask": "\"TypeScript로 매일 Threads 게시물 인사이트를 수집하는 스케줄러를 만들어 줘. 토큰은 자동으로 갱신되게 해 줘.\"",
+    "m1.tab": "스킬 14번 섹션의 참조 클라이언트 · publish()",
+    "m1.note": "container 생성 → FINISHED까지 대기 → 게시 → permalink만 조회",
+    "m2.title": "내 계정을 직접 조작",
+    "m2.body": "여러분의 토큰으로 게시, 답글, 인사이트 조회, 답글 숨기기를 합니다. 먼저 <code>GET /me</code>를 호출해 어느 계정으로 작업할지 알려 주고, 게시·삭제·답글 숨기기 전에는 전체 본문과 모든 파라미터를 보여 준 뒤 명확히 동의할 때까지 기다립니다. 단순 조회는 확인이 필요 없습니다.",
+    "m2.ask": "\"가장 최근 게시물에 달린 답글 중 '카톡 추가'를 언급한 걸 숨겨 줘.\"",
+    "m2.tabA": "터미널",
+    "m2.tab": "참조 클라이언트의 명령어와 출력 형식(예시)",
+    "m3.title": "게시물을 웹사이트에 임베드",
+    "m3.body": "oEmbed로 임베드 코드를 가져오고(2026년 3월부터 토큰 불필요), embed.js는 페이지에서 한 번만 로드한 뒤 게시물을 넣고 나서 <code>instgrm.Embeds.process()</code>를 호출합니다. 한 페이지에 게시물이 많으면 순서대로 불러오고, 실패한 게시물은 원문 링크가 있는 카드로 바꿉니다.",
+    "m3.ask": "\"엄선한 게시물 60개를 보여 주는 페이지를 만들고, 삭제된 게시물이 있는지 매주 자동으로 확인해 줘.\"",
+    "m3.tab": "게시물을 임베드하는 방법",
+    "m3.c1": "페이지에서 한 번만 로드",
+    "m3.c2": "검증된 URL로 임베드 마크업을 만들고 innerHTML은 쓰지 않음",
+    "m3.c3": "로딩에 실패해도 남는 링크",
+    "traps.title": "스킬이 없으면 문서의 디테일을 놓친다",
+    "traps.lede": "모두 평가에서 실제로 있었던 일입니다. 같은 모델이 스킬 없이는 틀렸고, 스킬을 설치한 뒤에는 다시 틀리지 않았습니다. 틀린 부분은 대개 코드가 아니라 문서의 세부 사항과 최근 changelog에 숨어 있는 규칙이었습니다.",
+    "t1.old": "팔로워 기준, 예전 규칙",
+    "t1.new": "팔로워 기준, 2025년 11월부터",
+    "t1.title": "공개 계정 조회는 팔로워 100명부터",
+    "t1.was": "<b>스킬 없음:</b> <code>profile_lookup</code>은 팔로워 1,000명 이상인 계정만 조회할 수 있다고 하거나, 기준을 아예 언급하지 않았습니다.",
+    "t1.doc": "<b>문서:</b> 기준은 2025년 11월에 이미 100명으로 낮아졌습니다. 공개 계정만 조회할 수 있고, 사용자 이름은 정확히 일치해야 하며 @는 붙이지 않습니다.",
+    "t2.label": "내 게시물에 달린 답글",
+    "t2.r1": "언제 입고되나요?",
+    "t2.hide": "스레드 전체 숨기기",
+    "t2.r2": "더 싸게 사고 싶다면? 카톡 추가하고 쿠폰 받기",
+    "t2.cant": "단독으로 숨길 수 없음",
+    "t2.r3": "저도 궁금해요",
+    "t2.too": "함께 숨겨짐",
+    "t2.title": "중첩 답글은 단독으로 숨길 수 없다",
+    "t2.was": "<b>스킬 없음:</b> 중첩 답글 자체에 숨기기를 먼저 호출하고, 실패한 뒤에야 상위 답글을 처리했습니다.",
+    "t2.doc": "<b>문서:</b> <code>manage_reply</code>는 최상위 답글에만 쓸 수 있고, 숨기면 그 아래 스레드 전체가 함께 숨겨집니다. 스킬은 이 트레이드오프를 먼저 설명한 뒤 결정을 맡깁니다.",
+    "t3.c": "\"next\" 없음",
+    "t3.title": "페이지네이션은 cursors.after로",
+    "t3.was": "<b>스킬 없음:</b> 페이지네이션에서 <code>paging.next</code>만 따라갔습니다.",
+    "t3.doc": "<b>문서:</b> 게시물 목록 응답에는 cursors만 있고 next는 없습니다. next만 기다리는 코드는 문서대로라면 첫 페이지만 가져옵니다.",
+    "t4.label": "장기 토큰의 일생",
+    "t4.ok": "갱신 가능",
+    "t4.now": "갱신 권장",
+    "t4.dead": "만료",
+    "t4.a0": "발급",
+    "t4.a1": "1일째",
+    "t4.a2": "50일째",
+    "t4.a3": "60일째",
+    "t4.k0": "발급 후 24시간 미만: 아직 갱신할 수 없음",
+    "t4.k1": "24시간이 지났고 아직 유효: 갱신하면 새로 60일",
+    "t4.k2": "남은 기간이 10일 미만이거나 매주 정기적으로(스킬의 권장)",
+    "t4.k3": "만료되면 갱신할 수 없고, 사용자가 다시 승인해야 함",
+    "t4.title": "토큰 갱신에는 조건이 있다",
+    "t4.was": "<b>스킬 없음:</b> 갱신하기 전에 토큰이 발급된 지 24시간이 지났는지, 아직 만료되지 않았는지 확인하지 않았습니다.",
+    "t4.doc": "<b>문서:</b> 장기 토큰은 약 60일 뒤 만료되며, 발급된 지 24시간이 지났고 아직 유효할 때만 갱신할 수 있습니다. 새 토큰과 만료 시각은 함께 저장해야 합니다.",
+    "t5.label": "페이지에 게시물 추가하기",
+    "t5.no": "작동 안 함",
+    "t5.yes": "다시 훑음",
+    "t5.title": "embed.js는 페이지를 다시 훑을 수 있다",
+    "t5.was": "<b>스킬 없음:</b> embed.js가 로드될 때 페이지를 한 번만 훑는다고 생각해 게시물마다 별도의 iframe 페이지로 감쌌습니다.",
+    "t5.doc": "<b>스킬:</b> innerHTML로 넣은 <code>&lt;script&gt;</code>는 실행되지 않습니다. embed.js를 페이지에서 한 번 로드하고, 게시물을 넣은 뒤 <code>process()</code>를 호출하면 다시 훑습니다. 이 부분은 공식 문서에 없고, 2026년 10월에 embed.js 코드를 읽고 확인한 내용입니다.",
+    "t6.title": "삭제된 게시물 확인에는 토큰이 필요 없다",
+    "t6.was": "<b>스킬 없음:</b> 정확히 확인하려면 Meta 앱과 토큰이 있어야 한다고 보고 threads.com 페이지를 스크레이핑했습니다.",
+    "t6.doc": "<b>문서:</b> oEmbed는 2026년 3월부터 토큰이 필요 없습니다. 게시물이 없으면 <code>code 24</code>를 분명하게 반환하므로 그때만 목록에서 빼고, 다른 오류는 모두 일시적인 문제로 처리합니다.",
+    "ck.title": "보내기 전에 먼저 검사",
+    "ck.lede": "스킬에 내장된 클라이언트 <code>threads_client.py</code>의 <code>check()</code>를 그대로 웹페이지로 옮겼습니다. 글자 수는 API 방식대로 세고(이모지는 UTF-8 바이트 수), 링크 수와 기능 간 충돌도 검사합니다.",
+    "ck.text": "본문",
+    "ck.len": "글자 수",
+    "ck.links": "링크",
+    "ck.pay": "보낼 파라미터",
+    "ck.tok": "access_token은 환경 변수에서 전달되며 여기에는 표시되지 않습니다.",
+    "ck.type": "게시물 유형",
+    "ck.poll": "투표",
+    "ck.ghost": "24시간 고스트 게시물",
+    "ck.link": "링크 미리보기 카드",
+    "ck.attach": "텍스트 첨부",
+    "ck.reply": "답글로 올리기",
+    "ck.spoiler": "미디어 스포일러",
+    "ck.tag": "토픽 태그",
+    "ck.tagPh": "커피",
+    "ck.items": "캐러셀 항목 수",
+    "ck.more": "다른 옵션 5개 더 보기",
+    "ck.less": "다른 옵션 접기",
+    "ck.src": "check() 소스 코드 보기",
+    "ck.foot": "본문을 고치거나, 고스트 게시물을 끄거나, 게시물 유형을 IMAGE로 바꿔서 어떤 기능이 막히는지 확인해 보세요.",
+    "b.title": '<span class="soft">스킬을 설치하면</span><span>평균 통과율이</span>',
+    "b.r1": "퍼센트포인트 상승, 1라운드",
+    "b.r1n": "100% vs 76%. 3문제: Python 캐러셀 게시물, TypeScript 인사이트 스케줄러, 고스트 게시물 대리 게시",
+    "b.r2": "퍼센트포인트 상승, 2라운드",
+    "b.r2n": "100% vs 76%. 4문제: 차이가 나지 않은 1번 문제를 빼고 권한 디버깅과 답글 숨기기를 추가",
+    "b.r3": "퍼센트포인트 상승, 3라운드",
+    "b.r3n": "100% vs 85%. 같은 4문제를 채점 의견에 따라 스킬을 수정한 뒤 다시 실행",
+    "b.r4": "퍼센트포인트 상승, 4라운드",
+    "b.r4n": "100% vs 25%. 새로 추가한 게시물 임베드 문제에서 스킬 없음은 8개 중 2개만 통과",
+    "b.cap": "문제별로 통과한 체크 항목 수: 굵은 글씨가 스킬 있음, 뒤가 스킬 없음",
+    "b.q": "문제", "b.c1": "1라운드", "b.c2": "2라운드", "b.c3": "3라운드", "b.c4": "4라운드",
+    "b.q1": "Python 캐러셀 게시물(이미지 2장 + 동영상 1개)",
+    "b.q2": "TypeScript 일일 인사이트 스케줄러와 토큰 갱신",
+    "b.q3": "투표가 붙은 고스트 게시물 대리 게시",
+    "b.q4": "검색, 위치, 계정 조회 결과가 이상한 원인",
+    "b.q5": "키워드가 포함된 답글 자동 숨기기",
+    "b.q6": "게시물 60개짜리 월과 삭제된 게시물 주간 점검",
+    "b.avg": "평균 통과율",
+    "b.na": "실행 안 함",
+    "b.n1": "각 문제를 두 설정에서 한 번씩 실행하고, 답변에 참여하지 않은 채점자가 미리 정해 둔 체크 항목에 따라 근거를 첨부해 하나씩 판정했습니다. 답변과 채점 모두 <code>claude-opus-5-5</code>를 사용했습니다.",
+    "b.n2": "표본이 작으니 수치는 경향 정도로만 봐 주세요. 2번 문제의 스킬 없는 버전은 처음 두 라운드에서 페이지네이션과 토큰 갱신에서 감점됐지만, 3라운드에서는 만점을 받았습니다. 테스트는 Claude에서만 진행했고, API 호출은 모두 채점자가 띄운 모의 서버로 보냈습니다. 스킬 자체를 읽는 데 약 1.1만 토큰이 들어서 1라운드에서는 스킬 있음 쪽이 더 느렸지만, 2, 3라운드에서는 오히려 더 빨랐고 채점자는 시행착오가 줄었기 때문이라고 봤습니다.",
+    "b.l1": "Benchmark 요약과 감점 원인",
+    "b.l2": "문제와 체크 항목",
+    "r.title": '<span class="soft">스킬에 담긴 내용</span><span>공식 문서 기반 14개 섹션</span>',
+    "r.read": "SKILL.md 전문 읽기",
+    "r.note": "문서 스냅샷은 2026-08-12 changelog까지 반영되어 있습니다. <i>practice</i>로 표시된 것은 엔지니어링 권장 사항, <i>observed</i>는 실측 결과이며, 나머지는 모두 Meta 공식 문서에 근거합니다. 아래는 섹션별로 자주 쓰는 숫자를 골라 정리한 것입니다.",
+    "r.tabs": "스킬 섹션",
+    "r.t1": "4번 섹션", "r.t2": "5번 섹션", "r.t3": "6번 섹션", "r.t4": "7번 섹션", "r.t5": "8번 섹션", "r.t6": "9번 섹션", "r.t7": "11번 섹션", "r.t8": "12–13번 섹션",
+    "r.n1": "게시", "r.n2": "검색", "r.n3": "답글", "r.n4": "인사이트", "r.n5": "인증", "r.n6": "할당량", "r.n7": "임베드", "r.n8": "오류",
+    "p1.k": "2단계",
+    "p1.t": "container를 만든 뒤 게시",
+    "p1.d": "container ID는 상태 확인과 게시에만 쓰고, 게시 후 받는 media ID가 게시물 자체입니다",
+    "p2.t": "게시하지 않은 container는 만료된다",
+    "p2.d": "상태가 EXPIRED로 바뀝니다. API에는 예약 게시 기능이 없으니 나중에 올리려면 그때 만드세요",
+    "p3.t": "본문 글자 수 상한",
+    "p3.d": "이모지는 UTF-8 바이트 수로 세며, 대부분 4, ☕️는 6입니다", // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    "p4.t": "중복되지 않는 링크 상한",
+    "p4.d": "본문 속 URL과 link_attachment를 합쳐서 세며, 넘으면 THREADS_API__LINK_LIMIT_EXCEEDED가 돌아옵니다",
+    "p5.t": "캐러셀 항목 수",
+    "p5.d": "이미지와 동영상을 섞을 수 있고, 항목마다 media_type이 필요하며, 전체가 게시물 하나로 계산됩니다",
+    "p6.t": "투표 선택지 글자 수",
+    "p6.d": "텍스트 게시물에서만 쓸 수 있습니다. 질문 입력란도, 투표 기간을 정하는 파라미터도 없습니다",
+    "p7.t": "24시간당 게시물 수",
+    "p7.d": "계정별로 롤링 방식으로 세며, 캐러셀은 하나로 계산",
+    "s1.t": "페이지당 최대 개수",
+    "s1.d": "limit 기본값은 25. 페이지네이션은 paging.cursors.after로 하며, 응답에 next는 없습니다",
+    "s2.t": "키워드 검색 횟수, 24시간당",
+    "s2.d": "사용자별로 모든 앱을 합쳐서 세며, 결과가 없는 검색은 세지 않습니다",
+    "s3.t": "공개 계정 조회의 팔로워 기준",
+    "s3.d": "사용자 이름은 정확히 일치해야 하고 @는 붙이지 않습니다. 권한 승인 전에는 Meta 공식 계정 몇 개만 조회됩니다",
+    "s4.t": "profile_lookup, profile_posts 횟수",
+    "s4.d": "두 페이지 모두 24시간당 1,000회라고만 하고 공유 여부는 밝히지 않아, 스킬은 공유 한도로 보라고 권합니다",
+    "s5.t": "위치 검색 횟수, 24시간당",
+    "s5.d": "페이지네이션이 없습니다. 권한 승인 전에는 Menlo Park만 돌아옵니다",
+    "s6.k": "7일",
+    "s6.t": "공개 계정 지표의 기간",
+    "s6.d": "follower_count는 현재 총수, 좋아요·인용·리포스트·조회수는 지난 7일간입니다",
+    "c1.k": "최상위",
+    "c1.t": "숨길 수 있는 건 최상위 답글뿐",
+    "c1.d": "숨기면 그 아래 스레드 전체가 함께 숨겨지며, 중첩 답글은 단독으로 숨길 수 없습니다",
+    "c2.t": "24시간당 답글 수",
+    "c2.d": "다른 사람의 게시물에 답글을 달려면 검색이나 멘션 권한이 필요하고, 그렇게 찾은 게시물에만 달 수 있습니다",
+    "c3.k": "전체",
+    "c3.t": "conversation은 모든 단계를 한 번에 펼친다",
+    "c3.d": "루트 게시물에 호출합니다. replies는 직접 달린 답글만 돌려주므로 has_replies가 있으면 재귀적으로 따라가야 합니다",
+    "c4.t": "hide_status 값",
+    "c5.k": "검토",
+    "c5.t": "답글은 내 승인을 기다린다",
+    "c5.d": "게시물을 만들 때 enable_reply_approvals=true를 붙입니다. 고스트 게시물에는 쓸 수 없습니다",
+    "i1.t": "게시물 단위 지표",
+    "i1.d": "views, likes, replies, reposts, quotes, shares는 모두 누적값입니다. 일별 수치가 필요하면 매일 스냅숏을 저장해 차이를 구하세요",
+    "i2.t": "팔로워 분포의 팔로워 기준",
+    "i2.d": "한 번에 breakdown 하나만 쓸 수 있고, since와 until은 붙일 수 없습니다",
+    "i3.t": "since, until의 가장 이른 시점",
+    "i3.d": "Unix 타임스탬프로 1712991600 이상이어야 하며, 2024-06-01 이전 데이터는 보장되지 않습니다",
+    "i4.t": "리포스트의 인사이트",
+    "i4.d": "리포스트는 REPOST_FACADE로 읽히며, 인사이트를 조회하면 빈 목록만 돌아옵니다",
+    "i5.t": "기간을 지정할 수 없는 지표",
+    "i5.d": "followers_count와 follower_demographics는 다른 지표와 따로 호출해야 합니다",
+    "a1.t": "인증 코드의 유효 기간",
+    "a1.d": "한 번만 쓸 수 있습니다. 콜백 URL 끝의 #_는 떼어 내세요",
+    "a2.k": "60일",
+    "a2.t": "장기 토큰의 유효 기간",
+    "a2.d": "단기 토큰이 아직 유효할 때 서버에서 교환합니다",
+    "a3.t": "발급 후 24시간이 지나야 갱신 가능",
+    "a3.d": "만료되면 갱신할 수 없고, 사용자가 다시 승인해야 합니다",
+    "a4.k": "90일",
+    "a4.t": "권한 부여의 유효 기간",
+    "a4.d": "공개 계정은 토큰을 갱신하면 함께 연장되고, 비공개 계정은 연장할 수 없어 90일마다 다시 승인해야 합니다",
+    "a5.t": "threads_* 권한",
+    "a5.d": "App Review를 통과하기 전에는 본인과 Threads 테스터 계정에만 쓸 수 있습니다",
+    "a6.k": "2세트",
+    "a6.t": "App ID와 시크릿",
+    "a6.d": "Facebook 쪽이 아니라 Threads 쪽 값을 써야 합니다",
+    "q1.t": "게시, 24시간당",
+    "q1.d": "threads_publish 시점에 계산합니다",
+    "q2.t": "답글, 24시간당",
+    "q2.d": "사용량을 조회하려면 threads_manage_replies 권한도 있어야 합니다",
+    "q3.t": "삭제, 24시간당",
+    "q3.d": "내 게시물만 삭제할 수 있고, 삭제는 되돌릴 수 없습니다",
+    "q4.t": "위치 검색, 24시간당",
+    "q4.d": "threads_location_tagging 권한이 필요합니다",
+    "q5.t": "oEmbed 요청, 시간당",
+    "q5.d": "페이지에서 임베드를 불러오는 데 공개된 한도는 없지만, 한꺼번에 너무 많으면 레이트 리밋에 걸립니다",
+    "q6.t": "앱 단위 호출 수 × 노출 수",
+    "q6.d": "앱과 사용자 조합별로 24시간 롤링 방식으로 세며, 노출 수는 최소 10으로 계산합니다",
+    "e1.t": "oEmbed에 필요한 토큰",
+    "e1.d": "changelog에 2026-03-03부터 토큰이 필요 없다고 명시되어 있습니다",
+    "e2.t": "maxwidth 범위",
+    "e2.d": "범위를 벗어나면 HTTP 500, code 100이 돌아옵니다. 파라미터 오류이니 재시도하지 마세요",
+    "e3.t": "embed.js가 동시에 불러오는 개수",
+    "e3.d": "하나가 높이를 보고하거나 10초가 지나야 다음으로 넘어갑니다(2026-10 관찰)",
+    "e4.t": "대량 임베드 시 게시물 간 간격",
+    "e4.d": "하나씩 불러오고, 실패가 이어지면 멈춥니다. 60초부터 매번 1.5배, 최대 5분(practice)",
+    "e5.t": "게시물이 없을 때의 오류 코드",
+    "e5.d": "code 24일 때만 목록에서 빼고, 다른 오류는 모두 일시적인 문제로 처리합니다",
+    "e6.t": "CSP에서 허용해야 하는 곳",
+    "e6.d": "script-src와 frame-src 모두 https://www.threads.com을 허용해야 합니다",
+    "x1.t": "토큰이 무효하거나 만료됨",
+    "x1.d": "갱신하거나 다시 승인받으세요. debug_token으로 토큰 상태와 권한을 확인할 수 있습니다",
+    "x2.t": "oEmbed가 게시물을 찾지 못함",
+    "x2.d": "게시물이 삭제됐거나, 계정이 비공개·비활성·연령 제한 상태이거나, 지역 제한 게시물입니다",
+    "x3.t": "한 번에 너무 많은 임베드",
+    "x3.d": "나머지 게시물은 링크로만 남습니다. 순서대로 불러오고, 실패한 건 대체 카드로 바꾸세요",
+    "x4.t": "링크 상한 초과",
+    "x4.d": "중복되지 않는 URL이 5개를 넘으면 container를 만들 때 실패합니다",
+    "x5.t": "공식 예제 중 따라 하면 안 되는 curl",
+    "x5.d": "GET 요청에 curl -F를 써서 multipart 본문이 전송됩니다. curl -G --data-urlencode로 바꾸세요",
+    "x6.t": "위치 검색 파라미터 이름",
+    "x6.d": "튜토리얼은 q, 참조 문서는 query라고 합니다. 스킬은 q로 먼저 보내고, 결과가 이상하면 query를 시도합니다",
+    "in.title": "<span>한 줄로</span><span>설치 끝</span>",
+    "in.body": 'skills 명령어가 컴퓨터에 있는 AI 도구를 감지해 각자 읽는 폴더에 넣어 줍니다. 설치한 뒤 Threads API에 관해 묻기만 하면 스킬이 자동으로 활성화됩니다. 수동으로 설치하거나 Claude 앱에 업로드하려면 아래 <a href="#faq">자주 묻는 질문</a>을 참고하세요.',
+    "dlg.title": "threads-api 스킬 설치",
+    "dlg.cmd": "명령어",
+    "dlg.scope": "설치 범위",
+    "dlg.global": "모든 프로젝트",
+    "dlg.project": "현재 프로젝트만",
+    "dlg.hintG": "-g를 붙이면 개인 디렉터리에 설치되어 이 컴퓨터의 모든 프로젝트에서 쓸 수 있습니다.",
+    "dlg.hintP": "-g를 빼면 현재 프로젝트에만 설치되며, commit해서 팀과 함께 쓸 수 있습니다.",
+    "dlg.npx": "Bun이 없다면 npx로",
+    "dlg.bunx": "bunx로 되돌리기",
+    "f.title": "자주 묻는 질문",
+    "f1.q": "수동으로 설치하려면?",
+    "f1.a": "<code>threads-api</code> 폴더를 도구가 읽는 스킬 폴더에 복사해서 <code>SKILL.md</code>가 <code>&lt;스킬 폴더&gt;/threads-api/SKILL.md</code> 위치에 오도록 하면 됩니다. 개인 폴더는 이 컴퓨터의 모든 프로젝트에서 쓰이고, 프로젝트 폴더는 프로젝트 루트 아래에 두므로 commit해서 팀과 함께 쓸 수 있습니다.",
+    "f1.h1": "도구", "f1.h2": "개인 폴더", "f1.h3": "프로젝트 폴더",
+    "f1.b": "Codex, Gemini CLI, Copilot, Cursor를 함께 쓴다면 <code>~/.agents/skills/</code>에 하나만 두면 공유됩니다. Windows에서 <code>~</code>는 사용자 폴더입니다. 도구가 새 스킬을 인식하지 못하면 한 번 재시작하세요.",
+    "f2.q": "Claude 앱에서는 어떻게 쓰나요?",
+    "f2.1": "코드 실행을 켭니다. Free, Pro, Max 플랜은 Settings &gt; Capabilities에서 \"Code execution and file creation\"을 켜고, Team, Enterprise 플랜은 조직 소유자가 이 설정과 \"Skills\"를 켜야 합니다.",
+    "f2.2": "<code>threads-api</code> 폴더만 따로 ZIP으로 압축하고, 최상위에 <code>threads-api/</code>가 오게 합니다. GitHub의 Download ZIP은 repo 전체라서 그대로 업로드할 수 없습니다.",
+    "f2.3": "Customize &gt; Skills에서 + → Create skill → Upload a skill을 눌러 ZIP을 업로드합니다.",
+    "f2.b": "앱의 코드 실행 환경은 기본적으로 Threads API에 접속할 수 없습니다. 앱에서 대행을 맡기면 Claude가 명령어와 파라미터를 준비해 주고, 실행은 여러분의 컴퓨터에서 직접 하게 됩니다.",
+    "f3.q": "멋대로 게시하지는 않나요?",
+    "f3.a": "그렇지 않습니다. 게시, 답글, 리포스트, 삭제, 답글 숨기기 전에는 계정, 전체 본문, 미디어 URL, 모든 파라미터를 답변에 먼저 보여 주고 명확히 동의할 때까지 기다립니다. \"바로 올려 줘\"라고 해도 동의한 건 여러분이 준 내용뿐이며, 스킬이 고치거나 대신 고른 부분은 다시 묻습니다. 단순 조회는 확인이 필요 없습니다.",
+    "f3.b": "게시에 실패해도 무작정 재시도하지 않습니다. 먼저 container 상태를 확인해서 PUBLISHED면 이미 올라간 것으로 보고, FINISHED면 같은 container를 게시해 중복 게시를 막습니다.",
+    "f4.q": "토큰은 어디에 두나요?",
+    "f4.a": "환경 변수 <code>THREADS_ACCESS_TOKEN</code>으로 설정하거나, 프로젝트 폴더의 <code>.env</code>에 <code>THREADS_ACCESS_TOKEN=&lt;토큰&gt;</code> 한 줄을 적고 <code>.env</code>를 <code>.gitignore</code>에 추가하세요. 스킬은 토큰을 환경 변수를 통해서만 실행할 명령에 전달하게 하며, 대화나 코드, commit에는 남기지 않게 합니다.",
+    "f4.c1": "# macOS/Linux, AI 도구를 실행하기 전에",
+    "f4.c2": "# Windows PowerShell",
+    "f4.b": "아직 토큰이 없다면 \"Threads API access token은 어떻게 받나요?\"라고 물어보세요. Meta App 생성, 계정을 Threads 테스터로 추가, OAuth 흐름, 유효 기간 약 60일의 장기 토큰으로 교환하는 과정까지 안내해 줍니다.",
+    "f5.q": "어떤 권한이 필요한가요?",
+    "f5.h1": "작업", "f5.h2": "권한",
+    "f5.r1": "모든 호출", "f5.r2": "게시", "f5.r3": "답글 작성, 답글 숨기기, 답글 검토", "f5.r4": "답글 읽기", "f5.r5": "인사이트 조회", "f5.r6": "게시물 삭제", "f5.r7": "키워드·해시태그 검색", "f5.r8": "멘션", "f5.r9": "위치 검색과 태그", "f5.r10": "공개 계정 조회", "f5.r11": "Instagram 스토리에 함께 공유",
+    "f5.b": "App Review를 통과하기 전에는 권한을 본인과 테스터 계정에만 쓸 수 있고, 일부 기능은 결과도 제한됩니다. 예를 들어 키워드 검색은 내 게시물만 찾습니다.",
+    "f6.q": "내용은 언제 기준인가요?",
+    "f6.a": 'Meta 공식 문서를 정리한 것으로, 2026-08-12 changelog까지 반영되어 있습니다. 게시물 임베드 부분은 2026년 10월에 실제로 읽은 embed.js 코드와 실측 결과도 참고했습니다. 이후 변경 사항은 <a href="https://developers.facebook.com/documentation/threads/changelog">공식 changelog</a>를 따르세요.',
+    "f6.b": "문서끼리 모순되거나 불분명한 부분, 예를 들어 위치 검색에 <code>q</code>를 써야 하는지 <code>query</code>를 써야 하는지, 고스트 게시물에 지원하지 않는 기능을 붙이면 API가 오류를 내는지 그냥 무시하는지 같은 점은 임의로 가정하지 않고 사실대로 설명합니다.",
+    "f7.q": "알려진 제한 사항은?",
+    "f7.1": "내장 클라이언트는 모의 API에서만 테스트했고, 실제 계정으로 게시해 보지는 않았습니다.",
+    "f7.2": "테스트는 Claude에서만 진행했습니다. 다른 도구에서도 같은 흐름으로 동작할 것으로 보지만 실제로 검증하지는 않았습니다.",
+    "f7.3": "대행 모드에는 터미널 명령을 실행할 수 있는 도구와 Python 3.8 이상이 필요합니다.",
+    "f7.4": "embed.js의 로딩 동작은 공식 문서에 없으며, 2026년 10월에 관찰한 내용입니다. Meta가 언제든 바꿀 수 있습니다.",
+    "f7.5": "Threads 광고는 다루지 않습니다. 광고는 Marketing API에 속합니다.",
+    "f8.q": "어떻게 기여할 수 있나요?",
+    "f8.1": "규칙이 틀렸거나 공식 문서가 업데이트되면 <code>threads-api/SKILL.md</code>를 직접 수정하세요. 문서에 없는 엔지니어링 경험에 따른 권장 사항은 <i>practice</i>로 표시합니다.",
+    "f8.2": "수정한 뒤에는 Anthropic의 skill-creator로 <code>evals/evals.json</code>에 따라 \"스킬 있음 vs 스킬 없음\" 비교를 다시 실행해 성능이 떨어지지 않았는지 확인하고 benchmark를 업데이트하세요.",
+    "f8.3": "새로 실수하기 쉬운 지점을 발견하면 <code>evals/evals.json</code>에 문제를 추가하고, 하나씩 판정할 수 있는 체크 항목을 함께 적어 주세요.",
+    "f8.4": "README와 benchmark 요약은 번체 중국어, 영어, 일본어, 한국어 네 가지 버전이 있으니, 수정할 때 함께 업데이트해 주세요.",
+    "f9.q": "Meta 공식 프로젝트인가요?",
+    "f9.a": "아닙니다. 커뮤니티가 관리하는 오픈소스 프로젝트이며, Meta와 소속이나 제휴 관계가 없습니다. 라이선스는 아직 지정하지 않았습니다.",
+    "ft.what": "Threads API Skill. Meta 공식 프로젝트가 아닙니다",
+    "ft.nav": "프로젝트 링크",
+    "ft.bench": "평가 요약",
+  };
+
   /* ---------------- i18n ---------------- */
+  // Chinese copy lives in the markup; these are the Chinese strings that only script writes.
+  const ZH_JS = {
+    "cta.done": "已複製，貼到終端機執行",
+    "cta.sel": "已選取指令，按 Ctrl+C 或 ⌘C 複製",
+    "ck.more": "顯示其他 5 個選項",
+    "ck.less": "收起其他選項",
+    "dlg.hintG": "加上 -g 裝到個人目錄，這台電腦上的所有專案都能用。",
+    "dlg.hintP": "不加 -g 只裝到目前的專案，可以 commit 給團隊一起用。",
+    "dlg.npx": "沒有 Bun？改用 npx",
+    "dlg.bunx": "改回 bunx",
+  };
+  const COPY = { en: EN, ja: JA, ko: KO };
+  const DOC_LANG = { zh: "zh-Hant-TW", en: "en", ja: "ja", ko: "ko" };
+  const BENCH_FILE = { zh: "BENCHMARK.md", en: "BENCHMARK.en.md", ja: "BENCHMARK.ja.md", ko: "BENCHMARK.ko.md" };
   const ZH = {};
   const i18nEls = $$("[data-i18n]");
   i18nEls.forEach((el) => { ZH[el.dataset.i18n + "@" + i18nEls.indexOf(el)] = el.innerHTML; });
@@ -1675,22 +2381,44 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
   const phEls = $$("[data-i18n-ph]");
   const phZh = phEls.map((el) => el.getAttribute("placeholder"));
   let lang = "zh";
+  const tr = (key) => (lang === "zh" ? ZH_JS[key] : COPY[lang][key]);
 
-  function applyLang(next, first) {
+  // The Japanese and Korean faces load only once someone picks the language, as the same request as the Chinese face.
+  const FONT_FAMILY = { ja: "Noto+Sans+JP", ko: "Noto+Sans+KR" };
+  function loadFont(l) {
+    if (!(l in FONT_FAMILY) || $(`link[data-font="${l}"]`)) return;
+    const zhFont = $('link[data-font="zh"]');
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = zhFont.href.replace("Noto+Sans+TC", FONT_FAMILY[l]);
+    link.dataset.font = l;
+    zhFont.after(link);
+  }
+
+  function applyLang(next) {
     lang = next;
-    document.documentElement.lang = lang === "en" ? "en" : "zh-Hant-TW";
+    loadFont(lang);
+    document.documentElement.lang = DOC_LANG[lang];
+    const copy = COPY[lang];
     i18nEls.forEach((el, i) => {
       const key = el.dataset.i18n;
-      const html = lang === "en" ? EN[key] : ZH[key + "@" + i];
+      const html = copy ? copy[key] : ZH[key + "@" + i];
       if (html != null && el.innerHTML !== html) el.innerHTML = html;
     });
-    ariaEls.forEach((el, i) => { const v = lang === "en" ? EN[el.dataset.i18nAria] : ariaZh[i]; if (v) el.setAttribute("aria-label", v); });
-    phEls.forEach((el, i) => { const v = lang === "en" ? EN[el.dataset.i18nPh] : phZh[i]; if (v != null) el.setAttribute("placeholder", v); });
-    const t = $("#lang-toggle");
-    t.textContent = lang === "en" ? "中文" : "English";
-    t.setAttribute("lang", lang === "en" ? "zh-Hant-TW" : "en");
+    ariaEls.forEach((el, i) => { const v = copy ? copy[el.dataset.i18nAria] : ariaZh[i]; if (v) el.setAttribute("aria-label", v); });
+    phEls.forEach((el, i) => { const v = copy ? copy[el.dataset.i18nPh] : phZh[i]; if (v != null) el.setAttribute("placeholder", v); });
+    langOpts.forEach((b) => {
+      if (b.dataset.lang !== lang) { b.removeAttribute("aria-current"); return; }
+      b.setAttribute("aria-current", "true");
+      langCur.textContent = b.textContent;
+      langCur.lang = b.lang;
+    });
+    $$("a[data-bench]").forEach((a) => { a.href = new URL(BENCH_FILE[lang], a.href).href; });
     labelTables();
-    if (!first) { renderChecker(); renderScope(); }
+    swapSample();
+    syncMore();
+    renderChecker();
+    renderScope();
   }
   function labelTables() {
     $$(".stack-table").forEach((table) => {
@@ -1700,11 +2428,38 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
       });
     });
   }
-  $("#lang-toggle").addEventListener("click", () => {
-    const next = lang === "en" ? "zh" : "en";
-    store.set("tas-lang", next);
-    applyLang(next);
-  });
+
+  /* ---------------- language switch ---------------- */
+  const langBtn = $("#lang-btn"), langList = $("#lang-list"), langCur = $("#lang-cur");
+  const langOpts = $$("[data-lang]", langList);
+  const hasPopover = "popover" in HTMLElement.prototype;
+  if (hasPopover && !CSS.supports("anchor-name", "--lang")) {
+    // No anchor positioning: pin the open list under its button by hand.
+    const place = () => {
+      const r = langBtn.getBoundingClientRect();
+      langList.style.top = `${r.bottom + scrollY + 4}px`;
+      langList.style.right = `${document.documentElement.clientWidth - r.right}px`;
+    };
+    langList.addEventListener("toggle", (e) => { if (e.newState === "open") place(); });
+    addEventListener("resize", () => { if (langList.matches(":popover-open")) place(); });
+  }
+  if (!hasPopover) {
+    // No popover support: the same markup works as a plain disclosure.
+    langList.removeAttribute("popover");
+    langBtn.removeAttribute("popovertarget");
+    langBtn.setAttribute("aria-controls", "lang-list");
+    const setOpen = (open) => { langList.hidden = !open; langBtn.setAttribute("aria-expanded", open); };
+    setOpen(false);
+    langBtn.addEventListener("click", () => setOpen(langList.hidden));
+    document.addEventListener("click", (e) => { if (!e.target.closest(".lang")) setOpen(false); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !langList.hidden) { setOpen(false); langBtn.focus(); } });
+  }
+  langOpts.forEach((b) => b.addEventListener("click", () => {
+    store.set("tas-lang", b.dataset.lang);
+    applyLang(b.dataset.lang);
+    if (hasPopover) langList.hidePopover(); else { langList.hidden = true; langBtn.setAttribute("aria-expanded", "false"); }
+    langBtn.focus();
+  }));
 
   /* ---------------- copy buttons ---------------- */
   function commandText(id) { const el = document.getElementById(id); return el.textContent.replace(/^\$\s*/, "").trim(); }
@@ -1721,7 +2476,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
         const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
       }
       if (done) {
-        done.textContent = ok ? (lang === "en" ? EN["cta.done"] : "已複製，貼到終端機執行") : (lang === "en" ? "Selected. Press Ctrl+C or ⌘C to copy." : "已選取指令，按 Ctrl+C 或 ⌘C 複製");
+        done.textContent = tr(ok ? "cta.done" : "cta.sel");
         done.classList.add("is-on");
         clearTimeout(done._t); done._t = setTimeout(() => done.classList.remove("is-on"), 2600);
       }
@@ -1762,13 +2517,8 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
   let scope = "global", runner = "bunx";
   function renderScope() {
     $("#dlg-cmd").innerHTML = `<span class="tk">${runner} skills add</span> <span class="tk">Scorpio-meow/Threads-skill</span> <span class="tk">--skill threads-api${scope === "global" ? " -g" : ""}</span>`;
-    const hint = $("#dlg-hint");
-    hint.innerHTML = scope === "global"
-      ? (lang === "en" ? EN["dlg.hintG"] : "加上 -g 裝到個人目錄，這台電腦上的所有專案都能用。")
-      : (lang === "en" ? EN["dlg.hintP"] : "不加 -g 只裝到目前的專案，可以 commit 給團隊一起用。");
-    $("#dlg-runner").textContent = runner === "bunx"
-      ? (lang === "en" ? EN["dlg.npx"] : "沒有 Bun？改用 npx")
-      : (lang === "en" ? EN["dlg.bunx"] : "改回 bunx");
+    $("#dlg-hint").innerHTML = tr(scope === "global" ? "dlg.hintG" : "dlg.hintP");
+    $("#dlg-runner").textContent = tr(runner === "bunx" ? "dlg.npx" : "dlg.bunx");
   }
   bindSeg($(".seg", dlg), (b) => { scope = b.dataset.scope; renderScope(); });
   $("#dlg-runner").addEventListener("click", () => { runner = runner === "bunx" ? "npx" : "bunx"; renderScope(); });
@@ -1932,7 +2682,55 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     ghost_doubt: (a) => `文件只說限時貼文支援文字防雷，${a.list.join("、")} 可能被 API 拒絕，也可能直接被忽略`,
     carousel: () => "輪播要有 2–20 個項目",
   };
-  const pyJson = (o) => "{" + Object.entries(o).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join(", ") + "}";
+  const JA_MSG = {
+    media_type: (a) => `投稿の種類は ${a.allowed.join("、")} のいずれかにしてください`,
+    text_required: () => "テキスト投稿には本文が必要です",
+    text_len: (a) => `本文は ${a.n} と数えられ、上限の 500 を超えています（絵文字は UTF-8 のバイト数で数えます）`,
+    links: () => "重複しないリンクが 5 個を超えています",
+    text_only: (a) => `${a.k} はテキスト（TEXT）投稿でしか使えません`,
+    not_text: (a) => `${a.k} はテキスト投稿には使えません`,
+    needs_url: (a) => `${a.kind} 投稿には ${a.key} が必要です`,
+    alt_text: () => "代替テキストは 1,000 文字までです",
+    topic_tag: () => "トピックタグは 1〜50 文字で、「.」と「&」は使えません",
+    entities: () => "テキストのネタバレ防止は 10 か所までです",
+    poll_ab: () => "アンケートには option_a と option_b が必要です",
+    poll_len: (a) => `アンケートの選択肢 ${a.k} は 1〜25 文字にしてください`,
+    poll_attach: () => "アンケートはテキスト添付（text_attachment）と一緒に使えません",
+    attach_len: () => "テキスト添付は 10,000 文字までです",
+    attach_link: () => "投稿に link_attachment があるときは、テキスト添付に link_attachment_url を付けられません",
+    ghost: (a) => `ゴースト投稿で使えるのはテキストのネタバレ防止だけで、${a.list.join("、")} は付けられません`,
+    ghost_doubt: (a) => `ドキュメントにはゴースト投稿はテキストのネタバレ防止に対応とだけあり、${a.list.join("、")} は API に拒否されるか、そのまま無視される可能性があります`,
+    carousel: () => "カルーセルには 2〜20 個の項目が必要です",
+  };
+  const KO_MSG = {
+    media_type: (a) => `게시물 유형은 ${a.allowed.join(", ")} 중 하나여야 합니다`,
+    text_required: () => "텍스트 게시물에는 본문이 있어야 합니다",
+    text_len: (a) => `본문 길이는 ${a.n}, 상한 500을 넘습니다(이모지는 UTF-8 바이트 수로 계산)`,
+    links: () => "중복되지 않는 링크가 5개를 넘습니다",
+    text_only: (a) => `${a.k} 파라미터는 텍스트(TEXT) 게시물에서만 쓸 수 있습니다`,
+    not_text: (a) => `${a.k} 파라미터는 텍스트 게시물에 쓸 수 없습니다`,
+    needs_url: (a) => `${a.kind} 게시물에는 ${a.key} 값이 있어야 합니다`,
+    alt_text: () => "대체 텍스트는 최대 1,000자입니다",
+    topic_tag: () => "토픽 태그는 1–50자여야 하고 '.'이나 '&'를 쓸 수 없습니다",
+    entities: () => "텍스트 스포일러는 최대 10곳입니다",
+    poll_ab: () => "투표에는 option_a와 option_b가 있어야 합니다",
+    poll_len: (a) => `투표 선택지 ${a.k}는 1–25자여야 합니다`,
+    poll_attach: () => "투표는 텍스트 첨부(text_attachment)와 함께 쓸 수 없습니다",
+    attach_len: () => "텍스트 첨부는 최대 10,000자입니다",
+    attach_link: () => "게시물에 link_attachment가 있으면 텍스트 첨부에 link_attachment_url을 넣을 수 없습니다",
+    ghost: (a) => `고스트 게시물은 텍스트 스포일러만 지원하므로 ${a.list.join(", ")} 기능은 붙일 수 없습니다`,
+    ghost_doubt: (a) => `문서에는 고스트 게시물이 텍스트 스포일러를 지원한다고만 되어 있어, ${a.list.join(", ")} 항목은 API가 거부하거나 그냥 무시할 수 있습니다`,
+    carousel: () => "캐러셀에는 항목이 2–20개 있어야 합니다",
+  };
+  // English shows the client's own message alone; the other languages add a translation above it.
+  const MSG = { zh: ZH_MSG, ja: JA_MSG, ko: KO_MSG };
+  const CK_UI = {
+    zh: { bad: (n) => `${n} 個錯誤，publish 會在呼叫 API 前停下`, warn: (n) => `可以送出，但有 ${n} 個提醒`, ok: "檢查通過，可以送出", child: (i) => `第 ${i} 個項目：`, carousel: (n) => `# 先建立 ${n} 個項目 container（is_carousel_item=true），再建立輪播` },
+    en: { bad: (n) => `${n} error${n > 1 ? "s" : ""}: publish stops before calling the API`, warn: (n) => `Ready to send, with ${n} warning${n > 1 ? "s" : ""}`, ok: "Passes the check, ready to send", child: () => "", carousel: (n) => `# create ${n} item containers (is_carousel_item=true) first, then the carousel` },
+    ja: { bad: (n) => `エラー ${n} 件：publish は API を呼び出す前に止まります`, warn: (n) => `送信できますが、注意点が ${n} 件あります`, ok: "チェックを通過しました。送信できます", child: (i) => `${i} 番目の項目：`, carousel: (n) => `# 先に項目の container を ${n} 個作成し（is_carousel_item=true）、そのあとカルーセルを作成` },
+    ko: { bad: (n) => `오류 ${n}개: publish가 API를 호출하기 전에 멈춥니다`, warn: (n) => `보낼 수 있지만 주의할 점이 ${n}개 있습니다`, ok: "검사를 통과했습니다. 보낼 수 있습니다", child: (i) => `${i}번째 항목: `, carousel: (n) => `# 항목 container ${n}개를 먼저 만든 뒤(is_carousel_item=true) 캐러셀을 만듭니다` },
+  };
+  const pyJson =(o) => "{" + Object.entries(o).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join(", ") + "}";
   const enc = (v) => (typeof v === "boolean" ? String(v) : (v && typeof v === "object" && !Array.isArray(v)) ? pyJson(v) : Array.isArray(v) ? v.join(",") : String(v));
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
@@ -1940,6 +2738,19 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     text: $("#ck-text"), a: $("#ck-opt-a"), b: $("#ck-opt-b"), type: $("#ck-type"), poll: $("#ck-poll"), ghost: $("#ck-ghost"),
     link: $("#ck-link"), attach: $("#ck-attach"), reply: $("#ck-reply"), spoiler: $("#ck-spoiler"), tag: $("#ck-tag"), items: $("#ck-items"),
   };
+  // The sample post in each language (Chinese comes from the markup), with the text_attachment body the switch adds.
+  const SAMPLE = {
+    zh: { text: ck.text.defaultValue, a: ck.a.defaultValue, b: ck.b.defaultValue, note: "活動辦法：全館手沖咖啡豆 9 折，數量有限，售完為止。" },
+    en: { text: "Weekend only! 10% off our new pour-over coffee beans ☕️ Details here https://example.com/sale", a: "Light roast", b: "Dark roast", note: "Terms: 10% off all pour-over coffee beans while stocks last." }, // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    ja: { text: "週末限定！新入荷のドリップ用コーヒー豆が 10% オフ ☕️ 詳細はこちら https://example.com/sale", a: "浅煎り", b: "深煎り", note: "キャンペーン詳細：ドリップ用コーヒー豆が全品 10% オフ。数量限定で、なくなり次第終了します。" }, // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+    ko: { text: "주말 한정! 신상 핸드드립 원두 10% 할인 ☕️ 자세히 보기 https://example.com/sale", a: "라이트 로스트", b: "다크 로스트", note: "이벤트 안내: 핸드드립 원두 전 품목 10% 할인, 수량 한정으로 소진 시 종료됩니다." }, // taste-skill-ignore: the emoji is quoted post text and the API's counting rule
+  };
+  // Follow the language only while a field still holds one of the samples, so a visitor's own text is never replaced.
+  function swapSample() {
+    for (const k of ["text", "a", "b"]) {
+      if (Object.values(SAMPLE).some((s) => s[k] === ck[k].value)) ck[k].value = SAMPLE[lang][k];
+    }
+  }
   function buildSpec() {
     const t = ck.type.value;
     const spec = { media_type: t };
@@ -1953,7 +2764,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     if (ck.poll.checked) spec.poll_attachment = { option_a: ck.a.value, option_b: ck.b.value };
     if (ck.ghost.checked) spec.is_ghost_post = true;
     if (ck.link.checked) spec.link_attachment = "https://example.com/sale";
-    if (ck.attach.checked) spec.text_attachment = { plaintext: "活動辦法：全館手沖咖啡豆 9 折，數量有限，售完為止。" };
+    if (ck.attach.checked) spec.text_attachment = { plaintext: SAMPLE[lang].note };
     if (ck.reply.checked) spec.reply_to_id = "<media-id>";
     if (ck.spoiler.checked) spec.is_spoiler_media = true;
     if (ck.tag.value !== "") spec.topic_tag = ck.tag.value;
@@ -1961,11 +2772,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
   }
   function paramsText(spec) {
     const lines = [];
-    const zh = lang !== "en";
-    if (spec.media_type === "CAROUSEL") {
-      const n = (spec.children || []).length;
-      lines.push(zh ? `# 先建立 ${n} 個項目 container（is_carousel_item=true），再建立輪播` : `# create ${n} item containers (is_carousel_item=true) first, then the carousel`);
-    }
+    if (spec.media_type === "CAROUSEL") lines.push(CK_UI[lang].carousel((spec.children || []).length));
     for (const [k, v] of Object.entries(spec)) {
       if (k === "children") { lines.push(`children=${v.map((_, i) => `<item-${i + 1}-id>`).join(",")}`); continue; }
       lines.push(`${k}=${enc(v)}`);
@@ -1987,14 +2794,14 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
     $("#ck-link-m").classList.toggle("over", nl > 5);
     $("#ck-len-bar").style.setProperty("--p", Math.min(1, tl / 500));
     $("#ck-link-bar").style.setProperty("--p", Math.min(1, nl / 5));
-    const zh = lang !== "en";
+    const ui = CK_UI[lang], msg = MSG[lang];
     let status, cls;
-    if (errors.length) { cls = "is-bad"; status = zh ? `${errors.length} 個錯誤，publish 會在呼叫 API 前停下` : `${errors.length} error${errors.length > 1 ? "s" : ""}: publish stops before calling the API`; }
-    else if (warnings.length) { cls = "is-warn"; status = zh ? `可以送出，但有 ${warnings.length} 個提醒` : `Ready to send, with ${warnings.length} warning${warnings.length > 1 ? "s" : ""}`; }
-    else { cls = "is-ok"; status = zh ? "檢查通過，可以送出" : "Passes the check, ready to send"; }
+    if (errors.length) { cls = "is-bad"; status = ui.bad(errors.length); }
+    else if (warnings.length) { cls = "is-warn"; status = ui.warn(warnings.length); }
+    else { cls = "is-ok"; status = ui.ok; }
     const item = (e, kind) => {
-      const pre = e.child !== undefined ? (zh ? `第 ${e.child + 1} 個項目：` : "") : "";
-      const human = zh && ZH_MSG[e.id] ? `<span>${esc(pre + ZH_MSG[e.id](e.a))}</span>` : "";
+      const pre = e.child !== undefined ? ui.child(e.child + 1) : "";
+      const human = msg ? `<span>${esc(pre + msg[e.id](e.a))}</span>` : "";
       return `<li class="${kind}">${human}<code>${esc(e.msg)}</code></li>`;
     };
     const out = `<p class="ck-status ${cls}"><span class="dot" aria-hidden="true"></span><span>${esc(status)}</span></p>` +
@@ -2005,19 +2812,16 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
   let lastOut = "";
   ["input", "change"].forEach((ev) => $(".ck").addEventListener(ev, (e) => { if (e.target.closest(".ck-side, .ck-main")) renderChecker(); }));
   const moreBtn = $("#ck-more");
+  const syncMore = () => { moreBtn.textContent = tr($("#ck-side").classList.contains("show-more") ? "ck.less" : "ck.more"); };
   moreBtn.addEventListener("click", () => {
-    const side = $("#ck-side");
-    const open = side.classList.toggle("show-more");
-    moreBtn.setAttribute("aria-expanded", open);
-    moreBtn.textContent = open ? (lang === "en" ? "Show fewer options" : "收起其他選項") : (lang === "en" ? EN["ck.more"] : "顯示其他 5 個選項");
+    moreBtn.setAttribute("aria-expanded", $("#ck-side").classList.toggle("show-more"));
+    syncMore();
   });
 
   /* ---------------- start ---------------- */
   const saved = store.get("tas-lang");
-  const initial = saved || ((navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en");
-  applyLang(initial, true);
-  renderChecker();
-  renderScope();
+  const browserLang = (navigator.language || "").toLowerCase().slice(0, 2);
+  applyLang(Object.hasOwn(DOC_LANG, saved) ? saved : Object.hasOwn(DOC_LANG, browserLang) ? browserLang : "en");
 })();
 </script>
 </body>
