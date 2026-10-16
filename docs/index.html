@@ -7,6 +7,26 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="讓 AI 助理熟悉 Meta Threads API 的開源 Agent Skill：寫串接程式、代你發文、嵌入貼文，都照官方文件的規則來。">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1211" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/favicon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="canonical" href="https://scorpio-meow.github.io/Threads-skill/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Threads API Skill">
+<meta property="og:title" content="Threads API Skill">
+<meta property="og:description" content="把 Threads API 的眉角寫進你的 AI 助理：開源 Agent Skill，寫串接程式、代你發文、嵌入貼文，都照 Meta 官方文件的規則來。">
+<meta property="og:url" content="https://scorpio-meow.github.io/Threads-skill/">
+<meta property="og:image" content="https://scorpio-meow.github.io/Threads-skill/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="天蠍喵喵的黑貓 LOGO，旁邊寫著「把 Threads API 的眉角寫進你的 AI 助理」">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="ja_JP">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://api.fontshare.com">
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@400,500&amp;display=swap" data-font="switzer">
@@ -196,7 +216,11 @@ button { cursor: pointer; }
 
 /* ---------- header ---------- */
 .top .wrap { align-items: center; padding-top: clamp(24px, 4vh, 44px); }
-.wordmark { grid-column: 4 / span 4; font-weight: 500; font-size: var(--step-small); letter-spacing: 0.01em; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; justify-self: start; }
+.wordmark { grid-column: 4 / span 4; font-weight: 500; font-size: var(--step-small); letter-spacing: 0.01em; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; gap: 10px; justify-self: start; }
+.mark { display: block; flex: none; }
+.wordmark .mark { width: 34px; height: 34px; transition: transform var(--t-ui) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .wordmark:hover .mark { transform: rotate(-6deg) scale(1.06); } }
+.foot-row .mark { width: 24px; height: 24px; }
 .top-links { grid-column: 8 / -1; justify-self: end; display: flex; gap: clamp(16px, 2vw, 28px); align-items: center; font-size: var(--step-small); }
 .top-links a, .lang-btn { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
 @media (hover: hover) and (pointer: fine) { .top-links a:hover, .lang-btn:hover { text-decoration: underline; text-decoration-thickness: 0.07em; text-underline-offset: 0.24em; } }
@@ -207,14 +231,14 @@ html:not(.js) .lang { display: none; }
 .lang-btn svg { width: 10px; height: 6px; flex: none; transition: transform var(--t-ui) var(--ease-out); }
 .lang:has(.lang-list:popover-open) .lang-btn svg { transform: rotate(180deg); }
 .lang-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
-.lang-list { position: absolute; z-index: 30; inset: auto; top: 100%; right: 0; margin: 0; padding: 6px; min-width: 176px; overflow: visible; background: var(--bg); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 1px 2px rgb(16 32 24 / 0.06), 0 18px 40px -14px rgb(16 32 24 / 0.26); }
+.lang-list { position: absolute; z-index: 30; inset: auto; top: 100%; right: 0; margin: 0; padding: 6px; min-width: 176px; overflow: visible; background: var(--bg); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 1px 2px rgb(16 32 24 / 0.06), 0 18px 40px -14px rgb(16 32 24 / 0.26); } /* taste-skill-ignore: the open popover menu floats above the page */
 @supports (anchor-name: --lang) {
   .lang-list { position-anchor: --lang; top: anchor(bottom); right: anchor(right); margin-top: 4px; }
 }
 .lang-list li + li { margin-top: 2px; }
 .lang-list button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 18px; min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--radius); background: none; font-size: var(--step-small); text-align: left; white-space: nowrap; transition: background-color var(--t-hover) ease; }
 .lang-list button[aria-current="true"] { font-weight: 500; }
-.lang-list button[aria-current="true"]::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-ink) 22%, transparent); }
+.lang-list button[aria-current="true"]::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-ink) 22%, transparent); } /* taste-skill-ignore: edge for the mint dot inside the menu */
 @media (hover: hover) and (pointer: fine) { .lang-list button:hover { background: var(--surface); } }
 
 /* ---------- hero ---------- */
@@ -550,6 +574,8 @@ html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
 .foot-row nav a { color: var(--ink); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
 @media (hover: hover) and (pointer: fine) { .foot-row nav a:hover { text-decoration: underline; text-underline-offset: 0.24em; } }
 .foot-row p:last-child { text-align: right; }
+.foot-row .by { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.foot-row .by span { align-self: baseline; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 1279px) {
@@ -615,6 +641,7 @@ html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
   .foot-row { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .foot-row nav { justify-content: flex-start; }
   .foot-row p:last-child { text-align: left; }
+  .foot-row .by { justify-content: flex-start; }
   [data-ui] .r .act, [data-ui] .r .tag { grid-column: 2; justify-self: start; }
   [data-ui] .r.nest { margin-left: 14px; }
   [data-ui] .tl-axis span:nth-child(2) { white-space: normal; }
@@ -655,7 +682,7 @@ html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
 
 <header class="top">
   <div class="wrap grid">
-    <a class="wordmark" href="#top">Threads API Skill</a>
+    <a class="wordmark" href="#top"><img class="mark" src="assets/logo.webp" width="34" height="34" alt="">Threads API Skill</a>
     <nav class="top-links" aria-label="站外連結與語言" data-i18n-aria="nav.aria">
       <a href="#install" data-i18n="nav.install">安裝</a>
       <a href="https://github.com/Scorpio-meow/Threads-skill">GitHub</a>
@@ -1377,7 +1404,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
       <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README.ja.md" lang="ja">日本語</a>
       <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README.ko.md" lang="ko">한국어</a>
     </nav>
-    <p>2026 · Scorpio-meow</p>
+    <p class="by"><img class="mark" src="assets/logo.webp" width="24" height="24" alt=""><span>2026 · Scorpio-meow</span></p>
   </div>
 </footer>
 
