@@ -4,7 +4,19 @@
 
 이 프로젝트의 주요 변경 사항을 여기에 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 참고했습니다. 버전 번호는 `threads-api/SKILL.md`의 `metadata.version`을 따르며, Agensi에서도 같은 번호를 씁니다. 1.0 이전 변경 사항은 날짜별로 정리합니다.
 
-## 미출시
+## 1.3 - 2026-10-19
+
+### 변경
+
+- SKILL.md 8절의 `debug_token` 설명을 Meta changelog의 2026-08-18 항목에 맞춰 갱신: `access_token`에는 Threads 테스터의 토큰 외에 앱 액세스 토큰(`TH|<APP_ID>|<APP_SECRET>`)도 쓸 수 있으며, 어느 쪽이든 `input_token`과 같은 앱의 토큰이어야 함. 다른 앱의 토큰을 넘겼을 때의 오류 메시지도 추가. 12절 `code 190` 행에 8절 참조를 넣고, 문서 스냅샷 날짜를 2026-08-18로 갱신(SKILL.md, 4개 언어 README, `docs/llms.txt`, 소개 사이트). `evals/benchmark.json`에서 1–3라운드 2번 문제의 스킬 있음 버전은 모두, 계정이 Threads 테스터가 아니면 `debug_token`으로 90일 권한 승인을 확인하는 단계를 건너뛴다고 적었음. 갱신한 뒤 아직 평가를 다시 실행하지 않음.
+- `threads-api/SKILL.md`의 `metadata.version`을 1.3으로 올림.
+- 설치 안내:
+  - 4개 언어 README의 도구 표에 `bunx skills`의 `-a` 값을 넣고 Google Antigravity, Cline, Kiro, JetBrains Junie, Roo Code를 추가. Windsurf는 Devin Desktop으로 바꾸고 새 경로로 갱신.
+  - README에 "그 밖의 설치 방법"(GitHub CLI의 `gh skill`, Codex, Copilot CLI, Gemini CLI, Kiro), "ChatGPT", "업데이트와 삭제" 세 절을 추가.
+  - Claude 앱 안내는 대상을 Pro, Max 플랜으로 고치고, 운영체제별 ZIP 압축 방법과 Settings > Capabilities에서 업로드하는 위치도 추가.
+  - 사이트의 도구 목록, "수동으로 설치하려면?"·"Claude 앱에서는 어떻게 쓰나요?", `docs/llms.txt`, 사용 문제 issue 양식도 함께 갱신.
+
+## 1.2 - 2026-10-18
 
 ### 추가
 

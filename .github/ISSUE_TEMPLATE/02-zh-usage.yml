@@ -20,12 +20,18 @@ body:
       options:
         - "Claude Code"
         - "Claude 應用程式（網頁版／桌面版）"
+        - "ChatGPT"
         - "OpenAI Codex"
-        - "Gemini CLI"
         - "GitHub Copilot"
         - "Cursor"
-        - "Windsurf"
+        - "Gemini CLI"
+        - "Google Antigravity"
+        - "Devin Desktop（原 Windsurf）"
         - "OpenCode"
+        - "Cline"
+        - "Kiro"
+        - "JetBrains Junie"
+        - "Roo Code"
         - "其他"
     validations:
       required: true
@@ -42,8 +48,12 @@ body:
       label: "安裝方式"
       options:
         - "skills 指令"
+        - "GitHub CLI（gh skill）"
+        - "工具內建的安裝方式（Codex、Gemini CLI、Copilot CLI、Kiro）"
         - "手動複製資料夾"
         - "上傳 ZIP（Claude 應用程式）"
+        - "上傳 ZIP（ChatGPT）"
+        - "Agensi"
     validations:
       required: true
   - type: textarea

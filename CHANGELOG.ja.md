@@ -4,7 +4,19 @@
 
 このプロジェクトの主な変更をここに記録します。形式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) を参考にしています。バージョン番号は `threads-api/SKILL.md` の `metadata.version` に合わせ、Agensi でも同じ番号を使います。1.0 より前の変更は日付ごとにまとめています。
 
-## 未リリース
+## 1.3 - 2026-10-19
+
+### 変更
+
+- SKILL.md 第 8 節の `debug_token` の説明を、Meta の changelog の 2026-08-18 の項目に合わせて更新：`access_token` には Threads テスターのトークンのほか、アプリアクセストークン（`TH|<APP_ID>|<APP_SECRET>`）も使える。どちらの場合も `input_token` と同じアプリのものでなければならず、別のアプリのトークンを渡したときのエラーメッセージも追記。第 12 節の `code 190` の行に第 8 節への参照を加え、ドキュメントのスナップショット日付を 2026-08-18 に更新（SKILL.md、4 言語の README、`docs/llms.txt`、紹介サイト）。`evals/benchmark.json` では、ラウンド 1–3 の問題 2 のスキルあり版がいずれも、アカウントが Threads テスターでなければ `debug_token` による 90 日間の権限の認可のチェックを省くと書いていました。更新後はまだ評価を再実行していません。
+- `threads-api/SKILL.md` の `metadata.version` を 1.3 に変更。
+- インストール手順：
+  - 4 言語の README にあるツールの表に `bunx skills` の `-a` の値を載せ、Google Antigravity、Cline、Kiro、JetBrains Junie、Roo Code を追加。Windsurf は Devin Desktop に改め、新しいパスに更新。
+  - README に「そのほかのインストール方法」（GitHub CLI の `gh skill`、Codex、Copilot CLI、Gemini CLI、Kiro）、「ChatGPT」、「更新と削除」の 3 節を追加。
+  - Claude アプリの手順は対象を Pro、Max プランに改め、OS ごとの ZIP の作り方と、Settings > Capabilities からアップロードする場所も追記。
+  - サイトのツール一覧、「手動でインストールするには？」「Claude アプリではどう使う？」、`docs/llms.txt`、使い方に関する issue フォームも合わせて更新。
+
+## 1.2 - 2026-10-18
 
 ### 追加
 

@@ -20,12 +20,18 @@ body:
       options:
         - "Claude Code"
         - "Claude apps (web / desktop)"
+        - "ChatGPT"
         - "OpenAI Codex"
-        - "Gemini CLI"
         - "GitHub Copilot"
         - "Cursor"
-        - "Windsurf"
+        - "Gemini CLI"
+        - "Google Antigravity"
+        - "Devin Desktop (formerly Windsurf)"
         - "OpenCode"
+        - "Cline"
+        - "Kiro"
+        - "JetBrains Junie"
+        - "Roo Code"
         - "Other"
     validations:
       required: true
@@ -42,8 +48,12 @@ body:
       label: "Installation method"
       options:
         - "skills command"
+        - "GitHub CLI (gh skill)"
+        - "A tool's own installer (Codex, Gemini CLI, Copilot CLI, Kiro)"
         - "Copied the folder manually"
         - "Uploaded a ZIP (Claude apps)"
+        - "Uploaded a ZIP (ChatGPT)"
+        - "Agensi"
     validations:
       required: true
   - type: textarea

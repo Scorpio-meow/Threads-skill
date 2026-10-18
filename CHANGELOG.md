@@ -4,7 +4,19 @@
 
 本專案的重要變動都記在這裡，格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。版本號跟著 `threads-api/SKILL.md` 的 `metadata.version` 走，Agensi 上的版本也用同一個號碼；1.0 之前的變動依日期記錄。
 
-## 未發布
+## 1.3 - 2026-10-19
+
+### 變更
+
+- SKILL.md 第 8 節的 `debug_token` 說明同步 Meta changelog 2026-08-18 的條目：`access_token` 除了 Threads 測試人員的 token，也可以用 App token（`TH|<APP_ID>|<APP_SECRET>`），不論哪一種都必須和 `input_token` 來自同一個 App；也補上 token 來自其他 App 時的錯誤訊息。第 12 節 `code 190` 那列加上指向第 8 節的參照，文件快照日期改為 2026-08-18（SKILL.md、README 四語版、`docs/llms.txt`、介紹網站）。`evals/benchmark.json` 裡，第 1–3 輪第 2 題有技能的版本都提到帳號不是測試人員時，會略過用 `debug_token` 檢查 90 天權限授權的步驟；加入後還沒重跑評測。
+- `threads-api/SKILL.md` 的 `metadata.version` 調高為 1.3。
+- 安裝說明：
+  - README 四語版的工具表格加上 `bunx skills` 的 `-a` 參數，新增 Google Antigravity、Cline、Kiro、JetBrains Junie、Roo Code；Windsurf 改為 Devin Desktop 並更新路徑。
+  - README 新增「其他安裝方式」（GitHub CLI 的 `gh skill`、Codex、Copilot CLI、Gemini CLI、Kiro）、「ChatGPT」和「更新與移除」三節。
+  - Claude 應用程式的步驟改為 Pro、Max 方案，補上各系統壓縮 ZIP 的方法，以及從 Settings > Capabilities 上傳的位置。
+  - 介紹網站的工具列表、「要怎麼手動安裝？」「在 Claude 應用程式怎麼用？」、`docs/llms.txt` 和「使用問題」issue 表單一併更新。
+
+## 1.2 - 2026-10-18
 
 ### 新增
 

@@ -4,8 +4,8 @@
 
 A skill that teaches AI assistants the Meta Threads API: it helps you write, review, and debug integration code, can also use your token to post, reply, and pull insights directly, and helps you embed Threads posts on your website.
 
-- Built in the [Agent Skills](https://agentskills.io) format (one folder plus a `SKILL.md`), so it installs in Claude Code, the Claude apps, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, Windsurf, and OpenCode.
-- Distilled from Meta's official documentation, covering the changelog through 2026-08-12. The embedding section also draws on the live embed.js code and tests run in October 2026.
+- Built in the [Agent Skills](https://agentskills.io) format (one folder plus a `SKILL.md`), so it installs in more than a dozen tools, including Claude Code, the Claude apps, ChatGPT, OpenAI Codex, GitHub Copilot, Cursor, Gemini CLI, Devin Desktop (formerly Windsurf) and OpenCode.
+- Distilled from Meta's official documentation, covering the changelog through 2026-08-18. The embedding section also draws on the live embed.js code and tests run in October 2026.
 - The skill itself is written in English; the assistant replies in whatever language you use. The examples below use Claude.
 - Not an official Meta project.
 - Project site: <https://scorpio-meow.github.io/Threads-skill/>, where you can try “Check before you send” in your browser.
@@ -19,14 +19,14 @@ bunx skills add Scorpio-meow/Threads-skill --skill threads-api -g
 ```
 
 - `-g` installs to your user directory (available in every project); drop `-g` to install into the current project only.
-- To install for specific tools only, add `-a`, e.g. `-a claude-code -a codex`.
-- No Bun? Swap `bunx` for `npx`.
+- To install for specific tools only, add `-a`, e.g. `-a claude-code -a codex`; the value for each tool is in the [table in the next section](#skill-folders-by-tool).
+- No [Bun](https://bun.sh)? Swap `bunx` for `npx`.
 
 Once installed, the skill kicks in automatically when you ask anything about the Threads API, for example:
 
 > My keyword_search only returns my own posts. What am I doing wrong?
 
-Manual installation for each tool is covered in the next section.
+Manual installation and the other ways to install are covered in the next section.
 
 ## Installation
 
@@ -34,24 +34,34 @@ Manual installation for each tool is covered in the next section.
 
 Manual installation means copying the `threads-api` folder into the skill folder your tool reads, so that `SKILL.md` ends up at `<skill folder>/threads-api/SKILL.md`. The user folder applies to every project on this machine; the project folder lives under the project root and can be committed so your team shares it.
 
-| Tool | User folder | Project folder | Invoke manually |
-|---|---|---|---|
-| Claude Code | `~/.claude/skills/` | `.claude/skills/` | `/threads-api` |
-| OpenAI Codex (CLI, IDE extension) | `~/.agents/skills/` | `.agents/skills/` | `/skills` or `$threads-api` |
-| Gemini CLI | `~/.gemini/skills/` or `~/.agents/skills/` | `.gemini/skills/` or `.agents/skills/` | `/skills list` to check it loaded |
-| GitHub Copilot (VS Code, Copilot CLI) | `~/.copilot/skills/` or `~/.agents/skills/` | `.github/skills/` or `.agents/skills/` | `/threads-api` |
-| Cursor | `~/.cursor/skills/` or `~/.agents/skills/` | `.cursor/skills/` or `.agents/skills/` | Type `/` in Agent chat and pick it |
-| Windsurf | `~/.codeium/windsurf/skills/` | `.windsurf/skills/` | `@threads-api` |
-| OpenCode | `~/.config/opencode/skills/` | `.opencode/skills/` or `.agents/skills/` | — |
+| Tool | `-a` value | User folder | Project folder | Invoke manually |
+|---|---|---|---|---|
+| Claude Code | `claude-code` | `~/.claude/skills/` | `.claude/skills/` | `/threads-api` |
+| OpenAI Codex (CLI, IDE extension, ChatGPT desktop app) | `codex` | `~/.agents/skills/` | `.agents/skills/` | `/skills` or `$threads-api` |
+| GitHub Copilot (VS Code, Copilot CLI, JetBrains) | `github-copilot` | `~/.copilot/skills/` | `.github/skills/` | `/threads-api` |
+| Cursor | `cursor` | `~/.cursor/skills/` | `.cursor/skills/` | Type `/` in Agent chat and pick it |
+| Gemini CLI | `gemini-cli` | `~/.gemini/skills/` | `.gemini/skills/` | `/skills list` to check it loaded |
+| Google Antigravity | `antigravity` | `~/.gemini/config/skills/` | `.agents/skills/` | — |
+| Devin Desktop (formerly Windsurf) | `devin` | `~/.config/devin/skills/` | `.devin/skills/` | `@threads-api` |
+| OpenCode | `opencode` | `~/.config/opencode/skills/` | `.opencode/skills/` | — |
+| Cline | `cline` | `~/.cline/skills/` | `.cline/skills/` | `/threads-api` |
+| Kiro | `kiro-cli` | `~/.kiro/skills/` | `.kiro/skills/` | Type `/` and pick it |
+| JetBrains Junie | `junie` | `~/.junie/skills/` | `.junie/skills/` | `/threads-api` or `$threads-api` |
+| Roo Code | `roo` | `~/.roo/skills/` | `.roo/skills/` | — |
 
-On Windows, `~` is your user folder (`%USERPROFILE%`). Every tool uses the skill automatically when the conversation calls for it; the "Invoke manually" column just shows how to request it explicitly. If you use Codex, Gemini CLI, Copilot, and Cursor together, a single copy in `~/.agents/skills/` is shared by all of them.
+On Windows, `~` is your user folder (`%USERPROFILE%`). Every tool uses the skill automatically when the conversation calls for it; the "Invoke manually" column just shows how to request it explicitly.
+
+- Codex, Copilot, Cursor, Gemini CLI, OpenCode, Devin Desktop, Junie and Roo Code also read `~/.agents/skills/`, so if you use several of them, one copy there serves them all. Claude Code reads only `~/.claude/skills/`.
+- `bunx skills` keeps one copy in the shared `.agents/skills/` folder (`~/.agents/skills/` with `-g`) and links it for the other tools. If a tool doesn't see the skill afterwards, install it by hand into the folder from the table.
+- Tools not in the table (Amp, Goose, Kilo Code, Trae, Qwen Code and more) can use `bunx skills` too; see the [skills README](https://github.com/vercel-labs/skills) for their `-a` values.
+- Devin Desktop still reads the Windsurf-era `~/.codeium/windsurf/skills/` and `.windsurf/skills/`.
 
 The example below copies to `~/.agents/skills/`. For other tools, set `TARGET` to the path from the table above.
 
 macOS/Linux:
 
 ```bash
-git clone https://github.com/Scorpio-meow/Threads-skill.git
+git clone --depth 1 https://github.com/Scorpio-meow/Threads-skill.git
 TARGET=~/.agents/skills
 mkdir -p "$TARGET"
 cp -r Threads-skill/threads-api "$TARGET/"
@@ -60,21 +70,67 @@ cp -r Threads-skill/threads-api "$TARGET/"
 Windows PowerShell:
 
 ```powershell
-git clone https://github.com/Scorpio-meow/Threads-skill.git
+git clone --depth 1 https://github.com/Scorpio-meow/Threads-skill.git
 $TARGET = "$HOME\.agents\skills"
 New-Item -ItemType Directory -Force $TARGET | Out-Null
 Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
 ```
 
-To update later, run `git pull` in the `Threads-skill` folder and copy again; if you installed with the `skills` command, run `bunx skills update`. If your tool doesn't pick up the new skill, restart it.
+If your tool doesn't pick up the new skill, restart it.
+
+### Other ways to install
+
+Some tools have their own install commands:
+
+- **GitHub CLI** (2.90 or later; `gh skill` is in public preview). `--agent` takes the same values as `-a` in the table.
+
+  ```bash
+  gh skill install Scorpio-meow/Threads-skill threads-api --agent claude-code --scope user
+  ```
+
+- **OpenAI Codex**: in Codex, enter
+
+  ```text
+  $skill-installer install https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api
+  ```
+
+  Codex runs commands in a sandbox with network access off by default, so it asks before operate mode reaches the Threads API. To always allow it, add this to `~/.codex/config.toml`:
+
+  ```toml
+  [sandbox_workspace_write]
+  network_access = true
+  ```
+
+- **GitHub Copilot CLI**: after cloning, run `copilot skill add Threads-skill/threads-api`; if you add it mid-session, load it with `/skills reload`. Put it in a repository's `.github/skills/` and commit it, and the Copilot cloud agent uses it too.
+- **Gemini CLI**: installs for your user by default; add `--scope workspace` to install into the current project only.
+
+  ```bash
+  gemini skills install https://github.com/Scorpio-meow/Threads-skill.git --path threads-api
+  ```
+
+- **Kiro**: in the Kiro panel, open **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub**, and paste a URL that points to the skill's subfolder: `https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`.
+- **Devin Desktop**: manage skills from **⋯** → **Skills** at the top right of the Cascade panel.
+- **Cline**: new skills are on by default; toggle them in the **Skills** tab at the bottom of the Cline panel.
 
 ### Claude apps (web/desktop)
 
-1. Turn on code execution: on Free, Pro, and Max plans, enable "Code execution and file creation" under **Settings > Capabilities**; on Team and Enterprise plans, an organization owner must enable "Code execution and file creation" and "Skills" in the organization settings.
+1. Turn on code execution: on Pro and Max plans, enable "Code execution and file creation" under **Settings > Capabilities**; on Team and Enterprise plans, an organization owner must enable "Code execution and file creation" and "Skills" in the organization settings.
 2. Zip the `threads-api` folder **on its own**, so the top level of the ZIP is the `threads-api/` folder. GitHub's "Download ZIP" gives you the whole repo (with `Threads-skill-main/` at the top level), which can't be uploaded as is.
-3. Go to **Customize > Skills**, click **+** → **Create skill** → **Upload a skill**, and upload the ZIP.
+   - macOS/Linux: in the `Threads-skill` folder, run `zip -r ../threads-api.zip threads-api -x '*.DS_Store'`.
+   - Windows: in File Explorer, right-click the `threads-api` folder → **Compress to ZIP file** (on Windows 10, **Send to → Compressed (zipped) folder**).
+3. Go to **Customize > Skills**, click **+** → **Create skill** → **Upload a skill**, and upload the ZIP. If your UI shows **Settings > Capabilities** instead, click **Upload skill** in its Skills section.
 
-If the UI has changed, follow the [official guide](https://support.claude.com/en/articles/12512180-using-skills-in-claude).
+Uploaded skills are private to your account; to share one with your whole organization, an owner has to provision it. The apps' code environment can't reach the Threads API by default, so run operate mode on your own machine. If the UI has changed, follow the [official guide](https://support.claude.com/en/articles/12512180-using-skills-in-claude).
+
+### ChatGPT
+
+According to the [official help article](https://help.openai.com/en/articles/20001066-skills-in-chatgpt), skills in ChatGPT are available to eligible Business, Enterprise, Healthcare and Edu users, and your workspace settings decide whether you can upload one.
+
+1. Zip the `threads-api` folder as described in the previous section.
+2. In the sidebar, open **Plugins** → the **Skills** tab → **Create** → **Upload from your computer**, and upload the ZIP.
+3. Type `@` in a chat to pick `threads-api`, or let ChatGPT decide when to use it.
+
+Skills don't sync between ChatGPT and Codex yet, so install it in Codex separately.
 
 ### Agensi
 
@@ -82,9 +138,19 @@ The skill is also listed for free on [Agensi](https://agensi.io/skills/threads-a
 
 Updates to this repository reach Agensi only after Agensi approves them, so this repository always has the latest content.
 
+### Updating and removing
+
+| Installed with | Update | Remove |
+|---|---|---|
+| `bunx skills` | `bunx skills update threads-api` | `bunx skills remove threads-api` |
+| `gh skill` | `gh skill update` | Delete the `threads-api` folder |
+| Gemini CLI | Uninstall, then install again | `gemini skills uninstall threads-api` |
+| Manual copy | Run `git pull` in the `Threads-skill` folder, then copy again | Delete the `threads-api` folder |
+| Claude apps, ChatGPT | Delete the old one, then upload the new ZIP | Delete it on the Skills page |
+
 ### Official docs for each tool
 
-If paths or UIs have changed, defer to the official docs: [Claude Code](https://code.claude.com/docs/en/skills)・[OpenAI Codex](https://learn.chatgpt.com/docs/build-skills)・[Gemini CLI](https://geminicli.com/docs/cli/skills/)・[GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)・[VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)・[Cursor](https://cursor.com/docs/skills)・[Windsurf](https://docs.devin.ai/desktop/cascade/skills)・[OpenCode](https://opencode.ai/docs/skills)
+If paths or UIs have changed, defer to the official docs: [Claude Code](https://code.claude.com/docs/en/skills)・[Claude apps](https://support.claude.com/en/articles/12512180-using-skills-in-claude)・[ChatGPT](https://help.openai.com/en/articles/20001066-skills-in-chatgpt)・[OpenAI Codex](https://learn.chatgpt.com/docs/build-skills)・[GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)・[VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)・[Cursor](https://cursor.com/docs/skills)・[Gemini CLI](https://geminicli.com/docs/cli/skills/)・[Google Antigravity](https://antigravity.google/docs/skills)・[Devin Desktop](https://docs.devin.ai/desktop/cascade/skills)・[OpenCode](https://opencode.ai/docs/skills)・[Cline](https://docs.cline.bot/customization/skills)・[Kiro](https://kiro.dev/docs/skills/)・[JetBrains Junie](https://junie.jetbrains.com/docs/agent-skills.html)・[Roo Code](https://roocodeinc.github.io/Roo-Code/features/skills/)・[skills](https://github.com/vercel-labs/skills)・[gh skill](https://cli.github.com/manual/gh_skill_install)
 
 ## Features
 
@@ -258,7 +324,7 @@ For each round's eval setup, time and token usage, and the reason behind every l
 - The Claude apps can't reach the Threads API by default, so Operate mode has to run on your own machine. Operate mode also requires a tool that can run terminal commands.
 - The official docs contradict themselves or are unclear in a few places, such as whether location search uses `q` or `query`, whether the API errors out or silently ignores unsupported features on a ghost post, and whether webhooks require App Review. The skill says so plainly when these come up instead of guessing.
 - embed.js's loading behavior (at most 3 embeds at a time, `instgrm.Embeds.process()`, `data-theme`, and so on) isn't documented; it was observed in October 2026, and Meta may change it at any time.
-- The documentation snapshot is from 2026-08-12; for later changes, defer to the [official changelog](https://developers.facebook.com/documentation/threads/changelog).
+- The documentation snapshot is from 2026-08-18; for later changes, defer to the [official changelog](https://developers.facebook.com/documentation/threads/changelog).
 - Threads ads (part of the Marketing API) are not covered.
 
 ## Contributing

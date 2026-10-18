@@ -302,13 +302,19 @@ poll_attachment={"option_a": "淺焙", "option_b": "深焙"}</code></pre>
         <p class="tools-row" data-reveal>
           <span class="tools-lead" id="tools-lead" data-i18n="tools.lead">可以裝在</span>
           <a href="https://code.claude.com/docs/en/skills">Claude Code</a>
+          <a href="https://help.openai.com/en/articles/20001066-skills-in-chatgpt">ChatGPT</a>
           <a href="https://learn.chatgpt.com/docs/build-skills">OpenAI Codex</a>
-          <a href="https://geminicli.com/docs/cli/skills/">Gemini CLI</a>
           <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills">GitHub
             Copilot</a>
           <a href="https://cursor.com/docs/skills">Cursor</a>
-          <a href="https://docs.devin.ai/desktop/cascade/skills">Windsurf</a>
+          <a href="https://geminicli.com/docs/cli/skills/">Gemini CLI</a>
+          <a href="https://antigravity.google/docs/skills">Google Antigravity</a>
+          <a href="https://docs.devin.ai/desktop/cascade/skills">Devin Desktop</a>
           <a href="https://opencode.ai/docs/skills">OpenCode</a>
+          <a href="https://docs.cline.bot/customization/skills">Cline</a>
+          <a href="https://kiro.dev/docs/skills/">Kiro</a>
+          <a href="https://junie.jetbrains.com/docs/agent-skills.html">JetBrains Junie</a>
+          <a href="https://roocodeinc.github.io/Roo-Code/features/skills/">Roo Code</a>
         </p>
       </div>
     </section>
@@ -801,7 +807,7 @@ is_ghost_post=true</code></pre>
             data-reveal style="--i:1"><b data-i18n="r.read" style="font-weight:600">讀完整的 SKILL.md</b><span
               aria-hidden="true">→</span></a>
         </div>
-        <p class="rules-note" data-reveal style="--i:2" data-i18n="r.note">文件快照涵蓋到 2026-08-12 的 changelog。標成
+        <p class="rules-note" data-reveal style="--i:2" data-i18n="r.note">文件快照涵蓋到 2026-08-18 的 changelog。標成
           <i>practice</i> 的是工程建議，<i>observed</i> 是實測結果，其餘都出自 Meta 官方文件。下面挑出各節最常用到的數字。</p>
 
         <div class="rules-body">
@@ -1062,11 +1068,6 @@ is_ghost_post=true</code></pre>
                       <td><code>.agents/skills/</code></td>
                     </tr>
                     <tr>
-                      <th scope="row">Gemini CLI</th>
-                      <td><code>~/.gemini/skills/</code></td>
-                      <td><code>.gemini/skills/</code></td>
-                    </tr>
-                    <tr>
                       <th scope="row">GitHub Copilot</th>
                       <td><code>~/.copilot/skills/</code></td>
                       <td><code>.github/skills/</code></td>
@@ -1077,31 +1078,61 @@ is_ghost_post=true</code></pre>
                       <td><code>.cursor/skills/</code></td>
                     </tr>
                     <tr>
-                      <th scope="row">Windsurf</th>
-                      <td><code>~/.codeium/windsurf/skills/</code></td>
-                      <td><code>.windsurf/skills/</code></td>
+                      <th scope="row">Gemini CLI</th>
+                      <td><code>~/.gemini/skills/</code></td>
+                      <td><code>.gemini/skills/</code></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Google Antigravity</th>
+                      <td><code>~/.gemini/config/skills/</code></td>
+                      <td><code>.agents/skills/</code></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Devin Desktop</th>
+                      <td><code>~/.config/devin/skills/</code></td>
+                      <td><code>.devin/skills/</code></td>
                     </tr>
                     <tr>
                       <th scope="row">OpenCode</th>
                       <td><code>~/.config/opencode/skills/</code></td>
                       <td><code>.opencode/skills/</code></td>
                     </tr>
+                    <tr>
+                      <th scope="row">Cline</th>
+                      <td><code>~/.cline/skills/</code></td>
+                      <td><code>.cline/skills/</code></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Kiro</th>
+                      <td><code>~/.kiro/skills/</code></td>
+                      <td><code>.kiro/skills/</code></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">JetBrains Junie</th>
+                      <td><code>~/.junie/skills/</code></td>
+                      <td><code>.junie/skills/</code></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Roo Code</th>
+                      <td><code>~/.roo/skills/</code></td>
+                      <td><code>.roo/skills/</code></td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
-              <p data-i18n="f1.b">同時用 Codex、Gemini CLI、Copilot、Cursor 的話，放一份在 <code>~/.agents/skills/</code>
-                就能共用。<code>~</code> 在 Windows 是使用者資料夾。工具沒偵測到新技能時，重新啟動一次即可。</p>
+              <p data-i18n="f1.b">Codex、Copilot、Cursor、Gemini CLI、OpenCode、Devin Desktop、Junie、Roo Code 也會讀 <code>~/.agents/skills/</code>，放一份在這裡就能共用。<code>~</code>
+                在 Windows 是使用者資料夾。工具沒偵測到新技能時，重新啟動一次即可。</p>
             </div>
           </details>
           <details class="qa" name="faq" data-reveal style="--i:1">
             <summary><span data-i18n="f2.q">在 Claude 應用程式怎麼用？</span><i class="pm" aria-hidden="true"></i></summary>
             <div class="qa-body">
               <ol>
-                <li data-i18n="f2.1">開啟程式碼執行：Free、Pro、Max 方案到 Settings &gt; Capabilities 開啟「Code execution and file
+                <li data-i18n="f2.1">開啟程式碼執行：Pro、Max 方案到 Settings &gt; Capabilities 開啟「Code execution and file
                   creation」；Team、Enterprise 方案由組織擁有者開啟它和「Skills」。</li>
                 <li data-i18n="f2.2">把 <code>threads-api</code> 資料夾單獨壓成 ZIP，最上層要是 <code>threads-api/</code>。GitHub 的
                   Download ZIP 是整個 repo，不能直接上傳。</li>
-                <li data-i18n="f2.3">到 Customize &gt; Skills，按 + → Create skill → Upload a skill，上傳 ZIP。</li>
+                <li data-i18n="f2.3">到 Customize &gt; Skills，按 + → Create skill → Upload a skill，上傳 ZIP。介面如果是 Settings &gt; Capabilities，就在 Skills 區塊按 Upload skill。</li>
               </ol>
               <p data-i18n="f2.b">App 的程式碼執行環境預設連不到 Threads API。在 App 裡代操作時，Claude 會把指令和參數準備好，交給你在自己的電腦上執行。</p>
             </div>
@@ -1195,7 +1226,7 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
           <details class="qa" name="faq" data-reveal style="--i:5">
             <summary><span data-i18n="f6.q">內容新到什麼時候？</span><i class="pm" aria-hidden="true"></i></summary>
             <div class="qa-body">
-              <p data-i18n="f6.a">整理自 Meta 官方文件，涵蓋到 2026-08-12 的 changelog。嵌入貼文的部分另外參考 2026 年 10 月實際讀取的 embed.js
+              <p data-i18n="f6.a">整理自 Meta 官方文件，涵蓋到 2026-08-18 的 changelog。嵌入貼文的部分另外參考 2026 年 10 月實際讀取的 embed.js
                 程式碼和實測結果。之後的變動以<a href="https://developers.facebook.com/documentation/threads/changelog">官方
                   changelog</a> 為準。</p>
               <p data-i18n="f6.b">文件互相矛盾或沒寫清楚的地方，例如地點搜尋要用 <code>q</code> 還是 <code>query</code>、限時貼文加上不支援的功能時 API

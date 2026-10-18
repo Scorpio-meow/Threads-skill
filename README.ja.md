@@ -4,8 +4,8 @@
 
 AI アシスタントが Meta Threads API を使いこなせるようにするスキルです。連携コードの作成・レビュー・デバッグを手伝うほか、あなたのトークンを使って投稿、リプライ、インサイトの取得を直接行うこともできます。Threads の投稿を自分のサイトに埋め込む作業も手伝います。
 
-- [Agent Skills](https://agentskills.io) 形式（フォルダ 1 つと `SKILL.md` 1 ファイル）なので、Claude Code、Claude アプリ、OpenAI Codex、Gemini CLI、GitHub Copilot、Cursor、Windsurf、OpenCode にインストールできます。
-- 内容は Meta の公式ドキュメントをもとにまとめたもので、2026-08-12 までの changelog を反映しています。投稿の埋め込みについては、2026 年 10 月に実際の embed.js のコードを読んで確かめた内容と実測結果も取り入れています。
+- [Agent Skills](https://agentskills.io) 形式（フォルダ 1 つと `SKILL.md` 1 ファイル）なので、Claude Code、Claude アプリ、ChatGPT、OpenAI Codex、GitHub Copilot、Cursor、Gemini CLI、Devin Desktop（旧 Windsurf）、OpenCode など 10 種類以上のツールにインストールできます。
+- 内容は Meta の公式ドキュメントをもとにまとめたもので、2026-08-18 までの changelog を反映しています。投稿の埋め込みについては、2026 年 10 月に実際の embed.js のコードを読んで確かめた内容と実測結果も取り入れています。
 - スキル本体は英語で書かれていますが、AI アシスタントはあなたが使っている言語で返答します。以下では Claude を例に説明します。
 - Meta 公式のプロジェクトではありません。
 - 紹介サイト：<https://scorpio-meow.github.io/Threads-skill/>。「送信する前にチェック」をブラウザでそのまま試せます。
@@ -19,14 +19,14 @@ bunx skills add Scorpio-meow/Threads-skill --skill threads-api -g
 ```
 
 - `-g` を付けるとユーザーディレクトリにインストールされ、すべてのプロジェクトで使えます。`-g` を外すと現在のプロジェクトにだけインストールされます。
-- 特定のツールにだけインストールしたい場合は `-a` を付けます（例：`-a claude-code -a codex`）。
-- Bun がなければ、`bunx` を `npx` に置き換えても動きます。
+- 特定のツールにだけインストールしたい場合は `-a` を付けます（例：`-a claude-code -a codex`）。各ツールの値は[次の節の表](#各ツールのスキルフォルダ)を参照してください。
+- [Bun](https://bun.sh) がなければ、`bunx` を `npx` に置き換えても動きます。
 
 インストール後、Threads API に関する質問をすると自動で有効になります。たとえば次のような質問です。
 
 > keyword_search で自分の投稿しかヒットしないんだけど、どこが間違ってる？
 
-各ツールでの手動インストール方法は次の節を参照してください。
+手動インストールとそのほかのインストール方法は次の節を参照してください。
 
 ## インストール
 
@@ -34,24 +34,34 @@ bunx skills add Scorpio-meow/Threads-skill --skill threads-api -g
 
 手動でインストールするには、`threads-api` フォルダをツールが読み込むスキルフォルダにコピーし、`SKILL.md` が `<スキルフォルダ>/threads-api/SKILL.md` に置かれるようにします。ユーザーフォルダはその PC 上のすべてのプロジェクトで使われます。プロジェクトフォルダはプロジェクトのルートに置くもので、commit すればチームで共有できます。
 
-| ツール | ユーザーフォルダ | プロジェクトフォルダ | 手動呼び出し |
-|---|---|---|---|
-| Claude Code | `~/.claude/skills/` | `.claude/skills/` | `/threads-api` |
-| OpenAI Codex（CLI、IDE 拡張機能） | `~/.agents/skills/` | `.agents/skills/` | `/skills` または `$threads-api` |
-| Gemini CLI | `~/.gemini/skills/` または `~/.agents/skills/` | `.gemini/skills/` または `.agents/skills/` | `/skills list` で読み込まれているか確認できます |
-| GitHub Copilot（VS Code、Copilot CLI） | `~/.copilot/skills/` または `~/.agents/skills/` | `.github/skills/` または `.agents/skills/` | `/threads-api` |
-| Cursor | `~/.cursor/skills/` または `~/.agents/skills/` | `.cursor/skills/` または `.agents/skills/` | Agent のチャットで `/` を入力して選択 |
-| Windsurf | `~/.codeium/windsurf/skills/` | `.windsurf/skills/` | `@threads-api` |
-| OpenCode | `~/.config/opencode/skills/` | `.opencode/skills/` または `.agents/skills/` | — |
+| ツール | `-a` の値 | ユーザーフォルダ | プロジェクトフォルダ | 手動呼び出し |
+|---|---|---|---|---|
+| Claude Code | `claude-code` | `~/.claude/skills/` | `.claude/skills/` | `/threads-api` |
+| OpenAI Codex（CLI、IDE 拡張機能、ChatGPT デスクトップ版） | `codex` | `~/.agents/skills/` | `.agents/skills/` | `/skills` または `$threads-api` |
+| GitHub Copilot（VS Code、Copilot CLI、JetBrains） | `github-copilot` | `~/.copilot/skills/` | `.github/skills/` | `/threads-api` |
+| Cursor | `cursor` | `~/.cursor/skills/` | `.cursor/skills/` | Agent のチャットで `/` を入力して選択 |
+| Gemini CLI | `gemini-cli` | `~/.gemini/skills/` | `.gemini/skills/` | `/skills list` で読み込まれているか確認できます |
+| Google Antigravity | `antigravity` | `~/.gemini/config/skills/` | `.agents/skills/` | — |
+| Devin Desktop（旧 Windsurf） | `devin` | `~/.config/devin/skills/` | `.devin/skills/` | `@threads-api` |
+| OpenCode | `opencode` | `~/.config/opencode/skills/` | `.opencode/skills/` | — |
+| Cline | `cline` | `~/.cline/skills/` | `.cline/skills/` | `/threads-api` |
+| Kiro | `kiro-cli` | `~/.kiro/skills/` | `.kiro/skills/` | `/` を入力して選択 |
+| JetBrains Junie | `junie` | `~/.junie/skills/` | `.junie/skills/` | `/threads-api` または `$threads-api` |
+| Roo Code | `roo` | `~/.roo/skills/` | `.roo/skills/` | — |
 
-Windows では `~` はユーザーフォルダ（`%USERPROFILE%`）を指します。どのツールも会話の内容に関係があればスキルを自動で使います。「手動呼び出し」列は、明示的に使いたいときの方法です。Codex、Gemini CLI、Copilot、Cursor を併用している場合は、`~/.agents/skills/` に 1 つ置くだけで共有できます。
+Windows では `~` はユーザーフォルダ（`%USERPROFILE%`）を指します。どのツールも会話の内容に関係があればスキルを自動で使います。「手動呼び出し」列は、明示的に使いたいときの方法です。
+
+- Codex、Copilot、Cursor、Gemini CLI、OpenCode、Devin Desktop、Junie、Roo Code は `~/.agents/skills/` も読み込むので、複数のツールを併用している場合はここに 1 つ置くだけで共有できます。Claude Code が読み込むのは `~/.claude/skills/` だけです。
+- `bunx skills` は共有の `.agents/skills/`（`-g` のときは `~/.agents/skills/`）に 1 つ置き、ほかのツールにはリンクを作ります。インストール後にツールがスキルを認識しない場合は、下の手動インストールで表のフォルダに置いてください。
+- 表にないツール（Amp、Goose、Kilo Code、Trae、Qwen Code など）も `bunx skills` でインストールできます。`-a` の値は [skills の README](https://github.com/vercel-labs/skills) を参照してください。
+- Devin Desktop は Windsurf 時代の `~/.codeium/windsurf/skills/` と `.windsurf/skills/` も引き続き読み込みます。
 
 以下は `~/.agents/skills/` にコピーする例です。ほかのツールで使う場合は、`TARGET` を上の表のパスに置き換えてください。
 
 macOS／Linux：
 
 ```bash
-git clone https://github.com/Scorpio-meow/Threads-skill.git
+git clone --depth 1 https://github.com/Scorpio-meow/Threads-skill.git
 TARGET=~/.agents/skills
 mkdir -p "$TARGET"
 cp -r Threads-skill/threads-api "$TARGET/"
@@ -60,21 +70,67 @@ cp -r Threads-skill/threads-api "$TARGET/"
 Windows PowerShell：
 
 ```powershell
-git clone https://github.com/Scorpio-meow/Threads-skill.git
+git clone --depth 1 https://github.com/Scorpio-meow/Threads-skill.git
 $TARGET = "$HOME\.agents\skills"
 New-Item -ItemType Directory -Force $TARGET | Out-Null
 Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
 ```
 
-更新するときは、`Threads-skill` フォルダで `git pull` を実行してからもう一度コピーします。`skills` コマンドでインストールした場合は `bunx skills update` を実行してください。ツールが新しいスキルを認識しない場合は、一度再起動すれば反映されます。
+ツールが新しいスキルを認識しない場合は、一度再起動すれば反映されます。
+
+### そのほかのインストール方法
+
+独自のインストールコマンドを持つツールもあります。
+
+- **GitHub CLI**（2.90 以降。`gh skill` は現在 public preview）：`--agent` の値は表の `-a` と同じです。
+
+  ```bash
+  gh skill install Scorpio-meow/Threads-skill threads-api --agent claude-code --scope user
+  ```
+
+- **OpenAI Codex**：Codex で次のように入力します。
+
+  ```text
+  $skill-installer install https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api
+  ```
+
+  Codex はデフォルトでサンドボックス内でコマンドを実行し、ネットワークを使いません。代行操作で Threads API に接続するときは事前に承認を求められます。常に許可したい場合は `~/.codex/config.toml` に次を追加します。
+
+  ```toml
+  [sandbox_workspace_write]
+  network_access = true
+  ```
+
+- **GitHub Copilot CLI**：clone したあと `copilot skill add Threads-skill/threads-api` を実行します。セッションの途中で追加した場合は `/skills reload` で読み込みます。リポジトリの `.github/skills/` に置いて commit すれば、クラウドの Copilot cloud agent でも使われます。
+- **Gemini CLI**：デフォルトではユーザー単位でインストールされます。`--scope workspace` を付けると現在のプロジェクトにだけインストールされます。
+
+  ```bash
+  gemini skills install https://github.com/Scorpio-meow/Threads-skill.git --path threads-api
+  ```
+
+- **Kiro**：Kiro パネルの **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub** を選び、スキルのサブフォルダを指す URL を貼り付けます：`https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`
+- **Devin Desktop**：Cascade パネル右上の **⋯** → **Skills** でスキルを管理できます。
+- **Cline**：新しいスキルはデフォルトで有効です。Cline パネル下部の **Skills** タブで切り替えられます。
 
 ### Claude アプリ（Web 版／デスクトップ版）
 
-1. コード実行を有効にします。Free、Pro、Max プランでは **Settings > Capabilities** で「Code execution and file creation」をオンにします。Team、Enterprise プランでは、組織のオーナーが組織設定で「Code execution and file creation」と「Skills」をオンにする必要があります。
+1. コード実行を有効にします。Pro、Max プランでは **Settings > Capabilities** で「Code execution and file creation」をオンにします。Team、Enterprise プランでは、組織のオーナーが組織設定で「Code execution and file creation」と「Skills」をオンにする必要があります。
 2. `threads-api` フォルダ**だけ**を ZIP に圧縮します。ZIP の最上位は `threads-api/` フォルダにしてください。GitHub の「Download ZIP」でダウンロードされるのはリポジトリ全体（最上位が `Threads-skill-main/`）なので、そのままではアップロードできません。
-3. **Customize > Skills** で **+** → **Create skill** → **Upload a skill** の順に進み、ZIP をアップロードします。
+   - macOS／Linux：`Threads-skill` フォルダで `zip -r ../threads-api.zip threads-api -x '*.DS_Store'` を実行します。
+   - Windows：エクスプローラーで `threads-api` フォルダを右クリック →「ZIP ファイルに圧縮する」（Windows 10 では「送る → 圧縮 (zip 形式) フォルダー」）。
+3. **Customize > Skills** で **+** → **Create skill** → **Upload a skill** の順に進み、ZIP をアップロードします。画面が **Settings > Capabilities** の場合は、Skills セクションの **Upload skill** を押します。
 
-画面が変わっている場合は[公式ヘルプ](https://support.claude.com/en/articles/12512180-using-skills-in-claude)を参照してください。
+アップロードしたスキルは自分のアカウントでしか使えません。組織全体で使うには、組織のオーナーが配布する必要があります。アプリのコード実行環境はデフォルトでは Threads API に接続できないため、代行操作は自分の PC で実行してください。画面が変わっている場合は[公式ヘルプ](https://support.claude.com/en/articles/12512180-using-skills-in-claude)を参照してください。
+
+### ChatGPT
+
+[公式ヘルプ](https://help.openai.com/en/articles/20001066-skills-in-chatgpt)によると、ChatGPT のスキルは現在、Business、Enterprise、Healthcare、Edu プランの対象ユーザーが利用でき、アップロードできるかどうかはワークスペースの設定で決まります。
+
+1. 前の節の手順で `threads-api` フォルダを ZIP に圧縮します。
+2. サイドバーの **Plugins** → **Skills** タブ → **Create** → **Upload from your computer** の順に進み、ZIP をアップロードします。
+3. チャットで `@` を入力して `threads-api` を選ぶか、ChatGPT の判断に任せます。
+
+ChatGPT と Codex のスキルはまだ同期されないため、Codex には別途インストールしてください。
 
 ### Agensi
 
@@ -82,9 +138,19 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
 
 このリポジトリの更新は Agensi の審査を通ってから Agensi に反映されるため、最新の内容はこのリポジトリを基準にしてください。
 
+### 更新と削除
+
+| インストール方法 | 更新 | 削除 |
+|---|---|---|
+| `bunx skills` | `bunx skills update threads-api` | `bunx skills remove threads-api` |
+| `gh skill` | `gh skill update` | `threads-api` フォルダを削除 |
+| Gemini CLI | 削除してからもう一度インストール | `gemini skills uninstall threads-api` |
+| 手動コピー | `Threads-skill` フォルダで `git pull` を実行してからもう一度コピー | `threads-api` フォルダを削除 |
+| Claude アプリ、ChatGPT | 古いものを削除して新しい ZIP をアップロード | Skills ページで削除 |
+
 ### 各ツールの公式ドキュメント
 
-パスや画面が変わっている場合は、公式ドキュメントを優先してください：[Claude Code](https://code.claude.com/docs/en/skills)・[OpenAI Codex](https://learn.chatgpt.com/docs/build-skills)・[Gemini CLI](https://geminicli.com/docs/cli/skills/)・[GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)・[VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)・[Cursor](https://cursor.com/docs/skills)・[Windsurf](https://docs.devin.ai/desktop/cascade/skills)・[OpenCode](https://opencode.ai/docs/skills)
+パスや画面が変わっている場合は、公式ドキュメントを優先してください：[Claude Code](https://code.claude.com/docs/en/skills)・[Claude アプリ](https://support.claude.com/en/articles/12512180-using-skills-in-claude)・[ChatGPT](https://help.openai.com/en/articles/20001066-skills-in-chatgpt)・[OpenAI Codex](https://learn.chatgpt.com/docs/build-skills)・[GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)・[VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)・[Cursor](https://cursor.com/docs/skills)・[Gemini CLI](https://geminicli.com/docs/cli/skills/)・[Google Antigravity](https://antigravity.google/docs/skills)・[Devin Desktop](https://docs.devin.ai/desktop/cascade/skills)・[OpenCode](https://opencode.ai/docs/skills)・[Cline](https://docs.cline.bot/customization/skills)・[Kiro](https://kiro.dev/docs/skills/)・[JetBrains Junie](https://junie.jetbrains.com/docs/agent-skills.html)・[Roo Code](https://roocodeinc.github.io/Roo-Code/features/skills/)・[skills](https://github.com/vercel-labs/skills)・[gh skill](https://cli.github.com/manual/gh_skill_install)
 
 ## 機能
 
@@ -258,7 +324,7 @@ python3 threads_client.py delete <media-id>           # 投稿を削除（元に
 - Claude アプリはデフォルトでは Threads API に接続できないため、代行操作は自分の PC で実行する必要があります。また、代行操作にはツールがターミナルのコマンドを実行できることが必要です。
 - 公式ドキュメントには、互いに矛盾していたりあいまいだったりする箇所がいくつかあります。たとえば、場所の検索で `q` と `query` のどちらを使うのか、ゴースト投稿に非対応の機能を付けたときに API がエラーを返すのか無視するのか、webhook に App Review が必要かどうか、などです。スキルはこうした箇所に当たったとき、勝手に推測せず、そのとおりに説明します。
 - embed.js の読み込みの挙動（同時に読み込むのは最大 3 件、`instgrm.Embeds.process()`、`data-theme` など）は公式ドキュメントに書かれておらず、2026 年 10 月に観察したものです。Meta がいつ変更してもおかしくありません。
-- ドキュメントは 2026-08-12 時点のスナップショットです。それ以降の変更は[公式 changelog](https://developers.facebook.com/documentation/threads/changelog) を参照してください。
+- ドキュメントは 2026-08-18 時点のスナップショットです。それ以降の変更は[公式 changelog](https://developers.facebook.com/documentation/threads/changelog) を参照してください。
 - Threads 広告（Marketing API の範囲）は対象外です。
 
 ## コントリビューション

@@ -288,6 +288,11 @@
   gap: 14px clamp(18px, 2.2vw, 36px);
 }
 
+.tools-row::after {
+  content: "";
+  flex: auto;
+}
+
 .tools-lead {
   font-size: var(--step-body);
   color: var(--muted);

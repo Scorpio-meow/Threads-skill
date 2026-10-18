@@ -5,12 +5,12 @@ license: MIT
 compatibility: "Operate mode runs the bundled Python 3.8+ client (standard library only) and needs HTTPS access to graph.threads.net plus THREADS_ACCESS_TOKEN from the environment or a .env file in the working folder. Build and Embed don't need the client or a token."
 metadata:
   author: Scorpio-meow
-  version: "1.2"
+  version: "1.3"
 ---
 
 # Threads API
 
-Playbook for Meta's Threads API, distilled from the official docs (snapshot covering the changelog through **2026-08-12**). It serves three jobs:
+Playbook for Meta's Threads API, distilled from the official docs (snapshot covering the changelog through **2026-08-18**). It serves three jobs:
 
 - **Build** — write, review or debug code that calls the API.
 - **Operate** — call the API on the user's own account: post, reply, delete, hide replies, read insights.
@@ -202,7 +202,7 @@ Here `since`/`until` must be Unix timestamps ≥ `1712991600` (2024-04-13); the 
 - Refresh: `GET https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token=<long-lived>` → a new 60-day token. Allowed once the token is ≥ 24 h old, and only while it's unexpired; an expired token can't be refreshed, so the user must authorize again.
 - *(practice)* Refresh on a schedule well before expiry (e.g. when < 10 days remain, or weekly), store the new token and its expiry (from `expires_in`) atomically, and alert a human when a refresh fails.
 - Permission grants last 90 days. Refreshing a long-lived token extends the grant for public profiles; for private profiles the grant can't be extended (their tokens still refresh), so those users must authorize again every 90 days. Read `data_access_expires_at` from `debug_token` and prompt re-authorization before it passes.
-- Inspect a token: `GET /v1.0/debug_token?access_token=<a Threads tester's token for the same app>&input_token=<token>` → `data{type, application, is_valid, issued_at, expires_at, data_access_expires_at, scopes[], user_id}`. `scopes` lists what the user granted, not whether App Review approved those permissions; check approval in the App Dashboard.
+- Inspect a token: `GET /v1.0/debug_token?access_token=<app token, or a Threads tester's user token>&input_token=<token>` → `data{type, application, is_valid, issued_at, expires_at, data_access_expires_at, scopes[], user_id}`. The app token (`TH|<APP_ID>|<APP_SECRET>`, next item) is accepted since 2026-08-18, so a server can inspect its users' tokens without a tester. Either way, `access_token` must come from the same app as `input_token` (the users can differ); a token issued by another app fails with "The App_id in the input_token did not match the Viewing App". `scopes` lists what the user granted, not whether App Review approved those permissions; check approval in the App Dashboard.
 - App token (server-side, for app-level calls): `GET https://graph.threads.net/oauth/access_token?client_id=…&client_secret=…&grant_type=client_credentials` → `"TH|<APP_ID>|…"`, or pass `TH|<APP_ID>|<APP_SECRET>` directly as `access_token`.
 
 ## 9. Quotas and rate limits
@@ -276,7 +276,7 @@ These are *(practice)* items from a production gallery of hundreds of posts.
 
 | Symptom | Cause → fix |
 |---|---|
-| `code 190` / "Invalid OAuth 2.0 Access Token" | Expired, malformed or non-Threads token → refresh or re-authorize; inspect with `debug_token` |
+| `code 190` / "Invalid OAuth 2.0 Access Token" | Expired, malformed or non-Threads token → refresh or re-authorize; inspect with `debug_token` (§8.4) |
 | "Matching code was not found or was already used" | Code reused, older than 1 h, or `#_` left on → restart authorization |
 | Code exchange rejects `redirect_uri` | Not identical to the authorize step and dashboard entry (watch trailing slashes) |
 | OAuth fails although the app ID looks right | Facebook app ID/secret used instead of the Threads pair |

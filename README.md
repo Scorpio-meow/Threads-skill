@@ -4,8 +4,8 @@
 
 讓 AI 助理熟悉 Meta Threads API 的技能（skill）：幫你寫、檢查、除錯串接程式，也能用你的 token 直接發文、回覆、查數據，或把 Threads 貼文嵌入你的網站。
 
-- 採用 [Agent Skills](https://agentskills.io) 格式（一個資料夾加一份 `SKILL.md`），Claude Code、Claude 應用程式、OpenAI Codex、Gemini CLI、GitHub Copilot、Cursor、Windsurf、OpenCode 都能安裝。
-- 內容整理自 Meta 官方文件，涵蓋到 2026-08-12 的 changelog。嵌入貼文的部分另外參考 2026 年 10 月實際讀取的 embed.js 程式碼和實測結果。
+- 採用 [Agent Skills](https://agentskills.io) 格式（一個資料夾加一份 `SKILL.md`），Claude Code、Claude 應用程式、ChatGPT、OpenAI Codex、GitHub Copilot、Cursor、Gemini CLI、Devin Desktop（原 Windsurf）、OpenCode 等十多種工具都能安裝。
+- 內容整理自 Meta 官方文件，涵蓋到 2026-08-18 的 changelog。嵌入貼文的部分另外參考 2026 年 10 月實際讀取的 embed.js 程式碼和實測結果。
 - 技能本身用英文撰寫，AI 助理會用你使用的語言回覆。下文以 Claude 為例說明。
 - 非 Meta 官方專案。
 - 介紹網站：<https://scorpio-meow.github.io/Threads-skill/>，可以直接在瀏覽器試用「送出前先檢查」。
@@ -19,14 +19,14 @@ bunx skills add Scorpio-meow/Threads-skill --skill threads-api -g
 ```
 
 - `-g` 裝到個人目錄（所有專案都能用）；拿掉 `-g` 則只裝到目前的專案。
-- 只裝給特定工具，加上 `-a`，例如 `-a claude-code -a codex`。
-- 沒有 Bun 的話，把 `bunx` 換成 `npx` 也可以。
+- 只裝給特定工具，加上 `-a`，例如 `-a claude-code -a codex`；各工具的值見[下一節的表格](#各工具的技能資料夾)。
+- 沒有 [Bun](https://bun.sh) 的話，把 `bunx` 換成 `npx` 也可以。
 
 裝好後問一句跟 Threads API 有關的事就會自動啟用，例如：
 
 > 我的 keyword_search 只搜得到自己的貼文，是哪裡寫錯？
 
-各工具的手動安裝方式見下一節。
+各工具的手動安裝和其他安裝方式見下一節。
 
 ## 安裝
 
@@ -34,24 +34,34 @@ bunx skills add Scorpio-meow/Threads-skill --skill threads-api -g
 
 手動安裝就是把 `threads-api` 資料夾複製到工具讀取的技能資料夾，讓 `SKILL.md` 落在 `<技能資料夾>/threads-api/SKILL.md`。個人資料夾給這台電腦上的所有專案用；專案資料夾放在專案根目錄下，可以 commit 給團隊一起用。
 
-| 工具 | 個人資料夾 | 專案資料夾 | 手動叫用 |
-|---|---|---|---|
-| Claude Code | `~/.claude/skills/` | `.claude/skills/` | `/threads-api` |
-| OpenAI Codex（CLI、IDE 擴充套件） | `~/.agents/skills/` | `.agents/skills/` | `/skills` 或 `$threads-api` |
-| Gemini CLI | `~/.gemini/skills/` 或 `~/.agents/skills/` | `.gemini/skills/` 或 `.agents/skills/` | `/skills list` 可確認是否載入 |
-| GitHub Copilot（VS Code、Copilot CLI） | `~/.copilot/skills/` 或 `~/.agents/skills/` | `.github/skills/` 或 `.agents/skills/` | `/threads-api` |
-| Cursor | `~/.cursor/skills/` 或 `~/.agents/skills/` | `.cursor/skills/` 或 `.agents/skills/` | 在 Agent 對話輸入 `/` 選擇 |
-| Windsurf | `~/.codeium/windsurf/skills/` | `.windsurf/skills/` | `@threads-api` |
-| OpenCode | `~/.config/opencode/skills/` | `.opencode/skills/` 或 `.agents/skills/` | — |
+| 工具 | `-a` 參數 | 個人資料夾 | 專案資料夾 | 手動叫用 |
+|---|---|---|---|---|
+| Claude Code | `claude-code` | `~/.claude/skills/` | `.claude/skills/` | `/threads-api` |
+| OpenAI Codex（CLI、IDE 擴充套件、ChatGPT 桌面版） | `codex` | `~/.agents/skills/` | `.agents/skills/` | `/skills` 或 `$threads-api` |
+| GitHub Copilot（VS Code、Copilot CLI、JetBrains） | `github-copilot` | `~/.copilot/skills/` | `.github/skills/` | `/threads-api` |
+| Cursor | `cursor` | `~/.cursor/skills/` | `.cursor/skills/` | 在 Agent 對話輸入 `/` 選擇 |
+| Gemini CLI | `gemini-cli` | `~/.gemini/skills/` | `.gemini/skills/` | `/skills list` 可確認是否載入 |
+| Google Antigravity | `antigravity` | `~/.gemini/config/skills/` | `.agents/skills/` | — |
+| Devin Desktop（原 Windsurf） | `devin` | `~/.config/devin/skills/` | `.devin/skills/` | `@threads-api` |
+| OpenCode | `opencode` | `~/.config/opencode/skills/` | `.opencode/skills/` | — |
+| Cline | `cline` | `~/.cline/skills/` | `.cline/skills/` | `/threads-api` |
+| Kiro | `kiro-cli` | `~/.kiro/skills/` | `.kiro/skills/` | 輸入 `/` 選擇 |
+| JetBrains Junie | `junie` | `~/.junie/skills/` | `.junie/skills/` | `/threads-api` 或 `$threads-api` |
+| Roo Code | `roo` | `~/.roo/skills/` | `.roo/skills/` | — |
 
-`~` 在 Windows 是使用者資料夾（`%USERPROFILE%`）。所有工具都會在對話相關時自動使用技能，「手動叫用」欄只是指定使用的方式。同時用 Codex、Gemini CLI、Copilot、Cursor 的話，放一份在 `~/.agents/skills/` 就能共用。
+`~` 在 Windows 是使用者資料夾（`%USERPROFILE%`）。所有工具都會在對話相關時自動使用技能，「手動叫用」欄只是指定使用的方式。
+
+- Codex、Copilot、Cursor、Gemini CLI、OpenCode、Devin Desktop、Junie、Roo Code 也會讀 `~/.agents/skills/`，同時用好幾種工具的話，放一份在這裡就能共用。Claude Code 只讀 `~/.claude/skills/`。
+- `bunx skills` 會把技能放在共用的 `.agents/skills/`（加 `-g` 時是 `~/.agents/skills/`），再替其他工具建立連結。裝完工具沒讀到的話，改用下面的手動安裝，放到表中的資料夾。
+- 表上沒有的工具（Amp、Goose、Kilo Code、Trae、Qwen Code 等）也能用 `bunx skills` 安裝，`-a` 的值見 [skills 的說明](https://github.com/vercel-labs/skills)。
+- Devin Desktop 也還讀得到 Windsurf 時期的 `~/.codeium/windsurf/skills/` 和 `.windsurf/skills/`。
 
 以複製到 `~/.agents/skills/` 為例，換成其他工具時，把 `TARGET` 改成上表的路徑。
 
 macOS／Linux：
 
 ```bash
-git clone https://github.com/Scorpio-meow/Threads-skill.git
+git clone --depth 1 https://github.com/Scorpio-meow/Threads-skill.git
 TARGET=~/.agents/skills
 mkdir -p "$TARGET"
 cp -r Threads-skill/threads-api "$TARGET/"
@@ -60,21 +70,67 @@ cp -r Threads-skill/threads-api "$TARGET/"
 Windows PowerShell：
 
 ```powershell
-git clone https://github.com/Scorpio-meow/Threads-skill.git
+git clone --depth 1 https://github.com/Scorpio-meow/Threads-skill.git
 $TARGET = "$HOME\.agents\skills"
 New-Item -ItemType Directory -Force $TARGET | Out-Null
 Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
 ```
 
-之後要更新，在 `Threads-skill` 資料夾執行 `git pull` 再複製一次；用 `skills` 指令安裝的則執行 `bunx skills update`。工具若沒有偵測到新技能，重新啟動一次即可。
+工具若沒有偵測到新技能，重新啟動一次即可。
+
+### 其他安裝方式
+
+有些工具有自己的安裝指令：
+
+- **GitHub CLI**（2.90 以上，`gh skill` 目前是 public preview）：`--agent` 的值和上表的 `-a` 相同。
+
+  ```bash
+  gh skill install Scorpio-meow/Threads-skill threads-api --agent claude-code --scope user
+  ```
+
+- **OpenAI Codex**：在 Codex 輸入
+
+  ```text
+  $skill-installer install https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api
+  ```
+
+  Codex 預設在沙箱裡執行指令、不開網路，代操作要連到 Threads API 時會先請你核准。想一律允許，在 `~/.codex/config.toml` 加上：
+
+  ```toml
+  [sandbox_workspace_write]
+  network_access = true
+  ```
+
+- **GitHub Copilot CLI**：clone 之後執行 `copilot skill add Threads-skill/threads-api`；工作階段中途加入的，用 `/skills reload` 載入。放在 repo 的 `.github/skills/` 並 commit 的話，雲端的 Copilot cloud agent 也會用到。
+- **Gemini CLI**：預設裝到個人範圍，加上 `--scope workspace` 只裝到目前專案。
+
+  ```bash
+  gemini skills install https://github.com/Scorpio-meow/Threads-skill.git --path threads-api
+  ```
+
+- **Kiro**：Kiro 面板的 **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub**，網址要指到技能所在的子資料夾：`https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`。
+- **Devin Desktop**：Cascade 面板右上角的 **⋯** → **Skills** 可以管理技能。
+- **Cline**：新技能預設啟用，可以在 Cline 面板底部的 **Skills** 分頁切換。
 
 ### Claude 應用程式（網頁版／桌面版）
 
-1. 開啟程式碼執行：Free、Pro、Max 方案到 **Settings > Capabilities** 開啟「Code execution and file creation」；Team、Enterprise 方案要由組織擁有者在組織設定裡開啟「Code execution and file creation」和「Skills」。
+1. 開啟程式碼執行：Pro、Max 方案到 **Settings > Capabilities** 開啟「Code execution and file creation」；Team、Enterprise 方案由組織擁有者在組織設定裡開啟「Code execution and file creation」和「Skills」。
 2. 把 `threads-api` 資料夾**單獨**壓成 ZIP，ZIP 最上層要是 `threads-api/` 資料夾。GitHub 的「Download ZIP」下載的是整個 repo（最上層是 `Threads-skill-main/`），不能直接上傳。
-3. 到 **Customize > Skills**，按 **+** → **Create skill** → **Upload a skill**，上傳 ZIP。
+   - macOS／Linux：在 `Threads-skill` 資料夾執行 `zip -r ../threads-api.zip threads-api -x '*.DS_Store'`。
+   - Windows：在檔案總管對 `threads-api` 資料夾按右鍵 →「壓縮成 ZIP 檔案」（Windows 10 是「傳送到 → 壓縮的 (zipped) 資料夾」）。
+3. 到 **Customize > Skills**，按 **+** → **Create skill** → **Upload a skill**，上傳 ZIP。介面如果是 **Settings > Capabilities**，就在 Skills 區塊按 **Upload skill**。
 
-介面如有變動，以[官方說明](https://support.claude.com/en/articles/12512180-using-skills-in-claude)為準。
+上傳的技能只有你的帳號能用，要給整個組織得由組織擁有者佈建。App 的程式碼執行環境預設連不到 Threads API，代操作要在自己的電腦上執行。介面如有變動，以[官方說明](https://support.claude.com/en/articles/12512180-using-skills-in-claude)為準。
+
+### ChatGPT
+
+依[官方說明](https://help.openai.com/en/articles/20001066-skills-in-chatgpt)，ChatGPT 的技能目前開放給 Business、Enterprise、Healthcare、Edu 方案中符合資格的使用者，能不能上傳由工作區設定決定。
+
+1. 照上一節的方式把 `threads-api` 資料夾壓成 ZIP。
+2. 在側邊欄的 **Plugins** → **Skills** 分頁按 **Create** → **Upload from your computer**，上傳 ZIP。
+3. 對話中輸入 `@` 選擇 `threads-api`，或讓 ChatGPT 自動判斷。
+
+ChatGPT 和 Codex 的技能目前不會同步，用 Codex 的話要另外安裝。
 
 ### Agensi
 
@@ -82,9 +138,19 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
 
 這個 repo 的更新要等 Agensi 審核通過才會出現在 Agensi 上，最新內容以這個 repo 為準。
 
+### 更新與移除
+
+| 安裝方式 | 更新 | 移除 |
+|---|---|---|
+| `bunx skills` | `bunx skills update threads-api` | `bunx skills remove threads-api` |
+| `gh skill` | `gh skill update` | 刪除 `threads-api` 資料夾 |
+| Gemini CLI | 移除後重新安裝 | `gemini skills uninstall threads-api` |
+| 手動複製 | 在 `Threads-skill` 資料夾執行 `git pull`，再複製一次 | 刪除 `threads-api` 資料夾 |
+| Claude 應用程式、ChatGPT | 刪掉舊的，再上傳新的 ZIP | 在 Skills 頁面刪除 |
+
 ### 各工具官方說明
 
-路徑或介面如有變動，以官方文件為準：[Claude Code](https://code.claude.com/docs/en/skills)・[OpenAI Codex](https://learn.chatgpt.com/docs/build-skills)・[Gemini CLI](https://geminicli.com/docs/cli/skills/)・[GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)・[VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)・[Cursor](https://cursor.com/docs/skills)・[Windsurf](https://docs.devin.ai/desktop/cascade/skills)・[OpenCode](https://opencode.ai/docs/skills)
+路徑或介面如有變動，以官方文件為準：[Claude Code](https://code.claude.com/docs/en/skills)・[Claude 應用程式](https://support.claude.com/en/articles/12512180-using-skills-in-claude)・[ChatGPT](https://help.openai.com/en/articles/20001066-skills-in-chatgpt)・[OpenAI Codex](https://learn.chatgpt.com/docs/build-skills)・[GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)・[VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)・[Cursor](https://cursor.com/docs/skills)・[Gemini CLI](https://geminicli.com/docs/cli/skills/)・[Google Antigravity](https://antigravity.google/docs/skills)・[Devin Desktop](https://docs.devin.ai/desktop/cascade/skills)・[OpenCode](https://opencode.ai/docs/skills)・[Cline](https://docs.cline.bot/customization/skills)・[Kiro](https://kiro.dev/docs/skills/)・[JetBrains Junie](https://junie.jetbrains.com/docs/agent-skills.html)・[Roo Code](https://roocodeinc.github.io/Roo-Code/features/skills/)・[skills](https://github.com/vercel-labs/skills)・[gh skill](https://cli.github.com/manual/gh_skill_install)
 
 ## 功能
 
@@ -258,7 +324,7 @@ python3 threads_client.py delete <media-id>           # 刪文，無法復原
 - Claude 應用程式預設連不到 Threads API，代操作要在自己的電腦上執行。代操作也需要工具能執行終端機指令。
 - 官方文件有幾處互相矛盾或沒說清楚，例如地點搜尋要用 `q` 還是 `query`、限時貼文加上不支援的功能時 API 會報錯還是直接忽略、webhook 需不需要 App Review。技能遇到時會照實說明，不會自行假設。
 - embed.js 的載入行為（一次最多載入 3 則、`instgrm.Embeds.process()`、`data-theme` 等）官方沒有文件，是 2026 年 10 月觀察到的，Meta 可能隨時改變。
-- 文件快照到 2026-08-12，之後的變動請以[官方 changelog](https://developers.facebook.com/documentation/threads/changelog) 為準。
+- 文件快照到 2026-08-18，之後的變動請以[官方 changelog](https://developers.facebook.com/documentation/threads/changelog) 為準。
 - 不涵蓋 Threads 廣告（屬於 Marketing API）。
 
 ## 參與貢獻

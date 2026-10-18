@@ -4,7 +4,19 @@
 
 Notable changes to this project are recorded here, following the format of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version numbers follow `metadata.version` in `threads-api/SKILL.md`, and the Agensi listing uses the same numbers; changes before 1.0 are grouped by date.
 
-## Unreleased
+## 1.3 - 2026-10-19
+
+### Changed
+
+- Section 8 of SKILL.md now follows Meta's 2026-08-18 changelog entry on `debug_token`: besides a Threads tester's token, `access_token` can be the app token (`TH|<APP_ID>|<APP_SECRET>`); either way it must come from the same app as `input_token`, and the error for a token from another app is now listed. The `code 190` row in section 12 now points to section 8, and the doc snapshot date is now 2026-08-18 (SKILL.md, all four READMEs, `docs/llms.txt` and the site). In `evals/benchmark.json`, the with-skill runs of question 2 in rounds 1–3 all mention skipping the `debug_token` check of the 90-day permission grant when the account isn't a Threads tester; the evals haven't been rerun since this was updated.
+- `metadata.version` in `threads-api/SKILL.md` raised to 1.3.
+- Installation docs:
+  - The tool table in all four READMEs now gives each tool's `-a` value for `bunx skills` and adds Google Antigravity, Cline, Kiro, JetBrains Junie and Roo Code; Windsurf is now Devin Desktop, with its new paths.
+  - New README sections: “Other ways to install” (GitHub CLI's `gh skill`, Codex, Copilot CLI, Gemini CLI, Kiro), “ChatGPT” and “Updating and removing”.
+  - The Claude apps steps now name the Pro and Max plans, show how to make the ZIP on each system and also give the Settings > Capabilities upload location.
+  - The site's tool list, the “How do I install it by hand?” and “How do I use it in the Claude apps?” answers, `docs/llms.txt` and the usage issue forms are updated to match.
+
+## 1.2 - 2026-10-18
 
 ### Added
 
