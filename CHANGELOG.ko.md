@@ -6,6 +6,15 @@
 
 ## 미출시
 
+### 추가
+
+- 7–10번 문제(답글과 멘션을 받는 FastAPI webhook, Express OAuth 로그인과 장기 토큰 갱신, 문제가 많은 Python 게시 코드 리뷰, 이모지가 들어간 스레드를 다음 날 오전 8시에 대리 게시)와 5라운드 평가 결과. 4개 언어 benchmark 요약과 `evals/benchmark.json`에 기록.
+
+### 변경
+
+- SKILL.md 10절에 *(practice)* 한 줄을 추가: 같은 webhook 이벤트가 여러 번 전달될 수 있으므로 처리를 멱등하게 만들고, 원본 body의 해시가 아니라 `values.field`와 media ID를 키로 씀. 추가한 뒤 아직 평가를 다시 실행하지 않음.
+- `threads-api/SKILL.md`의 `metadata.version`을 1.2로 올림.
+
 ### 수정
 
 - GitHub 저장소 페이지의 Contributing 등 탭은 커뮤니티 파일의 상대 링크를 저장소 루트 기준으로 해석해서 404가 났음. 저장소 루트부터 세는 `/`로 시작하는 경로로 바꿈.

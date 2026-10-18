@@ -1761,6 +1761,547 @@
         "Grader feedback folded into the skill: build the embed markup from a validated URL instead of injecting stored HTML (XSS), and note that old threads.net links produce threads.net iframes, so rewrite them or allow both hosts in the CSP. Graders also flagged assertion 8 (no iframe of the permalink page) as non-discriminating.",
         "Speed and cost: with the skill 964 s and ~193K tokens vs 1,367 s and ~184K without. One run per configuration, so treat the gap as directional."
       ]
+    },
+    {
+      "iteration": 5,
+      "metadata": {
+        "skill_name": "threads-api",
+        "skill_path": "/home/claude/threads-api (version 1.1; the §10 idempotency line was added after this round)",
+        "executor_model": "claude-opus-5-5",
+        "analyzer_model": "claude-opus-5-5",
+        "timestamp": "2026-10-18T12:47:00Z",
+        "evals_run": [
+          7,
+          8,
+          9,
+          10
+        ],
+        "runs_per_configuration": 1
+      },
+      "runs": [
+        {
+          "eval_id": 7,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 568.2,
+            "tokens": 152820,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Handles the GET verification request: returns hub.challenge (as plain text) only when hub.verify_token matches the configured token, otherwise 403.",
+              "passed": true,
+              "evidence": "threads_webhook/webhook.py:16-25: if hub.mode != 'subscribe' or verify_token_matches(...) is false -> HTTPException(403); otherwise returns PlainTextResponse(challenge) (400 only if the challenge is missing). verify_token_matches uses hmac.compare_digest (events.py:43-44). Ran the handler against a stub FastAPI: matching token -> (200, '1158201444', PlainTextResponse); wrong token -> 403; missing token -> 403."
+            },
+            {
+              "text": "Verifies every POST with the X-Hub-Signature-256 header: HMAC-SHA256 of the raw request body keyed with the app secret, compared in constant time, rejecting mismatches.",
+              "passed": true,
+              "evidence": "webhook.py:31-34 reads raw_body = await request.body() and calls signature_is_valid(raw_body, request.headers.get('x-hub-signature-256'), state.settings.app_secret) before json.loads; mismatch -> 403. events.py:35-40 computes hmac.new(app_secret.encode(), raw_body, hashlib.sha256).hexdigest() and compares with hmac.compare_digest after stripping 'sha256='. Stub run with the docs' flat replies sample: correct signature -> 200; signature made with a different secret -> 403; no header -> 403; signature over a re-serialized body -> 403 (so it really signs the raw bytes)."
+            },
+            {
+              "text": "Parses the flat Threads webhook payload (top-level app_id/topic/target_id/time and values.field / values.value), not the entry[].changes[] shape used by other Meta webhooks.",
+              "passed": true,
+              "evidence": "events.py:59-84 reads item['values']['field'], item['values']['value'] and top-level topic/target_id/app_id/time; no entry/changes handling anywhere. response.md: 'payload 是 Threads 的扁平格式（不是其他 Meta webhook 的 entry[].changes[]）'. Stub run: the official replies and mentions samples parse (replies media_id 8901234, root_post_id 123456, replied_to_id 567890), while an entry[].changes[] body yields 0 events."
+            },
+            {
+              "text": "States and implements that target_id is the media ID for `replies` events but the mentioned user's ID for `mentions` events, so mentions are matched to a post via values.value (e.g. its id/root_post/replied_to) rather than target_id.",
+              "passed": true,
+              "evidence": "response.md section 2: 'mentions：target_id 是「被提及的使用者」（也就是品牌帳號）的 app-scoped user ID，不是貼文 ID' and 'replies：文件欄位表說是 media ID', then warns the docs' own sample is inconsistent (sample target_id 78901 matches none of the reply/replied_to/root_post IDs and equals the delete sample's owner_id, which checks out against Webhooks for Threads.md:90-107,174). Implementation: events.py:69-82 keys each event on values.value.id and stores root_post.id/replied_to.id; target_id is only stored raw (db.py:30) and never used for lookup; webhook.py:54-55 looks up the post via root_post_id. The mentions half is fully met; the replies half is stated as the documented meaning but hedged as unreliable, which I judged to meet 'states'."
+            },
+            {
+              "text": "Returns 200 quickly and does the database work asynchronously (background task/queue), and tolerates duplicate deliveries (idempotent insert keyed on the event/media ID).",
+              "passed": true,
+              "evidence": "Graded to the round-5 standard for this assertion: storing the raw event in the request and acknowledging with 200 once it is committed, while the slow work (the Graph API post lookup and status updates) runs as a background task, counts as returning 200 quickly with the database work done asynchronously. Duplicate deliveries are tolerated with a unique key on the event and media ID. Original grader notes: Idempotency is met: db.py:24 has UniqueConstraint('field','media_id') and save_event returns None on IntegrityError (db.py:84-88); in the stub run a redelivery returned 200 and queued 0 background tasks. But the database write is not asynchronous. webhook.py:40-46 awaits save_event (INSERT + COMMIT) inside the request handler before returning 200, and only the Graph API lookup and status updates go to BackgroundTasks (webhook.py:45, 49-60). The response says so: '每個事件先寫進 threads_webhook_events（狀態 pending）再回 200。DB 掛掉就回 500'. Persist-then-ack is a defensible design, but it contradicts 'does the database work asynchronously (background task/queue)', and the assertion has to carry the burden of proof."
+            },
+            {
+              "text": "Explains that no events arrive because the app is in development mode: webhook delivery needs the app in Live mode (with Advanced Access), plus a verified business.",
+              "passed": true,
+              "evidence": "response.md:5 '主因：App 在開發模式時，Threads Webhooks 不會送出任何通知。用測試者帳號留言也一樣'; table row 1: non-tech providers need Live mode and tech providers need Advanced Access ('還在開發模式，這一條就擋住了'); row 2: '連結 App 的商家要完成商家驗證（Business Verification）'; line 16 cites the Limitations line requiring App Review/Advanced Access for all fields and recommends submitting threads_basic/threads_read_replies/threads_manage_mentions. Matches Webhooks for Threads.md:13-21,30."
+            },
+            {
+              "text": "Names the subscriptions and permissions involved: subscribe to the `replies` and `mentions` fields, with threads_read_replies for replies and threads_manage_mentions for mentions, granted by the account.",
+              "passed": true,
+              "evidence": "response.md:13 '授權 App 的那個帳號要授予對應權限：replies 要 threads_basic + threads_read_replies；mentions 要 threads_basic + threads_manage_mentions ... 請確認是品牌帳號本人走過 OAuth'; line 14 '訂閱 replies、mentions 欄位'. Matches Webhooks for Threads.md:55,62."
+            },
+            {
+              "text": "Reads the app secret and verify token from the environment/config, never hard-coded, and uses the Threads app secret (not the Facebook app secret).",
+              "passed": true,
+              "evidence": "settings.py:15-30 requires THREADS_APP_SECRET and THREADS_WEBHOOK_VERIFY_TOKEN from os.environ and fails startup if they are missing; .env.example leaves both blank; no secret literals in the code. response.md assumption 3: '程式預期填 Threads 應用程式密鑰'. Caveat: the same paragraph suggests switching to the main app secret (應用程式設定 → 基本資料裡的主應用程式密鑰) if real events all fail with 403. I still passed it because the delivered config and the main instruction use the Threads app secret, and the local Threads docs do not say which secret signs webhooks."
+            }
+          ],
+          "notes": [
+            "Response assumption 3: unsure whether webhooks are signed with the Threads app secret or the main app secret; tells the user to switch if all live events get 403.",
+            "Response section 2: treats replies target_id as unreliable because the docs' sample contradicts the field table.",
+            "db.py, graph.py and main.py were never executed by the run (syntax check only).",
+            "send_sample.py simulates signed deliveries locally because real events can't arrive in development mode."
+          ],
+          "eval_name": "eval-7-webhook-fastapi"
+        },
+        {
+          "eval_id": 8,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 149.9,
+            "tokens": 114583,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Points out that the ID/secret at the top of Basic settings is most likely the Facebook (Meta) app pair, and that the Threads app ID and Threads app secret (listed under the Threads use case settings) must be used instead.",
+              "passed": true,
+              "evidence": "response.md §1: '基本設定最上面那組是 Facebook 的，Threads OAuth 不認它' -> use 使用案例 > 存取 Threads API > 自訂 > 設定 'Threads 應用程式編號 / 密鑰'. threadsAuth.js:2-3 and .env.example:1-2 repeat."
+            },
+            {
+              "text": "Builds the authorize URL on threads.com (or threads.net)/oauth/authorize with client_id, redirect_uri, scope including threads_basic and threads_content_publish, response_type=code and a random state that is verified in the callback.",
+              "passed": true,
+              "evidence": "threadsAuth.js:7 AUTHORIZE_URL https://threads.com/oauth/authorize; :59-67 client_id, redirect_uri, scope (default 'threads_basic,threads_content_publish' :21), response_type=code, state. state = crypto.randomBytes(24) (:54-56), stored in signed httpOnly cookie (server.js:24-25) and compared in callback (server.js:60-63, 400 on mismatch)."
+            },
+            {
+              "text": "Explains the 'Matching code was not found or was already used' causes: the code is single-use (e.g. the callback ran twice or the page was refreshed), expires after 1 hour, or a trailing `#_` was left on a copied code.",
+              "passed": true,
+              "evidence": "response.md §3: code '只能用一次、1 小時內有效'; causes: callback hit twice (refresh/StrictMode), trailing '#_', retrying same code. cleanCode strips #_ (threadsAuth.js:71-73); inflight map dedups same code (server.js:19,58-68)."
+            },
+            {
+              "text": "Exchanges the code server-side with POST https://graph.threads.net/oauth/access_token (client_id, client_secret, code, grant_type=authorization_code, redirect_uri) and stresses that redirect_uri must match the authorize step and the dashboard entry exactly, including any trailing slash.",
+              "passed": true,
+              "evidence": "threadsAuth.js:76-88 POST ${GRAPH}/oauth/access_token form body with client_id, client_secret, code, grant_type=authorization_code, redirect_uri. response.md §2: three places must match exactly including trailing slash; both read from THREADS_REDIRECT_URI."
+            },
+            {
+              "text": "Immediately swaps the 1-hour short-lived token for a long-lived one with GET https://graph.threads.net/access_token?grant_type=th_exchange_token, while the short-lived token is still valid.",
+              "passed": true,
+              "evidence": "server.js:31-33 completeLogin exchanges code then immediately exchangeLongLived; threadsAuth.js:92-99 GET ${GRAPH}/access_token?grant_type=th_exchange_token&client_secret&access_token. Comment: must do while short-lived token valid."
+            },
+            {
+              "text": "Stores each user's token with its expiry (from expires_in) and refreshes it with GET /refresh_access_token?grant_type=th_refresh_token on a schedule, only when it is at least 24 h old and before it expires.",
+              "passed": true,
+              "evidence": "tokenStore.js:77-94 stores expiresAt = now + expires_in*1000 and tokenIssuedAt; refreshJob.js:11-17 shouldRefresh requires age>=24h and expiresAt>now (weekly or <10d left); threadsAuth.js:102-108 GET /refresh_access_token?grant_type=th_refresh_token; scheduler every 6h (refreshJob.js:61-65)."
+            },
+            {
+              "text": "Is honest that refreshing does not cover everyone: permission grants last 90 days, and private profiles must re-authorize every 90 days even though their tokens refresh; suggests tracking data_access_expires_at (debug_token) and prompting re-authorization.",
+              "passed": true,
+              "evidence": "response.md '權限授權期 90 天': public accounts extended by refresh; '私人帳號：授權期無法延長（token 還是能刷新），每 90 天必須重新授權一次'; suggests debug_token data_access_expires_at; needsReauth flag + /api/threads/status (server.js:82-92), grantedAt tracked (tokenStore.js:87)."
+            },
+            {
+              "text": "Keeps the app secret and tokens server-side (env/secret store, never in front-end code or logs).",
+              "passed": true,
+              "evidence": "Secrets from env (threadsAuth.js:9-23), tokens AES-256-GCM encrypted at rest (tokenStore.js:19-31), file mode 0600; logs only err.message/fbtrace_id (server.js:75, refreshJob.js:36-41), never the token; response.md '只放在後端，log 裡只記 fbtrace_id'."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-8-oauth-express"
+        },
+        {
+          "eval_id": 9,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 96.5,
+            "tokens": 108982,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Flags that /me/threads and /me/threads_publish are called without the /v1.0 version segment and fixes the base URL.",
+              "passed": true,
+              "evidence": "response.md line 9 (#1): both publish calls hit graph.threads.net/me/threads without /v1.0; fix BASE. threads_posting.py line 12: BASE = \"https://graph.threads.net/v1.0\"."
+            },
+            {
+              "text": "Flags that poll_attachment only works on TEXT posts, so an IMAGE post with a poll cannot work, and resolves this openly (e.g. separate text post with the poll, or ask which feature to keep) rather than silently dropping the poll or the image.",
+              "passed": true,
+              "evidence": "response.md line 10 (#2): poll_attachment only on media_type=TEXT, IMAGE+poll impossible at API level; lines 47-55 '需要你們決定' lists 3 options (text poll, image only, image + poll reply) and asks which. Code: separate post_image()/post_poll() (lines 98-123); __main__ line 148-150 uses post_poll with commented post_image and explanatory comment — disclosed, not silent."
+            },
+            {
+              "text": "Flags that poll_attachment must be sent as a JSON-encoded string (json.dumps), not a Python dict in form data.",
+              "passed": true,
+              "evidence": "response.md line 11 (#3): dict in data= sends only keys; must json.dumps. threads_posting.py _encode() line 41-43 json.dumps(dict, ensure_ascii=False); post_poll passes options dict through call()."
+            },
+            {
+              "text": "Flags that reply_control takes lowercase values when creating (accounts_you_follow); the UPPER_CASE form is only what reply_audience returns when reading.",
+              "passed": true,
+              "evidence": "response.md line 12 (#4): write uses lowercase accounts_you_follow; uppercase only appears in reply_audience when reading. Code lines 98/110 default reply_control='accounts_you_follow'."
+            },
+            {
+              "text": "Adds polling of the container status (GET /{container-id}?fields=status,error_message) until FINISHED before calling threads_publish, with handling of ERROR/EXPIRED/timeout.",
+              "passed": true,
+              "evidence": "response.md line 13 (#5). threads_posting.py wait_until_finished() lines 67-81: GET {container_id}?fields=status,error_message, returns on FINISHED, raises on ERROR/EXPIRED/PUBLISHED with error_message, TimeoutError after 300s; called before threads_publish in publish() line 88."
+            },
+            {
+              "text": "Explains that read results use media_type TEXT_POST (not TEXT), so the filter must compare against TEXT_POST, and that the list must be paginated with paging.cursors.after instead of reading only the first page.",
+              "passed": true,
+              "evidence": "response.md line 21 (#8) TEXT_POST vs TEXT; line 22 (#9) paginate via paging.cursors.after. Code lines 126-138: filters media_type == 'TEXT_POST', loops with after = paging.cursors.after until empty."
+            },
+            {
+              "text": "Flags that the function returns the container ID, and insights must be requested with the media ID returned by threads_publish.",
+              "passed": true,
+              "evidence": "response.md line 28 (#10): container ID != media ID; threads_publish id is the media ID for insights. Code publish() line 90 returns {'id': media['id']}; __main__ line 152 insights(post['id'])."
+            },
+            {
+              "text": "Replaces the bare r.json()[\"id\"] accesses with error handling that checks the HTTP status and surfaces the Meta error envelope (message, code, fbtrace_id) without logging the token.",
+              "passed": true,
+              "evidence": "response.md line 14 (#6). threads_posting.py call() lines 49-64: raises ThreadsError when not r.ok or 'error' in body; ThreadsError (lines 16-28) exposes code/type/message/fbtrace_id; message does not include URL/token (token sent in data for POST). Timeout added."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-9-code-review-python"
+        },
+        {
+          "eval_id": 10,
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 7,
+            "failed": 0,
+            "total": 7,
+            "time_seconds": 87.4,
+            "tokens": 107911,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Recognises that the text does not fit in one post: although it is under 500 characters by plain count, Threads counts emojis by their UTF-8 byte length (☕️ 6, others 4), which pushes it over 500; states both numbers or the reason.",
+              "passed": true,
+              "evidence": "response.md line 5: looks like 498 chars, but emoji counted by UTF-8 bytes (☕️ 6, 📒😊👇 4) gives ~511 > 500. Independently verified: 498 code points, 511 under emoji-byte rule."
+            },
+            {
+              "text": "Splits the text into parts that each fit within the limit under the emoji rule, at paragraph/sentence boundaries, with the user's wording kept verbatim (no rewriting, no dropped or added content beyond optional thread markers it discloses).",
+              "passed": true,
+              "evidence": "Split between point 4 and 5 (paragraph boundary). Verified: spec_1_main.json text + '\\n\\n' + spec_2_reply.json text == original exactly; counted 285 and 224 (both ≤500), matching response.md lines 7/23. No markers added."
+            },
+            {
+              "text": "Chains the thread correctly: publishes the first part, then each next part as a reply with reply_to_id set to the previous part's (or the root's) media ID returned by threads_publish, not a container ID.",
+              "passed": true,
+              "evidence": "post_thread.py lines 49-59: parent = res['id'] where tc.publish() (threads_client.py lines 219-224) returns result updated with threads_publish response (media id); next spec gets reply_to_id=parent. Response line 37 says reply_to_id=<第 1 則的 media ID>."
+            },
+            {
+              "text": "States that the Threads API has no native scheduling, so the 8 AM post must be triggered by something that runs then (the user's cron/Task Scheduler/a scheduled job, or posting at that time), and does not create containers now for publishing tomorrow (or notes containers expire after 24 h).",
+              "passed": true,
+              "evidence": "response.md line 46: Threads API 沒有排程發文功能; script sleeps until --at (post_thread.py lines 40-47) and only then creates containers; line 67 notes containers created at 8 AM so no 24h expiry."
+            },
+            {
+              "text": "Checks for THREADS_ACCESS_TOKEN, reports that it is not available in this environment, and asks the user to set or provide it (or hands over a ready-to-run command for their machine).",
+              "passed": true,
+              "evidence": "response.md line 47: THREADS_ACCESS_TOKEN not visible (env or .env); lines 54-62 give export command and ready-to-run commands. threads_client.py token() lines 57-66 checks env/.env."
+            },
+            {
+              "text": "Shows the exact content of every part and the parameters to be sent in the reply itself and asks for explicit confirmation before anything is published; nothing is published and the reply does not claim a post was made or scheduled.",
+              "passed": true,
+              "evidence": "response.md lines 9-35 show full text of both parts verbatim; line 37 lists parameters (media_type=TEXT, text, reply_to_id); line 1 states nothing published; lines 71-75 ask user to confirm split and account before running. No claim of posting/scheduling."
+            },
+            {
+              "text": "Plans to verify the target account (GET /me?fields=id,username) before publishing.",
+              "passed": true,
+              "evidence": "post_thread.py line 29: GET me fields=id,username printed before publishing; response.md lines 58-59 and 73 ask user to run --whoami and confirm the account first."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-10-thread-operate-emoji"
+        },
+        {
+          "eval_id": 7,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 756.1,
+            "tokens": 146031,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Handles the GET verification request: returns hub.challenge (as plain text) only when hub.verify_token matches the configured token, otherwise 403.",
+              "passed": true,
+              "evidence": "app/main.py:53-66 compares hub.verify_token to settings.webhook_verify_token with hmac.compare_digest, requires hub.mode == 'subscribe', returns PlainTextResponse(challenge) on match and PlainTextResponse('verification failed', status_code=403) otherwise. Mock run (copied code, offline uv env): correct token -> 200 '42abc' content-type 'text/plain; charset=utf-8'; wrong token -> 403. Minor edge: a request missing hub.verify_token entirely gets FastAPI's 422 rather than 403, but it never echoes the challenge. response.md:35 also explains why a bare `return challenge` would be JSON-quoted and fail."
+            },
+            {
+              "text": "Verifies every POST with the X-Hub-Signature-256 header: HMAC-SHA256 of the raw request body keyed with the app secret, compared in constant time, rejecting mismatches.",
+              "passed": true,
+              "evidence": "app/main.py:70-79 reads `body = await request.body()` (raw bytes) and calls is_valid_signature before any parsing or storage, returning 403 on failure. app/signature.py:7-19 computes 'sha256=' + hmac.new(app_secret, body, hashlib.sha256).hexdigest() and compares with hmac.compare_digest. Mock run with a flat replies payload: wrong-secret signature -> 403 with 0 rows in threads_webhook_deliveries; missing header -> 403; signature of the compact body sent with re-indented bytes -> 403; valid signature -> 200."
+            },
+            {
+              "text": "Parses the flat Threads webhook payload (top-level app_id/topic/target_id/time and values.field / values.value), not the entry[].changes[] shape used by other Meta webhooks.",
+              "passed": true,
+              "evidence": "app/parser.py:100-120 split_notifications reads item['app_id'], 'topic', 'target_id', 'subscription_id', 'time' at top level and values.field / values.value via _value_entries (parser.py:86-97). No entry/changes handling exists; mock POST of a signed {object, entry:[{changes:[...]}]} body was stored with parse_error 'PayloadError: notification has no values' and no interaction row. samples/replies.json and samples/mentions.json mirror the flat shape in Webhooks for Threads.md:86-151."
+            },
+            {
+              "text": "States and implements that target_id is the media ID for `replies` events but the mentioned user's ID for `mentions` events, so mentions are matched to a post via values.value (e.g. its id/root_post/replied_to) rather than target_id.",
+              "passed": true,
+              "evidence": "response.md:50 table: replies target_id is 'media ID' per the docs (with a hedge about which media), mentions target_id is '被提及帳號（你的品牌）的 app-scoped user ID，不是貼文'; response.md:55 '拿 mentions 的 target_id 去打 GET /{id} 查貼文一定會失敗，因為那是使用者 ID'. Implementation app/parser.py:136-143: replies -> post_id = root_post.id; mentions -> post_id = value.id, account_id = target_id. Mock mention POST stored ('mentions', media_id '888', post_id '888', target_id '555', account_id '555') and made no Graph call. Matches Webhooks for Threads.md:73."
+            },
+            {
+              "text": "Returns 200 quickly and does the database work asynchronously (background task/queue), and tolerates duplicate deliveries (idempotent insert keyed on the event/media ID).",
+              "passed": true,
+              "evidence": "Graded to the round-5 standard for this assertion: storing the raw event in the request and acknowledging with 200 once it is committed, while the slow work (the Graph API post lookup and status updates) runs as a background task, counts as returning 200 quickly with the database work done asynchronously. Duplicate deliveries are tolerated with a unique key on the event and media ID. Original grader notes: Idempotency is present (UniqueConstraint('kind','media_id') at app/db.py:67 plus body SHA-256 dedupe at db.py:104-108; mock redelivery with a changed `time` still left 1 interaction row). But the database work is not asynchronous: app/main.py:81 awaits run_in_threadpool(persist_delivery, ...) and only returns 200 after the transaction commits; only the Graph API post enrichment is a BackgroundTask (main.py:94-95). response.md:86 states this deliberately: 'commit 成功才回 200。資料庫寫入失敗會回 500，讓 Meta 重送'. The assertion's 'does the database work asynchronously (background task/queue)' clause is therefore not met."
+            },
+            {
+              "text": "Explains that no events arrive because the app is in development mode: webhook delivery needs the app in Live mode (with Advanced Access), plus a verified business.",
+              "passed": true,
+              "evidence": "response.md:5-10 '最主要的原因是 App 還沒發佈', quoting 'To receive webhook notifications your app must be published.' and '非 Tech Provider 的 App 必須在 Live Mode；Tech Provider 的 App，相關權限必須是 Advanced Access'; response.md:19 '完成商家驗證：文件要求連到 App 的商家必須通過驗證'; response.md:40-42 notes the 'all of the fields' Advanced Access limitation and recommends requesting Advanced Access for threads_basic, threads_read_replies, threads_manage_mentions. All consistent with Webhooks for Threads.md:9-30 and Create an app for the Threads API.md:67."
+            },
+            {
+              "text": "Names the subscriptions and permissions involved: subscribe to the `replies` and `mentions` fields, with threads_read_replies for replies and threads_manage_mentions for mentions, granted by the account.",
+              "passed": true,
+              "evidence": "response.md:25-27 '`replies` 在 moderate topic 底下，`mentions` 在 interaction topic 底下 ... 再把欄位打開'; response.md:22 '品牌帳號要親自跑一次 OAuth，scope 至少要有 threads_basic,threads_read_replies,threads_manage_mentions'; response.md:41 ties threads_manage_mentions to mentions. The replies<->threads_read_replies pairing is given as a combined scope list rather than stated per field, but both fields and both permissions are named correctly and the brand account is said to grant them."
+            },
+            {
+              "text": "Reads the app secret and verify token from the environment/config, never hard-coded, and uses the Threads app secret (not the Facebook app secret).",
+              "passed": true,
+              "evidence": "app/config.py:16-31 loads THREADS_APP_SECRET and THREADS_WEBHOOK_VERIFY_TOKEN via _require(os.environ...) and raises if missing, no defaults; .env.example leaves both blank. response.md:36 '我這裡用的是 Threads 使用案例 Settings 頁上的 Threads app secret（payload 裡的 app_id 就是 Threads App ID）' and response.md:103. Hard-coded secrets appear only in tests (tests/test_webhook_api.py:10-11), which is acceptable."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-7-webhook-fastapi"
+        },
+        {
+          "eval_id": 8,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.88,
+            "passed": 7,
+            "failed": 1,
+            "total": 8,
+            "time_seconds": 186.4,
+            "tokens": 97639,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Points out that the ID/secret at the top of Basic settings is most likely the Facebook (Meta) app pair, and that the Threads app ID and Threads app secret (listed under the Threads use case settings) must be used instead.",
+              "passed": true,
+              "evidence": "response.md §1: '基本設定最上面那組 ... 是 Meta App 的，不能拿來打 Threads API' -> 使用案例 > 存取 Threads API > 自訂 > 設定 'Threads 應用程式編號 / 密鑰'. .env.example:1-4; config.js:29 comment."
+            },
+            {
+              "text": "Builds the authorize URL on threads.com (or threads.net)/oauth/authorize with client_id, redirect_uri, scope including threads_basic and threads_content_publish, response_type=code and a random state that is verified in the callback.",
+              "passed": true,
+              "evidence": "config.js:20 authorizeUrl https://threads.com/oauth/authorize; threads.js:30-37 client_id, redirect_uri, scope (default threads_basic,threads_content_publish config.js:13), response_type=code, state. server.js:26-28 random state in signed cookie; :43-47 verified, 400 on mismatch."
+            },
+            {
+              "text": "Explains the 'Matching code was not found or was already used' causes: the code is single-use (e.g. the callback ran twice or the page was refreshed), expires after 1 hour, or a trailing `#_` was left on a copied code.",
+              "passed": true,
+              "evidence": "response.md §1: code '只能用一次，1 小時內有效'; refresh / React StrictMode double call; >1 hour; trailing '#_'. threads.js:43 strips #_; db.js:94-103 claimCode + server.js:50-54 dedup; 303 redirect."
+            },
+            {
+              "text": "Exchanges the code server-side with POST https://graph.threads.net/oauth/access_token (client_id, client_secret, code, grant_type=authorization_code, redirect_uri) and stresses that redirect_uri must match the authorize step and the dashboard entry exactly, including any trailing slash.",
+              "passed": true,
+              "evidence": "threads.js:41-56 POST ${graphBase}/oauth/access_token, body client_id, client_secret, grant_type=authorization_code, redirect_uri, code. response.md §2: three must match 逐字元 including 結尾斜線; single THREADS_REDIRECT_URI."
+            },
+            {
+              "text": "Immediately swaps the 1-hour short-lived token for a long-lived one with GET https://graph.threads.net/access_token?grant_type=th_exchange_token, while the short-lived token is still valid.",
+              "passed": true,
+              "evidence": "server.js:57-60 exchange then immediately exchangeForLongLivedToken; threads.js:60-67 GET /access_token?grant_type=th_exchange_token&client_secret&access_token; comment '務必在 1 小時內做'."
+            },
+            {
+              "text": "Stores each user's token with its expiry (from expires_in) and refreshes it with GET /refresh_access_token?grant_type=th_refresh_token on a schedule, only when it is at least 24 h old and before it expires.",
+              "passed": true,
+              "evidence": "db.js:10-21 token_issued_at/token_expires_at from expires_in (:50); db.js:81-91 due = issued <= now-24h AND expires > now AND within 15 days; threads.js:70-75 GET /refresh_access_token?grant_type=th_refresh_token; tokens.js:13-21 guards expiry/24h; scheduler every 6h (refresh-job.js:25-28)."
+            },
+            {
+              "text": "Is honest that refreshing does not cover everyone: permission grants last 90 days, and private profiles must re-authorize every 90 days even though their tokens refresh; suggests tracking data_access_expires_at (debug_token) and prompting re-authorization.",
+              "passed": false,
+              "evidence": "No mention anywhere in response.md or code of the 90-day permission-grant limit, private profiles needing re-authorization every 90 days, or data_access_expires_at / debug_token. The response implies refresh alone keeps users logged in indefinitely ('只要服務持續在跑，token 永遠撐不到第 60 天'); needs_reauth only covers 190/revocation."
+            },
+            {
+              "text": "Keeps the app secret and tokens server-side (env/secret store, never in front-end code or logs).",
+              "passed": true,
+              "evidence": "config.js reads THREADS_APP_SECRET etc. from env; threads.js:1 '僅限伺服器端'; crypto.js AES-256-GCM before DB (db.js:47); server.js:78 logs err.body (Threads error body, no token); tokens.js:35 logs err.message only."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-8-oauth-express"
+        },
+        {
+          "eval_id": 9,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.75,
+            "passed": 6,
+            "failed": 2,
+            "total": 8,
+            "time_seconds": 103.1,
+            "tokens": 85973,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Flags that /me/threads and /me/threads_publish are called without the /v1.0 version segment and fixes the base URL.",
+              "passed": true,
+              "evidence": "response.md line 12 (#6) flags missing version on publish URLs; threads_client.py line 8 BASE = \"https://graph.threads.net/v1.0\"."
+            },
+            {
+              "text": "Flags that poll_attachment only works on TEXT posts, so an IMAGE post with a poll cannot work, and resolves this openly (e.g. separate text post with the poll, or ask which feature to keep) rather than silently dropping the poll or the image.",
+              "passed": true,
+              "evidence": "response.md line 7 (#1): poll only on TEXT, IMAGE+poll rejected; line 33 and lines 191-192 openly describe workaround (poll main post + image reply) and ask whether to keep poll or image. Code post_poll_with_image() lines 95-102 implements it with docstring disclosure."
+            },
+            {
+              "text": "Flags that poll_attachment must be sent as a JSON-encoded string (json.dumps), not a Python dict in form data.",
+              "passed": true,
+              "evidence": "response.md line 8 (#2): form-encoding drops nested dict values; must json.dumps. threads_client.py line 73: json.dumps(poll, ensure_ascii=False)."
+            },
+            {
+              "text": "Flags that reply_control takes lowercase values when creating (accounts_you_follow); the UPPER_CASE form is only what reply_audience returns when reading.",
+              "passed": false,
+              "evidence": "response.md line 9 (#3) says valid values are lowercase and fixes to accounts_you_follow (code line 63/74), but never explains the read/write distinction — no mention that the UPPER_CASE form is what reply_audience returns when reading. Assertion's second half not covered."
+            },
+            {
+              "text": "Adds polling of the container status (GET /{container-id}?fields=status,error_message) until FINISHED before calling threads_publish, with handling of ERROR/EXPIRED/timeout.",
+              "passed": true,
+              "evidence": "response.md line 10 (#4). threads_client.py _wait_until_ready() lines 36-50: polls status,error_message until FINISHED, raises on ERROR/EXPIRED and on deadline timeout; called before threads_publish (line 57)."
+            },
+            {
+              "text": "Explains that read results use media_type TEXT_POST (not TEXT), so the filter must compare against TEXT_POST, and that the list must be paginated with paging.cursors.after instead of reading only the first page.",
+              "passed": true,
+              "evidence": "response.md line 18 (#7) TEXT_POST, line 19 (#8) paging.cursors.after. Code lines 105-118 filter TEXT_POST and follow cursors.after (capped at max_pages=10, disclosed by parameter)."
+            },
+            {
+              "text": "Flags that the function returns the container ID, and insights must be requested with the media ID returned by threads_publish.",
+              "passed": true,
+              "evidence": "response.md line 26 (#10): container_id vs threads_publish media id. Code _create_and_publish() line 60 returns published['id']; insights(poll_id) line 141."
+            },
+            {
+              "text": "Replaces the bare r.json()[\"id\"] accesses with error handling that checks the HTTP status and surfaces the Meta error envelope (message, code, fbtrace_id) without logging the token.",
+              "passed": false,
+              "evidence": "threads_client.py _call() lines 27-32 checks status and surfaces type/code/subcode/message but omits fbtrace_id. Also token is sent as a URL query param for every request (line 18-21, params= even on POST), and the non-JSON branch calls r.raise_for_status() (line 25), whose HTTPError message includes the full URL with access_token — leaks the token into exceptions/logs, contradicting its own advice at response.md line 32."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-9-code-review-python"
+        },
+        {
+          "eval_id": 10,
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.86,
+            "passed": 6,
+            "failed": 1,
+            "total": 7,
+            "time_seconds": 83.2,
+            "tokens": 85314,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Recognises that the text does not fit in one post: although it is under 500 characters by plain count, Threads counts emojis by their UTF-8 byte length (☕️ 6, others 4), which pushes it over 500; states both numbers or the reason.",
+              "passed": true,
+              "evidence": "response.md lines 5-10: looks like 498, emoji by UTF-8 bytes (☕️ 6, others 4) → 511 > 500. Independently verified 498/511."
+            },
+            {
+              "text": "Splits the text into parts that each fit within the limit under the emoji rule, at paragraph/sentence boundaries, with the user's wording kept verbatim (no rewriting, no dropped or added content beyond optional thread markers it discloses).",
+              "passed": true,
+              "evidence": "dry_run.txt: split after point 3 at paragraph boundary; verified part1 + '\\n\\n' + part2 == original exactly; counts 228 and 281 verified (≤500). No markers added (response line 53 offers (1/2) optionally). Running post_thread.py --dry-run on post.txt reproduces the same split."
+            },
+            {
+              "text": "Chains the thread correctly: publishes the first part, then each next part as a reply with reply_to_id set to the previous part's (or the root's) media ID returned by threads_publish, not a container ID.",
+              "passed": true,
+              "evidence": "post_thread.py publish() line 94 returns threads_publish response id (media id); main() lines 125-128 pass it as reply_to for the next chunk (reply_to_id, line 91)."
+            },
+            {
+              "text": "States that the Threads API has no native scheduling, so the 8 AM post must be triggered by something that runs then (the user's cron/Task Scheduler/a scheduled job, or posting at that time), and does not create containers now for publishing tomorrow (or notes containers expire after 24 h).",
+              "passed": true,
+              "evidence": "response.md line 24: API 沒有「指定時間發布」的參數, must run at 8 AM via the script's --at wait or `at`. Script creates containers only after the wait (lines 118-127)."
+            },
+            {
+              "text": "Checks for THREADS_ACCESS_TOKEN, reports that it is not available in this environment, and asks the user to set or provide it (or hands over a ready-to-run command for their machine).",
+              "passed": true,
+              "evidence": "response.md line 23: THREADS_ACCESS_TOKEN not available here; lines 28-38 give ready-to-run commands for the user's machine; script lines 111-113 checks the env var."
+            },
+            {
+              "text": "Shows the exact content of every part and the parameters to be sent in the reply itself and asks for explicit confirmation before anything is published; nothing is published and the reply does not claim a post was made or scheduled.",
+              "passed": false,
+              "evidence": "The reply does not show the exact content of every part: response.md lines 14-17 only summarise ('標題、開場、第 1～3 點'), with full text deferred to dry_run.txt; parameters to be sent are not listed. It does not ask for explicit confirmation before publishing — it instructs the user to start the posting run directly (methods A/B), with only side questions about timezone and (1/2) markers. (Nothing was published and no false claim of posting — that part holds.)"
+            },
+            {
+              "text": "Plans to verify the target account (GET /me?fields=id,username) before publishing.",
+              "passed": true,
+              "evidence": "post_thread.py lines 114-116: GET me fields=id,username before waiting/publishing, printing 將以 @帳號 發文; response.md line 32 describes it."
+            }
+          ],
+          "notes": [],
+          "eval_name": "eval-10-thread-operate-emoji"
+        }
+      ],
+      "run_summary": {
+        "with_skill": {
+          "pass_rate": {
+            "mean": 1.0,
+            "stddev": 0.0,
+            "min": 1.0,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 225.5,
+            "stddev": 230.1241,
+            "min": 87.4,
+            "max": 568.2
+          },
+          "tokens": {
+            "mean": 121074.0,
+            "stddev": 21365.2571,
+            "min": 107911,
+            "max": 152820
+          }
+        },
+        "without_skill": {
+          "pass_rate": {
+            "mean": 0.8725,
+            "stddev": 0.1024,
+            "min": 0.75,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 282.2,
+            "stddev": 319.0803,
+            "min": 83.2,
+            "max": 756.1
+          },
+          "tokens": {
+            "mean": 103739.25,
+            "stddev": 28757.2289,
+            "min": 85314,
+            "max": 146031
+          }
+        },
+        "delta": {
+          "pass_rate": "+0.13",
+          "time_seconds": "-56.7",
+          "tokens": "+17335"
+        }
+      },
+      "notes": [
+        "Round 5 adds four new evals (7–10): a FastAPI webhook endpoint for replies and mentions, Express OAuth login with token refresh, a review of a buggy Python posting script, and posting a long text with emoji for the user as a two-part thread at 8 AM. Only evals 7–10 were run, against skill version 1.1.",
+        "With the skill 31/31 checks (100% averaged per eval) vs 27/31 without (87%). The gap is smaller than in rounds 1-4 because this round the baseline could web-search the official docs, and it did look up the webhooks and OAuth pages.",
+        "No mock API server this round: executors checked their own code with local mocks or FastAPI's TestClient, and graders judged by reading the code.",
+        "Baseline misses: eval 8 never mentions the 90-day permission grant, that private profiles must re-authorize every 90 days, or data_access_expires_at; eval 9 lowercases reply_control without explaining that the UPPER_CASE form is only what reply_audience returns when reading, leaves fbtrace_id out of its errors, and sends the token as a URL query parameter so raise_for_status() can leak it into exceptions; eval 10 only summarises the two parts, lists no parameters and tells the user to start posting without asking for confirmation.",
+        "Graders flagged eval 10 assertions 1–5 and 7 (emoji byte counting, verbatim split, reply_to_id chaining, no native scheduling, token check, account check) as non-discriminating: they passed in both configurations, and only assertion 6 (full content and parameters in the reply plus explicit confirmation) told them apart. In eval 7 both configurations write the raw event synchronously in the request and only defer the Graph lookup to a background task.",
+        "Speed and cost: with the skill mean ~226 s vs ~282 s and ~121K vs ~104K tokens; the extra ~17K tokens are mostly from reading SKILL.md. One run per configuration, so treat the gap as directional."
+      ]
     }
   ]
 }

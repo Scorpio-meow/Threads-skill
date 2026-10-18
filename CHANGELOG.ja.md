@@ -6,6 +6,15 @@
 
 ## 未リリース
 
+### 追加
+
+- 問題 7–10（FastAPI でリプライとメンションを受け取る webhook、Express での OAuth ログインと長期トークンの延長、不具合のある Python 投稿コードのレビュー、絵文字を含むスレッドを翌朝 8 時に代理投稿）とラウンド 5 の評価結果。4 言語の benchmark 概要と `evals/benchmark.json` に記録。
+
+### 変更
+
+- SKILL.md の第 10 節に *(practice)* の 1 行を追加：同じ webhook イベントが複数回届くことがあるため、処理は冪等にし、生の body のハッシュではなく `values.field` と media ID をキーにする。追加後はまだ評価を再実行していません。
+- `threads-api/SKILL.md` の `metadata.version` を 1.2 に変更。
+
 ### 修正
 
 - GitHub のリポジトリページの Contributing などのタブでは、コミュニティファイル内の相対リンクがリポジトリのルートから解決され、404 になっていた。リポジトリのルートから数える `/` 始まりのパスに変更。

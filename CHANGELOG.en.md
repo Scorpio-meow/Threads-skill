@@ -6,6 +6,15 @@ Notable changes to this project are recorded here, following the format of [Keep
 
 ## Unreleased
 
+### Added
+
+- Questions 7–10 (a FastAPI webhook for replies and mentions, Express OAuth login with long-lived token refresh, reviewing a buggy Python posting script, posting a thread with emoji at 8 AM the next day on the user's behalf) and the round 5 results, recorded in all four benchmark summaries and `evals/benchmark.json`.
+
+### Changed
+
+- Section 10 of SKILL.md gains a *(practice)* line: the same webhook event can arrive more than once, so processing should be idempotent, keyed on `values.field` plus the media ID, not on a hash of the raw body. The evals haven't been rerun since it was added.
+- `metadata.version` in `threads-api/SKILL.md` raised to 1.2.
+
 ### Fixed
 
 - The Contributing and other tabs on the GitHub repository page resolve relative links in the community files from the repository root, so they returned 404; the links now use paths that start with `/`, counted from the repository root.

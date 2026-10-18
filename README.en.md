@@ -227,23 +227,27 @@ python3 threads_client.py delete <media-id>           # Delete a post; cannot be
 
 ## Test results
 
-We compared "with skill" and "without skill" using the same model: each task ran once under each setup, and a grader that took no part in answering checked every result against a predefined checklist, item by item. The skill was revised between rounds based on the grader's feedback, for four rounds in total; round 4 ran only the new task 6, after the skill gained the embedding section. The tasks and checklists are in [`evals/evals.json`](evals/evals.json).
+We compared "with skill" and "without skill" using the same model: each task ran once under each setup, and a grader that took no part in answering checked every result against a predefined checklist, item by item. The skill was revised between rounds based on the grader's feedback, for five rounds in total; round 4 ran only the new task 6, after the skill gained the embedding section, and round 5 ran only the new tasks 7–10. The tasks and checklists are in [`evals/evals.json`](evals/evals.json).
 
 Each cell shows the number of checklist items passed, formatted as "with skill vs without skill":
 
-| Task | Round 1 | Round 2 | Round 3 | Round 4 |
-|---|---|---|---|---|
-| 1. Python carousel post (two images + one video) | 8/8 vs 8/8 | — | — | — |
-| 2. TypeScript daily insights job with token refresh | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — |
-| 3. Publishing a ghost post with a poll on the user's behalf | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — |
-| 4. Diagnosing unexpected search, location, and profile lookup results | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — |
-| 5. Auto-hiding replies that contain keywords | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — |
-| 6. A 60-post Threads wall plus a weekly check for deleted posts | — | — | — | 8/8 vs 2/8 |
-| **Average pass rate** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** |
+| Task | Round 1 | Round 2 | Round 3 | Round 4 | Round 5 |
+|---|---|---|---|---|---|
+| 1. Python carousel post (two images + one video) | 8/8 vs 8/8 | — | — | — | — |
+| 2. TypeScript daily insights job with token refresh | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — |
+| 3. Publishing a ghost post with a poll on the user's behalf | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — |
+| 4. Diagnosing unexpected search, location, and profile lookup results | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — |
+| 5. Auto-hiding replies that contain keywords | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — |
+| 6. A 60-post Threads wall plus a weekly check for deleted posts | — | — | — | 8/8 vs 2/8 | — |
+| 7. FastAPI webhook for replies and mentions | — | — | — | — | 8/8 vs 8/8 |
+| 8. Express OAuth login with long-lived token refresh | — | — | — | — | 8/8 vs 7/8 |
+| 9. Reviewing a buggy Python posting script | — | — | — | — | 8/8 vs 6/8 |
+| 10. Posting a thread with emoji at 8 AM the next day on the user's behalf | — | — | — | — | 7/7 vs 6/7 |
+| **Average pass rate** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** |
 
 - The average pass rate is the mean of the per-task pass rates. Task 1 scored full marks on both sides and didn't separate them, so rounds 2 onward use tasks 2–5; task 3 gained one checklist item starting in round 2.
 - Each task ran only once per setup, so the sample is tiny and the numbers only indicate direction. For example, the without-skill version of task 2 lost points on pagination and token refresh in the first two rounds, then scored full marks in round 3.
-- Nearly every point lost without the skill came from not knowing the rules in the docs, not from being unable to write the code; the examples in "What difference does the skill make" all come from these tests.
+- Nearly every point lost without the skill came from not knowing the rules in the docs, not from being unable to write the code; the examples in "What difference does the skill make" all come from these tests. In round 5 the without-skill setup could search the web for the official docs, and did, so the gap narrowed to 100% vs 87%.
 
 For each round's eval setup, time and token usage, and the reason behind every lost point, see the [benchmark summary](evals/BENCHMARK.en.md); item-by-item verdicts and the grader's evidence are in [evals/benchmark.json](evals/benchmark.json).
 

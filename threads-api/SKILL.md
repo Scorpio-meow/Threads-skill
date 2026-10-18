@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Operate mode runs the bundled Python 3.8+ client (standard library only) and needs HTTPS access to graph.threads.net plus THREADS_ACCESS_TOKEN from the environment or a .env file in the working folder. Build and Embed don't need the client or a token."
 metadata:
   author: Scorpio-meow
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Threads API
@@ -220,6 +220,7 @@ App-level, per app–user pair, rolling 24 h: calls ≤ 4800 × impressions (imp
 - Delivery requires the app in Live mode (Advanced Access for tech providers), a verified business, and the user's granted permissions; replies and mentions only fire on media owned by non-private accounts; delete and publish fire for public accounts or private ones that authorized the app. The docs conflict on App Review: the webhooks page says Advanced Access is needed to get notifications for all fields, the app-setup page says App Review isn't required — if a Live app gets no events, check Advanced Access next.
 - Payload (flat, not the `entry[].changes[]` shape of other Meta webhooks): `{"app_id","topic","target_id","time","subscription_id","has_uid_field","values":{"value":{…media fields…},"field":"replies|mentions|delete|publish"}}`. `target_id` is the media ID for `replies` and `delete`, but the mentioned user's ID for `mentions`. Delete payloads carry `deleted_at`.
 - *(general Meta webhooks behavior, outside this doc set)* Answer the GET verification by echoing `hub.challenge` when `hub.verify_token` matches; verify each POST's `X-Hub-Signature-256` (HMAC-SHA256 of the raw body with the app secret); return 200 quickly and process asynchronously.
+- *(practice)* The same event can arrive more than once: make processing idempotent, keyed on `values.field` plus the media ID (`values.value.id`; for `replies` and `delete` that's also `target_id`), not on a hash of the raw body, since a redelivery isn't guaranteed to be byte-identical.
 
 ## 11. Embedding posts, oEmbed and Web Intents
 

@@ -6,6 +6,15 @@
 
 ## 未發布
 
+### 新增
+
+- 第 7–10 題（FastAPI 接收留言與提及的 webhook、Express 的 OAuth 登入與長期 token 續期、審查一段出錯的 Python 發文程式、隔天早上 8 點代發含 emoji 的串文）與第 5 輪評測結果，記在四語版 benchmark 摘要和 `evals/benchmark.json`。
+
+### 變更
+
+- SKILL.md 第 10 節新增一條 *(practice)*：同一個 webhook 事件可能送達不只一次，處理要做到冪等，以 `values.field` 加上 media ID 為鍵，不要用原始 body 的雜湊。加入後還沒重跑評測。
+- `threads-api/SKILL.md` 的 `metadata.version` 調高為 1.2。
+
 ### 修正
 
 - GitHub 首頁的 Contributing 等分頁會從 repo 根目錄解析社群檔案裡的相對連結，點了會 404；改用以 `/` 開頭、從 repo 根目錄算起的路徑。

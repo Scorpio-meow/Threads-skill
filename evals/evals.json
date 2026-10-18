@@ -93,6 +93,69 @@
         "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
         "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL."
       ]
+    },
+    {
+      "id": 7,
+      "prompt": "我們用 Python + FastAPI 做客服系統，想用 Threads Webhooks 即時收到品牌帳號（公開帳號）的新留言和被提及（mention）的通知，收到後寫進資料庫，並用通知裡的 target_id 去查是哪一則貼文。App 現在還在開發模式，我用自己的帳號去留言測試，callback 一個事件都沒收到。請幫我寫 webhook 端點，也告訴我為什麼收不到。",
+      "expected_output": "A FastAPI webhook endpoint: GET verification echoing hub.challenge, X-Hub-Signature-256 HMAC check on the raw body with the Threads app secret, parsing of the flat Threads payload (values.field/values.value, not entry[].changes[]), correct target_id semantics (media ID for replies, mentioned user's ID for mentions), fast 200 with async processing. Explains that delivery needs a Live app with Advanced Access, a verified business, the right permissions and field subscriptions.",
+      "files": [],
+      "expectations": [
+        "Handles the GET verification request: returns hub.challenge (as plain text) only when hub.verify_token matches the configured token, otherwise 403.",
+        "Verifies every POST with the X-Hub-Signature-256 header: HMAC-SHA256 of the raw request body keyed with the app secret, compared in constant time, rejecting mismatches.",
+        "Parses the flat Threads webhook payload (top-level app_id/topic/target_id/time and values.field / values.value), not the entry[].changes[] shape used by other Meta webhooks.",
+        "States and implements that target_id is the media ID for `replies` events but the mentioned user's ID for `mentions` events, so mentions are matched to a post via values.value (e.g. its id/root_post/replied_to) rather than target_id.",
+        "Returns 200 quickly and does the database work asynchronously (background task/queue), and tolerates duplicate deliveries (idempotent insert keyed on the event/media ID).",
+        "Explains that no events arrive because the app is in development mode: webhook delivery needs the app in Live mode (with Advanced Access), plus a verified business.",
+        "Names the subscriptions and permissions involved: subscribe to the `replies` and `mentions` fields, with threads_read_replies for replies and threads_manage_mentions for mentions, granted by the account.",
+        "Reads the app secret and verify token from the environment/config, never hard-coded, and uses the Threads app secret (not the Facebook app secret)."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "我在做一個讓用戶用 Threads 帳號登入、幫他們排程發文的 SaaS，後端是 Node.js + Express。OAuth 換 token 那一步一直回「Matching code was not found or was already used」，有時候則是 redirect_uri 不符。我現在用的是 App 後台「基本設定」最上面那組應用程式編號和應用程式密鑰。請幫我把整個授權流程寫對：登入、callback、換成長期 token、存起來，而且要讓用戶不用每 60 天重新登入。",
+      "expected_output": "Express routes for the Threads OAuth flow with state/CSRF, a server-side code exchange using the Threads app ID/secret with an identical redirect_uri, immediate long-lived exchange, token storage with expiry and scheduled th_refresh_token refresh; diagnoses the 'Matching code' and redirect_uri errors and the wrong app credential pair; is honest that private profiles still need re-authorization every 90 days.",
+      "files": [],
+      "expectations": [
+        "Points out that the ID/secret at the top of Basic settings is most likely the Facebook (Meta) app pair, and that the Threads app ID and Threads app secret (listed under the Threads use case settings) must be used instead.",
+        "Builds the authorize URL on threads.com (or threads.net)/oauth/authorize with client_id, redirect_uri, scope including threads_basic and threads_content_publish, response_type=code and a random state that is verified in the callback.",
+        "Explains the 'Matching code was not found or was already used' causes: the code is single-use (e.g. the callback ran twice or the page was refreshed), expires after 1 hour, or a trailing `#_` was left on a copied code.",
+        "Exchanges the code server-side with POST https://graph.threads.net/oauth/access_token (client_id, client_secret, code, grant_type=authorization_code, redirect_uri) and stresses that redirect_uri must match the authorize step and the dashboard entry exactly, including any trailing slash.",
+        "Immediately swaps the 1-hour short-lived token for a long-lived one with GET https://graph.threads.net/access_token?grant_type=th_exchange_token, while the short-lived token is still valid.",
+        "Stores each user's token with its expiry (from expires_in) and refreshes it with GET /refresh_access_token?grant_type=th_refresh_token on a schedule, only when it is at least 24 h old and before it expires.",
+        "Is honest that refreshing does not cover everyone: permission grants last 90 days, and private profiles must re-authorize every 90 days even though their tokens refresh; suggests tracking data_access_expires_at (debug_token) and prompting re-authorization.",
+        "Keeps the app secret and tokens server-side (env/secret store, never in front-end code or logs)."
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "同事寫的這段 Threads 發文程式上線後問題一堆：發文常常失敗或報錯、篩選純文字貼文永遠回傳空清單、抓數據也一直報錯。幫我 code review，列出每個問題的原因，然後給一份修好的版本。\n\n```python\nimport os\nimport requests\n\nTOKEN = os.environ[\"THREADS_TOKEN\"]\nBASE = \"https://graph.threads.net\"\n\n\ndef post_image_with_poll(text, image_url):\n    r = requests.post(f\"{BASE}/me/threads\", data={\n        \"media_type\": \"IMAGE\",\n        \"image_url\": image_url,\n        \"text\": text,\n        \"poll_attachment\": {\"option_a\": \"要\", \"option_b\": \"不要\"},\n        \"reply_control\": \"ACCOUNTS_YOU_FOLLOW\",\n        \"access_token\": TOKEN,\n    })\n    container_id = r.json()[\"id\"]\n    r = requests.post(f\"{BASE}/me/threads_publish\",\n                      data={\"creation_id\": container_id, \"access_token\": TOKEN})\n    print(\"published\", r.json())\n    return container_id\n\n\ndef text_posts_only():\n    r = requests.get(f\"{BASE}/v1.0/me/threads\",\n                     params={\"fields\": \"id,text,media_type\", \"access_token\": TOKEN})\n    return [p for p in r.json()[\"data\"] if p[\"media_type\"] == \"TEXT\"]\n\n\ndef insights(post_id):\n    r = requests.get(f\"{BASE}/v1.0/{post_id}/insights\",\n                     params={\"metric\": \"views,likes\", \"access_token\": TOKEN})\n    return r.json()\n\n\nif __name__ == \"__main__\":\n    pid = post_image_with_poll(\"新品要不要出大杯？\", \"https://cdn.example.com/cup.jpg\")\n    print(insights(pid))\n    print(len(text_posts_only()))\n```",
+      "expected_output": "A review naming each defect with its cause, and a corrected version: /v1.0 on every call, poll is TEXT-only and a JSON string (resolve the IMAGE+poll conflict openly), lowercase reply_control, wait for FINISHED before publishing, compare against TEXT_POST and paginate, insights by media ID not container ID, real error handling.",
+      "files": [],
+      "expectations": [
+        "Flags that /me/threads and /me/threads_publish are called without the /v1.0 version segment and fixes the base URL.",
+        "Flags that poll_attachment only works on TEXT posts, so an IMAGE post with a poll cannot work, and resolves this openly (e.g. separate text post with the poll, or ask which feature to keep) rather than silently dropping the poll or the image.",
+        "Flags that poll_attachment must be sent as a JSON-encoded string (json.dumps), not a Python dict in form data.",
+        "Flags that reply_control takes lowercase values when creating (accounts_you_follow); the UPPER_CASE form is only what reply_audience returns when reading.",
+        "Adds polling of the container status (GET /{container-id}?fields=status,error_message) until FINISHED before calling threads_publish, with handling of ERROR/EXPIRED/timeout.",
+        "Explains that read results use media_type TEXT_POST (not TEXT), so the filter must compare against TEXT_POST, and that the list must be paginated with paging.cursors.after instead of reading only the first page.",
+        "Flags that the function returns the container ID, and insights must be requested with the media ID returned by threads_publish.",
+        "Replaces the bare r.json()[\"id\"] accesses with error handling that checks the HTTP status and surfaces the Meta error envelope (message, code, fbtrace_id) without logging the token."
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "幫我把下面這篇文字發到 Threads，明天早上 8 點發。如果一則放得下就發一則，放不下就拆成串文（第一則當主文，其餘依序回覆在下面）。token 在環境變數 THREADS_ACCESS_TOKEN。\n\n【在家手沖入門：我花三年踩過的坑】☕️\n\n很多人問我在家手沖要從哪裡開始，今天一次整理。\n\n1. 豆子比器材重要。與其花五千買手沖壺，不如先買新鮮烘焙、兩週內的豆子。超市架上的豆子常常已經放了好幾個月，香氣早就跑光了。\n\n2. 磨豆機是唯一值得多花錢的器材。刀片式磨豆機磨出來粗細不均，萃取一定不穩定；入門的手搖錐刀就能大幅改善。\n\n3. 水溫抓 90 到 93 度。淺焙可以高一點，深焙低一點，太燙容易苦。沒有溫度計的話，水滾後靜置一分鐘差不多。\n\n4. 粉水比先用 1:15。15 克豆子配 225 克水，先固定這個比例，再依口味微調，不要一次改好幾個變數。\n\n5. 悶蒸不能省。先倒兩倍粉重的水，等 30 秒讓二氧化碳排出，之後的萃取會均勻很多。\n\n6. 注水穩定比手法花俏重要。網路上各種繞圈法看看就好，先練到水流粗細一致，比什麼都有用。\n\n7. 記錄每一杯。豆子、研磨刻度、水溫、時間、味道，寫下來才知道是哪個變數造成差異。我的筆記本現在已經寫到第四本了 📒\n\n最後，好喝最重要。規則是拿來打破的，找到你自己喜歡的那一杯，才是手沖最好玩的地方 😊\n\n你們在家都怎麼沖？留言分享一下吧 👇",
+      "expected_output": "Counts the text the way Threads does (emojis as UTF-8 bytes): 498 characters but about 511 counted, so it does not fit in one post and is split into a thread at natural breaks with the text verbatim. Explains there's no native scheduling and how the 8 AM run would happen; checks the token (missing here); shows exact payloads (root, then reply_to_id chaining) and waits for confirmation; publishes nothing.",
+      "files": [],
+      "expectations": [
+        "Recognises that the text does not fit in one post: although it is under 500 characters by plain count, Threads counts emojis by their UTF-8 byte length (☕️ 6, others 4), which pushes it over 500; states both numbers or the reason.",
+        "Splits the text into parts that each fit within the limit under the emoji rule, at paragraph/sentence boundaries, with the user's wording kept verbatim (no rewriting, no dropped or added content beyond optional thread markers it discloses).",
+        "Chains the thread correctly: publishes the first part, then each next part as a reply with reply_to_id set to the previous part's (or the root's) media ID returned by threads_publish, not a container ID.",
+        "States that the Threads API has no native scheduling, so the 8 AM post must be triggered by something that runs then (the user's cron/Task Scheduler/a scheduled job, or posting at that time), and does not create containers now for publishing tomorrow (or notes containers expire after 24 h).",
+        "Checks for THREADS_ACCESS_TOKEN, reports that it is not available in this environment, and asks the user to set or provide it (or hands over a ready-to-run command for their machine).",
+        "Shows the exact content of every part and the parameters to be sent in the reply itself and asks for explicit confirmation before anything is published; nothing is published and the reply does not claim a post was made or scheduled.",
+        "Plans to verify the target account (GET /me?fields=id,username) before publishing."
+      ]
     }
   ]
 }

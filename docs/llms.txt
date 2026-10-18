@@ -21,7 +21,7 @@ Key concepts:
 
 ## Evaluation
 
-- [Benchmark summary](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/BENCHMARK.en.md): With-skill vs without-skill results over four rounds, with time, token usage and the reason behind every failed check
+- [Benchmark summary](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/BENCHMARK.en.md): With-skill vs without-skill results over five rounds, with time, token usage and the reason behind every failed check
 - [Eval set](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/evals.json): Task prompts and the checklist items each answer is graded against
 
 ## Optional
