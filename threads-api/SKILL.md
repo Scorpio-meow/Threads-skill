@@ -1,14 +1,20 @@
 ---
 name: threads-api
 description: "Use for Meta's Threads API and embedding Threads posts: code that posts, reads, searches, moderates, pulls insights or handles tokens/webhooks, and posting, replying or pulling stats for the user."
+license: MIT
+compatibility: "Operate mode runs the bundled Python 3.8+ client (standard library only) and needs HTTPS access to graph.threads.net plus THREADS_ACCESS_TOKEN from the environment or a .env file in the working folder. Build and Embed don't need the client or a token."
+metadata:
+  author: Scorpio-meow
+  version: "1.1"
 ---
 
 # Threads API
 
-Playbook for Meta's Threads API, distilled from the official docs (snapshot covering the changelog through **2026-08-12**). It serves two jobs:
+Playbook for Meta's Threads API, distilled from the official docs (snapshot covering the changelog through **2026-08-12**). It serves three jobs:
 
-- **Build** — write, review or debug code that calls the API (§2).
-- **Operate** — call the API on the user's own account: post, reply, delete, hide replies, read insights (§3).
+- **Build** — write, review or debug code that calls the API.
+- **Operate** — call the API on the user's own account: post, reply, delete, hide replies, read insights.
+- **Embed** — show Threads posts on a website with oEmbed and embed.js, or add "share to Threads" buttons with Web Intents.
 
 Statements are from the docs unless tagged *(practice)*, which marks engineering advice. If the API behaves differently from what's written here, or the user asks about something newer than the snapshot, check the live changelog (https://developers.facebook.com/documentation/threads/changelog), or the user's local copy of the docs if one is available. Threads ads live in the Marketing API and are out of scope.
 

@@ -2,12 +2,14 @@
 
 [繁體中文](CHANGELOG.md) | [English](CHANGELOG.en.md) | [日本語](CHANGELOG.ja.md) | **한국어**
 
-이 프로젝트의 주요 변경 사항을 여기에 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 참고했습니다. 아직 버전 번호가 없어서 날짜별로 정리합니다.
+이 프로젝트의 주요 변경 사항을 여기에 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 참고했습니다. 버전 번호는 `threads-api/SKILL.md`의 `metadata.version`을 따르며, Agensi에서도 같은 번호를 씁니다. 1.0 이전 변경 사항은 날짜별로 정리합니다.
 
-## 미출시
+## 1.1 - 2026-10-18
 
 ### 추가
 
+- `threads-api/SKILL.md` 프런트매터에 `license`, `compatibility`(대행 모드에는 Python 3.8 이상, graph.threads.net 접속, 환경 변수나 `.env`의 토큰이 필요), `metadata.version`을 추가.
+- 4개 언어 README에 "Agensi" 설치 방법을 추가하고, `docs/llms.txt`에 Agensi 페이지 링크를 추가.
 - 변경 이력 `CHANGELOG*.md`(번체 중국어, 영어, 일본어, 한국어).
 - `docs/llms.txt`: AI 어시스턴트와 크롤러를 위한 프로젝트 색인. SKILL.md, README, 평가 데이터를 안내합니다.
 - 4개 언어 README에 소개 사이트 링크 추가.
@@ -22,6 +24,8 @@
 
 ### 변경
 
+- `threads-api/SKILL.md` 첫머리의 용도를 두 가지에서 세 가지로 바꾸고 "Embed"(게시물 임베드와 Web Intents)를 추가. 목록에서 절 번호를 빼서 Agensi 같은 스토어 페이지에서도 읽기 쉽게 함.
+- 4개 언어 기여 가이드에 스킬 내용을 바꾸면 SKILL.md의 `metadata.version`을 올리고 Agensi에서도 같은 번호를 쓴다는 규칙을 추가.
 - 4개 언어 README의 "기여하기"를 요약으로 바꾸고, 자세한 내용은 `.github/CONTRIBUTING*.md`로 옮김.
 - 소개 사이트를 시스템 폰트로 변경. Fontshare와 Google Fonts에서 Switzer와 Noto Sans를 불러오지 않으므로, 방문자의 IP 주소가 더 이상 서드파티에 전달되지 않습니다. Segoe UI, Microsoft JhengHei 같은 시스템 폰트에는 500 굵기가 없어 보통 굵기로 표시되므로, 500으로 지정한 굵기를 600으로 변경.
 - 언어 메뉴와 테마 메뉴가 `TAS.menu()`(`docs/assets/js/core.js`)를 함께 사용.
@@ -42,6 +46,12 @@
   - JavaScript가 꺼져 있으면 동작하지 않는 컨트롤을 숨기고 대신 안내 문구를 표시하며, "스킬 없음" 답변도 보이도록 변경.
   - 타임라인 막대에 들어가지 않는 레이블은 잘려 보이는 대신 숨기도록 변경.
   - 좁은 화면에서 헤더의 링크가 다 들어가지 않으면 두 번째 줄로 내려 사이트 이름과 겹치지 않도록 수정.
+
+## 1.0 - 2026-10-18
+
+### 추가
+
+- 스킬을 1.0 버전으로 [Agensi](https://agensi.io/skills/threads-api)에 무료로 공개. 내용은 2026-10-14 시점의 `threads-api/SKILL.md`와 같음.
 
 ## 2026-10-16
 

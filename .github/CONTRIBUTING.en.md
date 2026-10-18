@@ -35,6 +35,7 @@ You can write issues and PRs in Traditional Chinese, English, Japanese or Korean
 - When the official docs contradict themselves or are unclear, say so plainly instead of guessing.
 - The reference client `threads_client.py` in section 14 uses only the Python standard library and must run on Python 3.8 or later.
 - The site's “Check before you send” is a JS port of `check()` ([`docs/assets/js/client.js`](../docs/assets/js/client.js)). When you change `check()`, update the JS port too and confirm that both return the same errors, warnings, character counts and link counts for the same specs.
+- When you change the skill's content, raise `metadata.version` in the SKILL.md frontmatter (for example 1.1 → 1.2); the changelog and Agensi use the same number.
 
 ## Rerunning the evals
 

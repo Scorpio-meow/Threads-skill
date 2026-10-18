@@ -2,12 +2,14 @@
 
 [繁體中文](CHANGELOG.md) | [English](CHANGELOG.en.md) | **日本語** | [한국어](CHANGELOG.ko.md)
 
-このプロジェクトの主な変更をここに記録します。形式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) を参考にしています。まだバージョン番号がないため、日付ごとにまとめています。
+このプロジェクトの主な変更をここに記録します。形式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) を参考にしています。バージョン番号は `threads-api/SKILL.md` の `metadata.version` に合わせ、Agensi でも同じ番号を使います。1.0 より前の変更は日付ごとにまとめています。
 
-## 未リリース
+## 1.1 - 2026-10-18
 
 ### 追加
 
+- `threads-api/SKILL.md` のフロントマターに `license`、`compatibility`（代行操作には Python 3.8 以上、graph.threads.net への接続、環境変数または `.env` のトークンが必要）、`metadata.version` を追加。
+- 4 言語の README に「Agensi」からのインストール方法を追加し、`docs/llms.txt` に Agensi のページへのリンクを追加。
 - 変更履歴 `CHANGELOG*.md`（繁体字中国語、英語、日本語、韓国語）。
 - `docs/llms.txt`：AI アシスタントやクローラー向けのプロジェクトの索引。SKILL.md、README、評価データを案内します。
 - 4 言語の README に紹介サイトへのリンクを追加。
@@ -22,6 +24,8 @@
 
 ### 変更
 
+- `threads-api/SKILL.md` 冒頭の用途を 2 つから 3 つにし、「Embed」（投稿の埋め込みと Web Intents）を追加。箇条書きから節番号を外し、Agensi などのストアページでも読みやすくしました。
+- 4 言語のコントリビューションガイドに、スキルの内容を変えたら SKILL.md の `metadata.version` を上げ、Agensi でも同じ番号を使うというルールを追加。
 - 4 言語の README の「コントリビューション」を要約にし、詳細は `.github/CONTRIBUTING*.md` に移動。
 - 紹介サイトをシステムフォントに変更。Fontshare と Google Fonts から Switzer と Noto Sans を読み込まなくなったため、訪問者の IP アドレスがサードパーティに送られなくなりました。Segoe UI や Microsoft JhengHei などのシステムフォントには 500 の太さがなく通常の太さで表示されるため、500 の指定を 600 に変更。
 - 言語メニューとテーマメニューで `TAS.menu()`（`docs/assets/js/core.js`）を共用。
@@ -42,6 +46,12 @@
   - JavaScript が無効なときは、動かないコントロールを隠して代わりの説明を表示し、「スキルなし」の返答も表示するように変更。
   - タイムラインのバーに収まらないラベルは、切れて表示される代わりに非表示にするように変更。
   - 狭い画面でヘッダーのリンクが収まらないときは 2 行目に移し、サイト名と重ならないように修正。
+
+## 1.0 - 2026-10-18
+
+### 追加
+
+- スキルをバージョン 1.0 として [Agensi](https://agensi.io/skills/threads-api) で無料公開。内容は 2026-10-14 時点の `threads-api/SKILL.md` と同じです。
 
 ## 2026-10-16
 

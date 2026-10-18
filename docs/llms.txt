@@ -17,6 +17,7 @@ Key concepts:
 ## Usage
 
 - [README](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/README.en.md): Installation for Claude Code, the Claude apps, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, Windsurf and OpenCode; environment variables, token permissions and known limitations
+- [Agensi listing](https://agensi.io/skills/threads-api): The same skill on the Agensi marketplace, free; updates appear there after Agensi approves them
 
 ## Evaluation
 

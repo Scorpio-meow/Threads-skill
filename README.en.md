@@ -76,6 +76,12 @@ To update later, run `git pull` in the `Threads-skill` folder and copy again; if
 
 If the UI has changed, follow the [official guide](https://support.claude.com/en/articles/12512180-using-skills-in-claude).
 
+### Agensi
+
+The skill is also listed for free on [Agensi](https://agensi.io/skills/threads-api). On the skill page, click "Copy prompt to install" and paste the copied prompt into your AI assistant; it connects to Agensi and installs the skill. Assistants already connected to the Agensi connector load the latest version from Agensi each time they use it.
+
+Updates to this repository reach Agensi only after Agensi approves them, so this repository always has the latest content.
+
 ### Official docs for each tool
 
 If paths or UIs have changed, defer to the official docs: [Claude Code](https://code.claude.com/docs/en/skills)・[OpenAI Codex](https://learn.chatgpt.com/docs/build-skills)・[Gemini CLI](https://geminicli.com/docs/cli/skills/)・[GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)・[VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)・[Cursor](https://cursor.com/docs/skills)・[Windsurf](https://docs.devin.ai/desktop/cascade/skills)・[OpenCode](https://opencode.ai/docs/skills)

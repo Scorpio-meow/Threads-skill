@@ -2,12 +2,14 @@
 
 [繁體中文](CHANGELOG.md) | **English** | [日本語](CHANGELOG.ja.md) | [한국어](CHANGELOG.ko.md)
 
-Notable changes to this project are recorded here, following the format of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). There are no version numbers yet, so entries are grouped by date.
+Notable changes to this project are recorded here, following the format of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version numbers follow `metadata.version` in `threads-api/SKILL.md`, and the Agensi listing uses the same numbers; changes before 1.0 are grouped by date.
 
-## Unreleased
+## 1.1 - 2026-10-18
 
 ### Added
 
+- `license`, `compatibility` (operate mode needs Python 3.8+, access to graph.threads.net, and a token from the environment or `.env`) and `metadata.version` in the `threads-api/SKILL.md` frontmatter.
+- An “Agensi” install option in all four READMEs, and a link to the Agensi page in `docs/llms.txt`.
 - The changelog `CHANGELOG*.md`, in Traditional Chinese, English, Japanese and Korean.
 - `docs/llms.txt`: a project index for AI assistants and crawlers, pointing to SKILL.md, the READMEs and the evaluation data.
 - A link to the project site in all four READMEs.
@@ -22,6 +24,8 @@ Notable changes to this project are recorded here, following the format of [Keep
 
 ### Changed
 
+- The opening of `threads-api/SKILL.md` lists three jobs instead of two, adding “Embed” (embedding posts and Web Intents); the bullets no longer carry section numbers, so they also read well on store pages such as Agensi.
+- All four contributing guides now say to raise `metadata.version` in SKILL.md whenever the skill's content changes, and to use the same number on Agensi.
 - The “Contributing” section of all four READMEs is now a summary, with the details moved to `.github/CONTRIBUTING*.md`.
 - The project site now uses system fonts instead of loading Switzer and Noto Sans from Fontshare and Google Fonts, so visitors' IP addresses are no longer shared with third parties. Font weight 500 became 600, because system fonts such as Segoe UI and Microsoft JhengHei have no 500 weight and would render it as regular.
 - The language and theme menus share `TAS.menu()` (`docs/assets/js/core.js`).
@@ -42,6 +46,12 @@ Notable changes to this project are recorded here, following the format of [Keep
   - With JavaScript disabled, controls that can't work are hidden and replaced with explanations, and the “without the skill” reply is shown.
   - Timeline labels that don't fit their bar are now hidden instead of being cut off.
   - On narrow screens, header links that don't fit move to a second row instead of overlapping the site name.
+
+## 1.0 - 2026-10-18
+
+### Added
+
+- The skill is listed for free on [Agensi](https://agensi.io/skills/threads-api) as version 1.0, with the same `threads-api/SKILL.md` as on 2026-10-14.
 
 ## 2026-10-16
 

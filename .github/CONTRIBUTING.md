@@ -35,6 +35,7 @@ issue 和 PR 用繁中、英文、日文、韓文都可以。不論在哪裡發�
 - 官方文件互相矛盾或沒說清楚時，照實寫出來，不要自行假設。
 - 第 14 節的參考用戶端 `threads_client.py` 只用 Python 標準函式庫，要能在 Python 3.8 以上執行。
 - 網站的「送出前先檢查」是 `check()` 的 JS 移植版（[`docs/assets/js/client.js`](../docs/assets/js/client.js)）。改了 `check()` 要一起改 JS 版，並確認兩邊對同一組 spec 給出一樣的錯誤、警告、字數和連結數。
+- 改了技能內容就調高 SKILL.md 前置資料的 `metadata.version`（例如 1.1 → 1.2），變更記錄和 Agensi 都用同一個版本號。
 
 ## 重跑評測
 

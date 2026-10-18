@@ -2,12 +2,14 @@
 
 **繁體中文** | [English](CHANGELOG.en.md) | [日本語](CHANGELOG.ja.md) | [한국어](CHANGELOG.ko.md)
 
-本專案的重要變動都記在這裡，格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。目前還沒有發布版本號，先依日期記錄。
+本專案的重要變動都記在這裡，格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。版本號跟著 `threads-api/SKILL.md` 的 `metadata.version` 走，Agensi 上的版本也用同一個號碼；1.0 之前的變動依日期記錄。
 
-## 未發布
+## 1.1 - 2026-10-18
 
 ### 新增
 
+- `threads-api/SKILL.md` 的前置資料加上 `license`、`compatibility`（代操作需要 Python 3.8 以上、能連到 graph.threads.net，並從環境變數或 `.env` 讀取 token）和 `metadata.version`。
+- README 四語版新增「Agensi」安裝方式，`docs/llms.txt` 加上 Agensi 頁面的連結。
 - 變更記錄 `CHANGELOG*.md`，有繁中、英文、日文、韓文版。
 - `docs/llms.txt`：給 AI 助理和爬蟲讀的專案索引，指向 SKILL.md、README 和評測資料。
 - README 四語版加入介紹網站的連結。
@@ -22,6 +24,8 @@
 
 ### 變更
 
+- `threads-api/SKILL.md` 開頭列出的用途從兩種改成三種，補上「Embed」（嵌入貼文和 Web Intents）；條列不再附章節編號，在 Agensi 等商店頁面上也讀得懂。
+- 貢獻指南四語版加上規則：改了技能內容就調高 SKILL.md 的 `metadata.version`，Agensi 也用同一個版本號。
 - README 四語版的「參與貢獻」改成摘要，細節移到 `.github/CONTRIBUTING*.md`。
 - 介紹網站改用系統字型，不再從 Fontshare 和 Google Fonts 載入 Switzer 和 Noto Sans，訪客的 IP 位址不會再傳給第三方。原本 500 的字重改為 600，因為 Segoe UI、微軟正黑體等系統字型沒有 500，會顯示成一般粗細。
 - 語言和外觀選單共用 `TAS.menu()`（`docs/assets/js/core.js`）。
@@ -42,6 +46,12 @@
   - 停用 JavaScript 時隱藏無法運作的控制項，改為顯示替代說明，並顯示「沒裝技能」的回覆。
   - 時間軸長條上放不下的標籤改為隱藏，不再被截斷。
   - 窄螢幕上頁首的連結放不下時移到第二行，不再疊在網站名稱上。
+
+## 1.0 - 2026-10-18
+
+### 新增
+
+- 技能以 1.0 版免費上架到 [Agensi](https://agensi.io/skills/threads-api)，內容和 2026-10-14 的 `threads-api/SKILL.md` 相同。
 
 ## 2026-10-16
 

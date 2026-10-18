@@ -76,6 +76,12 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
 
 画面が変わっている場合は[公式ヘルプ](https://support.claude.com/en/articles/12512180-using-skills-in-claude)を参照してください。
 
+### Agensi
+
+このスキルは [Agensi](https://agensi.io/skills/threads-api) でも無料で公開しています。スキルのページで「Copy prompt to install」を押し、コピーしたプロンプトを AI アシスタントに貼り付けると、Agensi に接続してスキルをインストールします。Agensi コネクタに接続済みのアシスタントは、使うたびに Agensi から最新版を読み込みます。
+
+このリポジトリの更新は Agensi の審査を通ってから Agensi に反映されるため、最新の内容はこのリポジトリを基準にしてください。
+
 ### 各ツールの公式ドキュメント
 
 パスや画面が変わっている場合は、公式ドキュメントを優先してください：[Claude Code](https://code.claude.com/docs/en/skills)・[OpenAI Codex](https://learn.chatgpt.com/docs/build-skills)・[Gemini CLI](https://geminicli.com/docs/cli/skills/)・[GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)・[VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)・[Cursor](https://cursor.com/docs/skills)・[Windsurf](https://docs.devin.ai/desktop/cascade/skills)・[OpenCode](https://opencode.ai/docs/skills)
