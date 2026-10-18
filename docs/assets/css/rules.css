@@ -1,39 +1,273 @@
-.rules-head { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 20px; }
-.rules-title { font-size: var(--step-head); line-height: 1.22; }
-:root:lang(en) .rules-title { line-height: 1.04; }
-.rules-title span { display: block; }
-.rules-note { grid-column: 1 / span 7; margin-top: 18px; color: var(--muted); font-size: var(--step-small); max-width: 40em; }
-.rules-body { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; margin-top: 56px; align-items: start; }
-.rules-tabs { grid-column: 1 / span 3; display: grid; gap: 6px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); }
-.rules-tabs button { display: grid; justify-items: start; gap: 2px; text-align: left; border: 0; border-radius: var(--radius); background: var(--surface); padding: 12px 16px; min-height: 64px; font-size: var(--step-body); font-weight: 500; transition: background-color var(--t-hover) ease, color var(--t-hover) ease, transform var(--t-press) var(--ease-out); }
-.rules-tabs button span { font-size: var(--ui-s); font-weight: 400; color: var(--muted); transition: color var(--t-hover) ease; }
-.rules-tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
-.rules-tabs button[aria-selected="true"] span { color: color-mix(in srgb, var(--bg) 72%, var(--ink)); }
-.rules-tabs button:active { transform: scale(0.985); }
-@media (hover: hover) and (pointer: fine) { .rules-tabs button[aria-selected="false"]:hover { background: var(--surface-2); } }
-html:not(.js) .rules-tabs { display: none; }
-.rules-panels { grid-column: 4 / -1; }
-.js .rules-panels .panel-title { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; white-space: nowrap; }
-html:not(.js) .rules-panels { grid-column: 1 / -1; display: grid; gap: 48px; }
-.panel-title { font-size: var(--step-lead); font-weight: 500; margin-bottom: 14px; }
-.bands { display: grid; gap: 4px; }
-.bands li { display: grid; grid-template-columns: minmax(96px, 0.9fr) minmax(0, 3.2fr) minmax(0, 1.5fr); align-items: center; gap: 6px 20px; min-height: 76px; padding: 14px 20px; border-radius: var(--radius); background: var(--surface); }
-.bands li:nth-child(even) { background: var(--surface-2); }
-.bands .key { font-size: var(--step-lead); font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.2; }
-.bands .what { display: grid; gap: 2px; }
-.bands .what b { font-weight: 500; font-size: var(--step-body); line-height: 1.45; }
-.bands .what span { font-size: var(--step-small); color: var(--muted); line-height: 1.55; }
-.bands code { justify-self: end; text-align: right; background: none; padding: 0; color: var(--muted); font-size: var(--ui-s); overflow-wrap: anywhere; }
-[role="tabpanel"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 6px; }
-@media (max-width: 1023px) {
-  .rules-note { grid-column: 1 / -1; }
-  .rules-body { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .rules-tabs { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; }
-  .rules-tabs button { min-height: 52px; padding: 8px 6px; justify-items: center; text-align: center; font-size: var(--step-small); }
-  .rules-tabs button span { display: none; }
-  .rules-panels { grid-column: 1 / -1; }
+.rules-head {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
 }
+
+.rules-title {
+  font-size: var(--step-head);
+  line-height: 1.22;
+  min-width: 0;
+}
+
+:root:lang(en) .rules-title {
+  line-height: 1.04;
+}
+
+.rules-title span {
+  display: block;
+}
+
+.rules-note {
+  grid-column: 1 / span 7;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: var(--step-small);
+  max-width: 40em;
+}
+
+.rules-body {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  margin-top: 56px;
+  align-items: start;
+}
+
+.rules-tabs {
+  grid-column: 1 / span 3;
+  display: grid;
+  gap: 6px;
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + 24px);
+}
+
+.rules-tabs button {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  text-align: left;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 12px 16px;
+  min-height: 64px;
+  font-size: var(--step-body);
+  font-weight: 600;
+  transition: background-color var(--t-hover) ease, color var(--t-hover) ease, transform var(--t-press) var(--ease-out);
+}
+
+.rules-tabs button span {
+  font-size: var(--ui-s);
+  font-weight: 400;
+  color: var(--muted);
+  transition: color var(--t-hover) ease;
+}
+
+.rules-tabs button[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.rules-tabs button[aria-selected="true"] span {
+  color: color-mix(in srgb, var(--bg) 72%, var(--ink));
+}
+
+.rules-tabs button:active {
+  transform: scale(0.985);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rules-tabs button[aria-selected="false"]:hover {
+    background: var(--surface-2);
+  }
+}
+
+html:not(.js) .rules-tabs {
+  display: none;
+}
+
+.rules-panels {
+  grid-column: 4 / -1;
+}
+
+.js .rules-panels .panel-title {
+  position: absolute;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+html:not(.js) .rules-panels {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 48px;
+}
+
+.panel-title {
+  font-size: var(--step-lead);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.bands {
+  display: grid;
+  gap: 4px;
+}
+
+.bands li {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.9fr) minmax(0, 3.2fr) minmax(0, 1.5fr);
+  align-items: center;
+  gap: 6px 20px;
+  min-height: 76px;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.bands li:nth-child(even) {
+  background: var(--surface-2);
+}
+
+.bands .key {
+  font-size: var(--step-lead);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.bands .what {
+  display: grid;
+  gap: 2px;
+}
+
+.bands .what b {
+  font-weight: 600;
+  font-size: var(--step-body);
+  line-height: 1.45;
+}
+
+.bands .what span {
+  font-size: var(--step-small);
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.bands code {
+  justify-self: end;
+  text-align: right;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  font-size: var(--ui-s);
+  overflow-wrap: anywhere;
+}
+
+[role="tabpanel"]:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 6px;
+}
+
+@media (max-width: 1023px) {
+  .rules-note {
+    grid-column: 1 / -1;
+  }
+
+  .rules-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .rules-tabs {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    background: var(--bg);
+    padding-block: 10px;
+  }
+
+  .rules-tabs button {
+    min-height: 52px;
+    padding: 8px 6px;
+    justify-items: center;
+    text-align: center;
+    font-size: var(--step-small);
+  }
+
+  .rules-tabs button span {
+    display: none;
+  }
+
+  .rules-panels {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1023px) and (max-height: 500px) {
+  .rules-tabs {
+    position: static;
+  }
+}
+
+@media print {
+  .rules-tabs {
+    display: none;
+  }
+
+  .rules-panels {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 48px;
+  }
+
+  .rules-panels [role="tabpanel"][hidden] {
+    display: block !important;
+  }
+
+  .js .rules-panels .panel-title {
+    position: static;
+    clip-path: none;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    white-space: normal;
+  }
+}
+
+@media (forced-colors: active) {
+  .rules-tabs button {
+    border: 1px solid ButtonText;
+  }
+
+  .rules-tabs button[aria-selected="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+
+  .rules-tabs button[aria-selected="true"] span {
+    color: HighlightText;
+  }
+}
+
 @media (max-width: 640px) {
-  .bands li { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 16px; }
-  .bands code { justify-self: start; text-align: left; }
+  .bands li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    padding: 16px;
+  }
+
+  .bands code {
+    justify-self: start;
+    text-align: left;
+  }
 }

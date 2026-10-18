@@ -8,6 +8,7 @@ A skill that teaches AI assistants the Meta Threads API: it helps you write, rev
 - Distilled from Meta's official documentation, covering the changelog through 2026-08-12. The embedding section also draws on the live embed.js code and tests run in October 2026.
 - The skill itself is written in English; the assistant replies in whatever language you use. The examples below use Claude.
 - Not an official Meta project.
+- Project site: <https://scorpio-meow.github.io/Threads-skill/>, where you can try “Check before you send” in your browser.
 
 ## Quick start
 
@@ -169,7 +170,7 @@ The token needs the matching permissions:
 | Reading replies | `threads_read_replies` |
 | Insights | `threads_manage_insights` |
 | Deleting posts | `threads_delete` |
-| Keyword and hashtag search | `threads_keyword_search` |
+| Keyword and topic tag search | `threads_keyword_search` |
 | Mentions | `threads_manage_mentions` |
 | Location search and tagging | `threads_location_tagging` |
 | Public profile lookup | `threads_profile_discovery` |
@@ -186,7 +187,7 @@ The skill itself is [`threads-api/SKILL.md`](threads-api/SKILL.md), organized in
 | 1 | Core concepts: API base URL, two-step publishing, container ID vs. media ID, different enum values for writes and reads |
 | 2–3 | Build mode and Operate mode workflows |
 | 4 | Publishing: flows for each post type, parameter tables, feature compatibility, character and media limits, container status |
-| 5 | Reading and search: profiles, posts, mentions, public profiles, keyword and hashtag search, locations, pagination |
+| 5 | Reading and search: profiles, posts, mentions, public profiles, keyword and topic tag search, locations, pagination |
 | 6 | Replies and moderation: reading, hiding, reply approvals |
 | 7 | Insights: per-post and account-level metrics |
 | 8 | Permissions, App Review, OAuth, token refresh |
@@ -198,6 +199,8 @@ The skill itself is [`threads-api/SKILL.md`](threads-api/SKILL.md), organized in
 | 14 | Reference client `threads_client.py` |
 
 Apart from the engineering advice marked *(practice)* and the live test results marked *(observed)*, everything comes from the official documentation.
+
+The change history is in [CHANGELOG.en.md](CHANGELOG.en.md).
 
 ### Reference client
 
@@ -250,11 +253,13 @@ For each round's eval setup, time and token usage, and the reason behind every l
 
 ## Contributing
 
-- If a rule is wrong or the official docs change, edit `threads-api/SKILL.md` directly. Content from the official docs should stay faithful to the original meaning; advice that comes from engineering experience rather than the docs should be marked *(practice)*.
-- After making changes, use Anthropic's skill-creator skill to rerun the "with skill vs without skill" comparison against `evals/evals.json`, confirm nothing regressed, then update evals/BENCHMARK.md and evals/benchmark.json.
-- If you find a new common pitfall, you can add a task to `evals/evals.json`, along with checklist items that can be verified one by one.
-- The README and benchmark summary come in four languages: Traditional Chinese, English, Japanese, and Korean. Please update all of them when you make changes.
+Reports of wrong rules, new pitfalls and improvements to the site are all welcome.
+
+- Workflow, repository layout and what to update together: [Contributing guide](.github/CONTRIBUTING.en.md)
+- [Code of Conduct](.github/CODE_OF_CONDUCT.en.md)
+- Report security issues privately as described in the [Security Policy](.github/SECURITY.en.md), not in a public issue.
+- Accessibility of the project site: [Accessibility Statement](.github/ACCESSIBILITY.en.md)
 
 ## License
 
-No license has been specified yet.
+[MIT](LICENSE)

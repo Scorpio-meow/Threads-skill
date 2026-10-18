@@ -1,24 +1,123 @@
-@media (prefers-reduced-motion: no-preference) {
-  .js [data-rise] { opacity: 0; transform: translateY(18px); animation: rise var(--t-reveal) var(--ease-out) forwards; animation-delay: calc(var(--i, 0) * 90ms + 160ms); }
-  .js .lines [data-line] { transform: translateY(105%); animation: line-up 900ms var(--ease-out) forwards; animation-delay: calc(var(--i, 0) * 110ms + 120ms); }
-  .js .hero-demo[data-rise] { transform: translateY(40px); animation-duration: 1100ms; }
-  .js [data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 700ms var(--ease-out), transform 900ms var(--ease-out); transition-delay: calc(var(--i, 0) * 75ms); }
-  .js [data-reveal].is-in { opacity: 1; transform: none; }
-  .js [data-reveal="fig"] { transform: translateY(32px) scale(0.985); }
-  .js .bands[data-rows] li { opacity: 0; transform: translateY(12px); transition: opacity 500ms var(--ease-out), transform 600ms var(--ease-out); transition-delay: calc(var(--r, 0) * 45ms); }
-  .js .bands[data-rows].is-in li { opacity: 1; transform: none; }
+@media screen and (prefers-reduced-motion: no-preference) {
+  .js [data-rise] {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rise var(--t-reveal) var(--ease-out) forwards;
+    animation-delay: calc(var(--i, 0) * 90ms + 160ms);
+  }
+
+  .js .lines [data-line] {
+    transform: translateY(105%);
+    animation: line-up 900ms var(--ease-out) forwards;
+    animation-delay: calc(var(--i, 0) * 110ms + 120ms);
+  }
+
+  .js .hero-demo[data-rise] {
+    transform: translateY(40px);
+    animation-duration: 1100ms;
+  }
+
+  .reveal [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 700ms var(--ease-out), transform 900ms var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 75ms);
+  }
+
+  .reveal [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal [data-reveal="fig"] {
+    transform: translateY(32px) scale(0.985);
+  }
+
+  .reveal .bands[data-rows] li {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 500ms var(--ease-out), transform 600ms var(--ease-out);
+    transition-delay: calc(var(--r, 0) * 45ms);
+  }
+
+  .reveal .bands[data-rows].is-in li {
+    opacity: 1;
+    transform: none;
+  }
+
   @supports (animation-timeline: view()) {
-    .hero-demo .demo { animation: drift linear both; animation-timeline: view(); animation-range: cover 50% cover 100%; }
-    @keyframes drift { to { transform: translateY(-3%); } }
+    .hero-demo .demo {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: cover 50% cover 100%;
+    }
+
+    @keyframes drift {
+      to {
+        transform: translateY(-3%);
+      }
+    }
   }
 }
-@keyframes rise { to { opacity: 1; transform: none; } }
-@keyframes line-up { to { transform: none; } }
+
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes line-up {
+  to {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  [data-ui] .stack > *, .js .mode-fig, [data-ui] .seg .seg-thumb, [data-ui] .meter .bar i { transition-duration: 1ms !important; }
-  [data-ui] .ck-list li { animation: none; }
+
+  [data-ui] .stack>*,
+  .js .mode :is(h3, p),
+  .js .mode-fig,
+  [data-ui] .seg .seg-thumb,
+  [data-ui] .meter .bar i,
+  [data-ui] input[role="switch"],
+  [data-ui] input[role="switch"]::after,
+  .qa,
+  .qa::details-content,
+  .qa .pm::before,
+  .qa .pm::after,
+  .skip,
+  .link-arrow span,
+  .wordmark .mark,
+  .lang-btn svg,
+  .btn,
+  .rules-tabs button,
+  [data-ui] .dlg-primary {
+    transition-duration: 1ms !important;
+  }
+
+  [data-ui] .ck-list li {
+    animation: none;
+  }
+
+  .btn:active,
+  .rules-tabs button:active,
+  [data-ui] .dlg-primary:active,
+  .link-arrow:hover span,
+  .wordmark:hover .mark {
+    transform: none;
+  }
 }
+
 @media (prefers-reduced-motion: no-preference) {
-  .lang-list:popover-open { animation: lang-in 200ms var(--ease-out); }
+  :is(.lang-list, .theme-list):popover-open {
+    animation: lang-in 200ms var(--ease-out);
+  }
 }
-@keyframes lang-in { from { opacity: 0; translate: 0 -4px; } }
+
+@keyframes lang-in {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}

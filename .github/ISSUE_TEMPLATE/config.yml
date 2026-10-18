@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "問題與想法 · Questions & ideas · 質問とアイデア · 질문과 아이디어"
+    url: https://github.com/Scorpio-meow/Threads-skill/discussions
+    about: "用法問題和新功能的想法請到 Discussions · Ask usage questions and share ideas in Discussions · 使い方の質問やアイデアは Discussions へ · 사용법 질문과 아이디어는 Discussions로"
+  - name: "資安漏洞 · Security vulnerability · 脆弱性 · 보안 취약점"
+    url: https://github.com/Scorpio-meow/Threads-skill/security/advisories/new
+    about: "請私下通報，不要開公開 issue · Report privately, not in a public issue · 公開の issue ではなく非公開で報告 · 공개 issue가 아닌 비공개로 제보"

@@ -1,0 +1,46 @@
+name: "サイトの問題"
+description: "紹介サイトの誤字、翻訳、レイアウト、機能、アクセシビリティの問題"
+title: "[site] "
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: "問題の種類"
+      options:
+        - "内容や翻訳の誤り"
+        - "レイアウトや機能の不具合"
+        - "アクセシビリティの問題"
+        - "その他"
+    validations:
+      required: true
+  - type: dropdown
+    id: lang
+    attributes:
+      label: "サイトの表示言語"
+      options:
+        - "繁體中文"
+        - "English"
+        - "日本語"
+        - "한국어"
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: "ブラウザ、デバイス、支援技術"
+      description: "例：ブラウザとバージョン、スマートフォンかパソコンか、使っているスクリーンリーダーなどの支援技術"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: "問題の説明"
+      description: "サイトのどの部分で、どんな操作をしたときに起きたか。スクリーンショットも歓迎です。"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "期待した結果"
+    validations:
+      required: false

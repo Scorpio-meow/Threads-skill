@@ -1,0 +1,41 @@
+name: "Wrong, outdated or missing rule"
+description: "The skill disagrees with Meta's official docs or the API's actual behavior, or a rule is missing"
+title: "[rule] "
+body:
+  - type: markdown
+    attributes:
+      value: "Before reporting, please check the [official changelog](https://developers.facebook.com/documentation/threads/changelog): the skill states its docs snapshot date at the top, and later changes may not be covered yet."
+  - type: input
+    id: section
+    attributes:
+      label: "Which section of the skill"
+      description: "For example §4.3 or Compatibility traps"
+    validations:
+      required: true
+  - type: textarea
+    id: skill
+    attributes:
+      label: "What the skill says now"
+      description: "You can paste the text from SKILL.md; for a missing rule, write “not mentioned”."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "What the official docs or the API actually do"
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: "Source"
+      description: "A link to the official docs or changelog; for live test results, include the request and response with the token removed."
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: "Confirmation"
+      options:
+        - label: "I haven't included any token, app secret or other personal data"
+          required: true

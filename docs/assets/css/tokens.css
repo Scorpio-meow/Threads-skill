@@ -10,6 +10,7 @@
   --accent-ink: #1d2220;
   --code-bg: #ffffff;
   --rule: #d3dad6;
+  --control-line: #777e7a;
   --key: #0a6b3e;
   --ok: #0a7a45;
   --bad: #c0213f;
@@ -20,8 +21,8 @@
   --field-surface: #2a302d;
   --field-rule: #3d4541;
 
-  --font-sans: "Switzer", "Noto Sans TC", "PingFang TC", "Heiti TC", "Microsoft JhengHei", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Noto Sans TC", monospace;
+  --font-sans: system-ui, -apple-system, "Segoe UI", "PingFang TC", "Heiti TC", "Microsoft JhengHei", "Noto Sans CJK TC", "Noto Sans TC", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", monospace;
 
   --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
   --step-body: clamp(1.0625rem, 1rem + 0.2vw, 1.1875rem);
@@ -50,6 +51,7 @@
   --t-reveal: 800ms;
   interpolate-size: allow-keywords;
 }
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --tone-0: #0f1211;
@@ -63,6 +65,7 @@
     --accent-ink: #0f1211;
     --code-bg: #0f1211;
     --rule: #303734;
+    --control-line: #777f7b;
     --key: #8cebb8;
     --ok: #8cebb8;
     --bad: #ff8399;
@@ -75,6 +78,11 @@
     color-scheme: dark;
   }
 }
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
 :root[data-theme="dark"] {
   --tone-0: #0f1211;
   --tone-1: #181c1a;
@@ -87,6 +95,7 @@
   --accent-ink: #0f1211;
   --code-bg: #0f1211;
   --rule: #303734;
+  --control-line: #777f7b;
   --key: #8cebb8;
   --ok: #8cebb8;
   --bad: #ff8399;
@@ -98,19 +107,22 @@
   --field-rule: #c2ccc6;
   color-scheme: dark;
 }
+
 :root:lang(en) {
   --lh-body: 1.55;
   --lh-head: 1.12;
   --track-body: -0.005em;
   --track-head: -0.025em;
 }
+
 :root:lang(ja) {
-  --font-sans: "Switzer", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Noto Sans JP", monospace;
+  --font-sans: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Hiragino Sans", "Yu Gothic UI", Meiryo, "Noto Sans CJK JP", monospace;
 }
+
 :root:lang(ko) {
-  --font-sans: "Switzer", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Noto Sans KR", monospace;
+  --font-sans: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Noto Sans KR", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", monospace;
   --lh-body: 1.7;
   --track-body: 0;
   --track-head: -0.01em;

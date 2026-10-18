@@ -1,0 +1,75 @@
+name: "Problem using the skill"
+description: "Installation failed, the skill didn't activate, or the assistant still gets things wrong with the skill installed"
+title: "[usage] "
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: "Type of problem"
+      options:
+        - "Installation failed"
+        - "The skill didn't activate"
+        - "With the skill installed, the assistant still wrote or did something wrong"
+        - "Other"
+    validations:
+      required: true
+  - type: dropdown
+    id: tool
+    attributes:
+      label: "AI tool"
+      options:
+        - "Claude Code"
+        - "Claude apps (web / desktop)"
+        - "OpenAI Codex"
+        - "Gemini CLI"
+        - "GitHub Copilot"
+        - "Cursor"
+        - "Windsurf"
+        - "OpenCode"
+        - "Other"
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: "Model and tool version"
+      description: "For example the model name and the tool's version number"
+    validations:
+      required: false
+  - type: dropdown
+    id: install
+    attributes:
+      label: "Installation method"
+      options:
+        - "skills command"
+        - "Copied the folder manually"
+        - "Uploaded a ZIP (Claude apps)"
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: "What you asked or did"
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "What happened"
+      description: "Error messages, the assistant's reply or the code it produced."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "What you expected"
+      description: "If you know the correct approach, a link to the official docs helps a lot."
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: "Confirmation"
+      options:
+        - label: "I haven't included any token, app secret or other personal data"
+          required: true

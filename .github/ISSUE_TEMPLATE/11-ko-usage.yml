@@ -1,0 +1,75 @@
+name: "스킬 사용 문제"
+description: "설치에 실패했거나, 스킬이 활성화되지 않거나, 스킬을 설치했는데도 AI 어시스턴트가 틀림"
+title: "[usage] "
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: "문제 유형"
+      options:
+        - "설치 실패"
+        - "스킬이 활성화되지 않음"
+        - "스킬을 설치했는데도 AI 어시스턴트가 잘못 작성하거나 잘못 실행함"
+        - "기타"
+    validations:
+      required: true
+  - type: dropdown
+    id: tool
+    attributes:
+      label: "AI 도구"
+      options:
+        - "Claude Code"
+        - "Claude 앱(웹/데스크톱)"
+        - "OpenAI Codex"
+        - "Gemini CLI"
+        - "GitHub Copilot"
+        - "Cursor"
+        - "Windsurf"
+        - "OpenCode"
+        - "기타"
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: "모델과 도구 버전"
+      description: "예: 사용한 모델 이름, 도구 버전 번호"
+    validations:
+      required: false
+  - type: dropdown
+    id: install
+    attributes:
+      label: "설치 방법"
+      options:
+        - "skills 명령"
+        - "폴더를 직접 복사"
+        - "ZIP 업로드(Claude 앱)"
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: "질문한 내용이나 수행한 작업"
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "실제로 일어난 일"
+      description: "오류 메시지, AI 어시스턴트의 답변, 생성된 코드 일부 등."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "기대한 결과"
+      description: "올바른 방법을 알고 있다면 공식 문서 링크를 함께 적어 주시면 큰 도움이 됩니다."
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: "확인"
+      options:
+        - label: "토큰, App 시크릿, 기타 개인 정보를 넣지 않았습니다"
+          required: true

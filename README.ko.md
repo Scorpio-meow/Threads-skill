@@ -8,6 +8,7 @@ AI 어시스턴트가 Meta Threads API를 제대로 다룰 수 있게 해 주는
 - 내용은 Meta 공식 문서를 정리한 것으로, 2026-08-12 changelog까지 반영되어 있습니다. 게시물 임베드 부분은 2026년 10월에 실제 embed.js 코드를 읽고 직접 테스트한 결과도 반영했습니다.
 - 스킬 자체는 영어로 작성되어 있지만, AI 어시스턴트는 여러분이 쓰는 언어로 답합니다. 아래에서는 Claude를 예로 들어 설명합니다.
 - Meta 공식 프로젝트가 아닙니다.
+- 소개 사이트: <https://scorpio-meow.github.io/Threads-skill/>. 브라우저에서 바로 "보내기 전에 먼저 검사"를 써 볼 수 있습니다.
 
 ## 빠른 시작
 
@@ -169,7 +170,7 @@ Claude는 원래도 Threads API의 기본 사용법을 알고 있지만, 상당�
 | 답글 읽기 | `threads_read_replies` |
 | 인사이트 조회 | `threads_manage_insights` |
 | 게시물 삭제 | `threads_delete` |
-| 키워드·해시태그 검색 | `threads_keyword_search` |
+| 키워드·토픽 태그 검색 | `threads_keyword_search` |
 | 멘션 | `threads_manage_mentions` |
 | 위치 검색과 태그 | `threads_location_tagging` |
 | 공개 계정 조회 | `threads_profile_discovery` |
@@ -186,7 +187,7 @@ App Review를 통과하기 전에는 권한을 본인과 테스터 계정에만 
 | 1 | 핵심 개념: API 주소, 2단계 게시, container ID와 media ID의 차이, 쓰기와 읽기에서 쓰는 열거값이 다른 점 |
 | 2–3 | 개발 모드, 대행 모드의 작업 흐름 |
 | 4 | 게시: 게시물 유형별 흐름, 파라미터 표, 기능 호환성, 글자 수와 미디어 사양, container 상태 |
-| 5 | 읽기와 검색: 프로필, 게시물, 멘션, 공개 계정, 키워드·해시태그 검색, 위치, 페이지네이션 |
+| 5 | 읽기와 검색: 프로필, 게시물, 멘션, 공개 계정, 키워드·토픽 태그 검색, 위치, 페이지네이션 |
 | 6 | 답글과 답글 관리: 읽기, 숨기기, 답글 검토 |
 | 7 | 인사이트(Insights): 게시물 단위와 계정 단위 지표 |
 | 8 | 권한, App Review, OAuth, 토큰 갱신 |
@@ -198,6 +199,8 @@ App Review를 통과하기 전에는 권한을 본인과 테스터 계정에만 
 | 14 | 참조 클라이언트 `threads_client.py` |
 
 *(practice)*로 표시된 엔지니어링 권장 사항과 *(observed)*로 표시된 실측 결과를 제외한 나머지 내용은 모두 공식 문서에 근거합니다.
+
+변경 이력은 [CHANGELOG.ko.md](CHANGELOG.ko.md)에 있습니다.
 
 ### 참조 클라이언트
 
@@ -244,17 +247,19 @@ python3 threads_client.py delete <media-id>           # 게시물 삭제, 되돌
 - 테스트는 Claude에서만 진행했습니다. 다른 도구에서도 같은 흐름으로 동작할 것으로 보지만 실제로 검증하지는 않았습니다.
 - Claude 앱은 기본적으로 Threads API에 접속할 수 없으므로, 대행 모드는 여러분의 컴퓨터에서 실행해야 합니다. 대행 모드에는 터미널 명령을 실행할 수 있는 도구도 필요합니다.
 - 공식 문서에는 서로 모순되거나 불분명한 부분이 몇 군데 있습니다. 예를 들어 위치 검색에 `q`를 써야 하는지 `query`를 써야 하는지, 고스트 게시물에 지원하지 않는 기능을 붙이면 API가 오류를 내는지 그냥 무시하는지, webhook에 App Review가 필요한지 등입니다. 스킬은 이런 경우 임의로 가정하지 않고 사실대로 설명합니다.
-- embed.js의 로딩 동작(한 번에 최대 3개 로드, `instgrm.Embeds.process()`, `data-theme` 등)은 공식 문서에 없으며 2026년 10월에 확인한 내용입니다. Meta가 언제든 바꿀 수 있습니다.
+- embed.js의 로딩 동작(한 번에 최대 3개 로드, `instgrm.Embeds.process()`, `data-theme` 등)은 공식 문서에 없으며 2026년 10월에 관찰한 내용입니다. Meta가 언제든 바꿀 수 있습니다.
 - 문서 스냅샷은 2026-08-12 기준입니다. 이후 변경 사항은 [공식 changelog](https://developers.facebook.com/documentation/threads/changelog)를 따르세요.
 - Threads 광고(Marketing API에 속함)는 다루지 않습니다.
 
 ## 기여하기
 
-- 규칙이 틀렸거나 공식 문서가 업데이트되면 `threads-api/SKILL.md`를 직접 수정하세요. 공식 문서에 근거한 내용은 원래 의미대로 적고, 문서에 없는 엔지니어링 경험에 따른 권장 사항은 *(practice)*로 표시하세요.
-- 수정한 뒤에는 Anthropic의 skill-creator 스킬로 `evals/evals.json`에 따라 "스킬 있음 vs 스킬 없음" 비교를 다시 실행해 성능이 떨어지지 않았는지 확인하고, evals/BENCHMARK.md와 evals/benchmark.json을 업데이트하세요.
-- 새로 실수하기 쉬운 지점을 발견하면 `evals/evals.json`에 문제를 추가하고, 하나씩 판정할 수 있는 체크 항목을 함께 적어 주세요.
-- README와 benchmark 요약은 번체 중국어, 영어, 일본어, 한국어 네 가지 버전이 있으니, 수정할 때 함께 업데이트해 주세요.
+규칙 오류 제보, 실수하기 쉬운 지점 추가, 사이트 개선 모두 환영합니다.
+
+- 절차, 저장소 구성, 함께 업데이트해야 할 부분: [기여 가이드](.github/CONTRIBUTING.ko.md)
+- [행동 강령](.github/CODE_OF_CONDUCT.ko.md)
+- 보안 문제는 공개 issue가 아니라 [보안 정책](.github/SECURITY.ko.md)에 따라 비공개로 제보해 주세요.
+- 소개 사이트의 접근성: [접근성 선언문](.github/ACCESSIBILITY.ko.md)
 
 ## 라이선스
 
-아직 라이선스를 지정하지 않았습니다.
+[MIT](LICENSE)

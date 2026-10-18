@@ -8,6 +8,7 @@
 - 內容整理自 Meta 官方文件，涵蓋到 2026-08-12 的 changelog。嵌入貼文的部分另外參考 2026 年 10 月實際讀取的 embed.js 程式碼和實測結果。
 - 技能本身用英文撰寫，AI 助理會用你使用的語言回覆。下文以 Claude 為例說明。
 - 非 Meta 官方專案。
+- 介紹網站：<https://scorpio-meow.github.io/Threads-skill/>，可以直接在瀏覽器試用「送出前先檢查」。
 
 ## 快速開始
 
@@ -199,6 +200,8 @@ token 要有對應的權限：
 
 除了標成 *(practice)* 的工程建議，以及標成 *(observed)* 的實測結果，其餘內容都出自官方文件。
 
+歷次變動記錄在 [CHANGELOG.md](CHANGELOG.md)。
+
 ### 參考用戶端
 
 第 14 節的 `threads_client.py` 只用 Python 標準函式庫（3.8 以上），不必安裝套件。代操作時 Claude 用它呼叫 API；開發模式則參考它的邏輯，改寫成你專案的語言。想自己用的話，把那段程式碼存成 `threads_client.py`（Windows 把 `python3` 換成 `python`）：
@@ -250,11 +253,13 @@ python3 threads_client.py delete <media-id>           # 刪文，無法復原
 
 ## 參與貢獻
 
-- 規則有誤或官方文件更新時，直接修改 `threads-api/SKILL.md`。出自官方文件的內容照原意寫；文件沒寫、屬於工程經驗的建議，標成 *(practice)*。
-- 修改後，用 Anthropic 的 skill-creator 技能照 `evals/evals.json` 重跑「有技能 vs 沒技能」的比較，確認沒有退步，再更新 evals/BENCHMARK.md 和 evals/benchmark.json。
-- 發現新的易錯點時，可以在 `evals/evals.json` 加一題，附上可以逐條判定的檢查項目。
-- README 和 benchmark 摘要有繁體中文、英文、日文、韓文四個版本，修改時請一併更新。
+歡迎回報規則錯誤、補充易錯點或改善網站。
+
+- 流程、repo 結構與修改時要一起更新的地方：[參與貢獻指南](.github/CONTRIBUTING.md)
+- [行為準則](.github/CODE_OF_CONDUCT.md)
+- 資安問題請照[資安政策](.github/SECURITY.md)私下通報，不要開公開 issue。
+- 介紹網站的無障礙狀況：[無障礙聲明](.github/ACCESSIBILITY.md)
 
 ## 授權
 
-尚未指定授權條款。
+[MIT](LICENSE)

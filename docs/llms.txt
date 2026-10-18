@@ -1,0 +1,35 @@
+# Threads API Skill
+
+> An Agent Skill that teaches AI assistants Meta's Threads API: writing and debugging integration code, acting on the user's own account (post, reply, moderate, pull insights), and embedding Threads posts on websites. Distilled from Meta's official docs, covering the changelog through 2026-08-12. Not an official Meta project.
+
+The whole skill is one English Markdown file in the Agent Skills format (a `threads-api/` folder holding `SKILL.md`). Statements come from Meta's docs unless tagged *(practice)* (engineering advice) or *(observed)* (live test results). Threads ads belong to the Marketing API and are out of scope.
+
+Key concepts:
+
+- Build mode: write, review or debug code that calls the API, following the project's existing stack.
+- Operate mode: call the API on the user's account with the bundled Python client; anything public or destructive needs the user's explicit confirmation first.
+- Embedding: oEmbed (no token since March 2026) plus embed.js loading, throttling and failure handling for pages with many posts.
+
+## Skill
+
+- [SKILL.md](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/threads-api/SKILL.md): The skill itself, in 14 sections: core facts, build and operate workflows, publishing, reading and search, replies and moderation, insights, auth and permissions, quotas, webhooks, embedding, troubleshooting, doc examples not to copy, and a standard-library Python reference client
+
+## Usage
+
+- [README](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/README.en.md): Installation for Claude Code, the Claude apps, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, Windsurf and OpenCode; environment variables, token permissions and known limitations
+
+## Evaluation
+
+- [Benchmark summary](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/BENCHMARK.en.md): With-skill vs without-skill results over four rounds, with time, token usage and the reason behind every failed check
+- [Eval set](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/evals.json): Task prompts and the checklist items each answer is graded against
+
+## Optional
+
+- [Grading data](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/benchmark.json): Per-check verdicts with the grader's evidence for every run
+- [Contributing guide](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/.github/CONTRIBUTING.en.md): How to fix rules, rerun the evals, update the site and keep the four language versions in sync
+- [Security policy](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/.github/SECURITY.en.md): What counts as a vulnerability and how to report it privately
+- [Changelog](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/CHANGELOG.en.md): Change history
+- [README in Traditional Chinese](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/README.md)
+- [README in Japanese](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/README.ja.md)
+- [README in Korean](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/README.ko.md)
+- [License](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/LICENSE): MIT

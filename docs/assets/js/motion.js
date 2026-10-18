@@ -1,7 +1,6 @@
 (() => {
   "use strict";
   const { $$, reducedMotion } = TAS;
-
   const modes = $$(".mode");
   const figs = $$(".mode-fig");
   const setStep = (k) => {
@@ -12,7 +11,7 @@
     entries.forEach((e) => { if (e.isIntersecting) setStep(e.target.dataset.step); });
   }, { rootMargin: "-45% 0px -45% 0px" });
   modes.forEach((m) => modeIO.observe(m));
-
+  [...modes, ...figs].forEach((el) => el.addEventListener("focusin", () => setStep(el.dataset.step)));
   function countUp(el) {
     const target = Number(el.dataset.count);
     if (reducedMotion.matches || !target) return;
@@ -35,4 +34,5 @@
     }
   }, { rootMargin: "0px 0px -6% 0px", threshold: 0 });
   $$("[data-reveal], .bands[data-rows]").forEach((el) => revealIO.observe(el));
+  document.documentElement.classList.add("reveal-on");
 })();

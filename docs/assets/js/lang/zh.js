@@ -29,6 +29,6 @@ TAS.lang.zh = {
     ghost_doubt: (a) => `文件只說限時貼文支援文字防雷，${a.list.join("、")} 可能被 API 拒絕，也可能直接被忽略`,
     carousel: () => "輪播要有 2–20 個項目",
   },
-  status: { bad: (n) => `${n} 個錯誤，publish 會在呼叫 API 前停下`, warn: (n) => `可以送出，但有 ${n} 個提醒`, ok: "檢查通過，可以送出", child: (i) => `第 ${i} 個項目：`, carousel: (n) => `# 先建立 ${n} 個項目 container（is_carousel_item=true），再建立輪播` },
+  status: { bad: (n, w) => `${n} 個錯誤${w ? `、${w} 個提醒` : ""}，publish 會在呼叫 API 前停下`, errLabel: "錯誤：", warnLabel: "提醒：", warn: (n) => `可以送出，但有 ${n} 個提醒`, ok: "檢查通過，可以送出", child: (i) => `第 ${i} 個項目：`, carousel: (n) => `# 先建立 ${n} 個項目 container（is_carousel_item=true），再建立輪播` },
   sample: { note: "活動辦法：全館手沖咖啡豆 9 折，數量有限，售完為止。" },
 };

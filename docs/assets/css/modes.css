@@ -1,24 +1,112 @@
-.modes { padding-top: calc(var(--section) * 0.4); }
-.modes-head { grid-column: 1 / span 6; display: grid; gap: 18px; margin-bottom: clamp(40px, 6vw, 72px); }
-.modes-grid { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
-.mode { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-content: center; max-width: 34em; min-width: 0; }
-.mode-fig { min-width: 0; }
-.mode h3 { font-size: var(--step-lead); font-weight: 500; }
-.mode p { color: var(--ink); }
-.mode .ask { color: var(--muted); }
-.mode-fig { margin-bottom: 40px; }
-@media (min-width: 1024px) {
-  .js .modes-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); row-gap: 0; }
-  .js .modes-grid .mode { grid-column: 1 / span 5; min-height: 68vh; padding-block: 8vh; transition: opacity 600ms ease; }
-  .js .modes-grid .mode:not(.is-active) { opacity: 0.32; }
-  .js .mode[data-step="0"] { grid-row: 1; }
-  .js .mode[data-step="1"] { grid-row: 2; }
-  .js .mode[data-step="2"] { grid-row: 3; }
-  .js .modes-grid .mode-fig { grid-column: 7 / -1; grid-row: 1 / span 3; align-self: start; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 14vh); margin: 0; transition: opacity 1200ms var(--ease-soft), visibility 1200ms, transform 1200ms var(--ease-soft); }
-  .js .modes-grid .mode-fig:not(.is-active) { opacity: 0; visibility: hidden; transform: translateY(14px); }
+.modes {
+  padding-top: calc(var(--section) * 0.4);
 }
+
+.modes-head {
+  grid-column: 1 / span 6;
+  display: grid;
+  gap: 18px;
+  margin-bottom: clamp(40px, 6vw, 72px);
+}
+
+.modes-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+}
+
+.mode {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-content: center;
+  max-width: 34em;
+  min-width: 0;
+}
+
+.mode-fig {
+  min-width: 0;
+}
+
+.mode h3 {
+  font-size: var(--step-lead);
+  font-weight: 600;
+}
+
+.mode p {
+  color: var(--ink);
+}
+
+.mode .ask {
+  color: var(--muted);
+}
+
+.mode-fig {
+  margin-bottom: 40px;
+}
+
+@media (min-width: 1024px) {
+  .js .modes-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: 0;
+  }
+
+  .js .modes-grid .mode {
+    grid-column: 1 / span 5;
+    min-height: 68vh;
+    padding-block: 8vh;
+  }
+
+  .js .modes-grid .mode :is(h3, p) {
+    transition: color 600ms ease;
+  }
+
+  .js .modes-grid .mode:not(.is-active) :is(h3, p) {
+    color: var(--muted);
+  }
+
+  .js .mode[data-step="0"] {
+    grid-row: 1;
+  }
+
+  .js .mode[data-step="1"] {
+    grid-row: 2;
+  }
+
+  .js .mode[data-step="2"] {
+    grid-row: 3;
+  }
+
+  .js .modes-grid .mode-fig {
+    grid-column: 7 / -1;
+    grid-row: 1 / span 3;
+    align-self: start;
+    position: sticky;
+    top: calc(env(safe-area-inset-top, 0px) + 14vh);
+    margin: 0;
+    transition: opacity 1200ms var(--ease-soft), transform 1200ms var(--ease-soft);
+  }
+
+  .js .modes-grid .mode-fig:not(.is-active) {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(14px);
+  }
+}
+
 @media (max-width: 1023px) {
-  .modes-head { grid-column: 1 / -1; }
-  .mode { max-width: 40em; }
-  .mode-fig { margin-bottom: 56px; }
+  .modes-head {
+    grid-column: 1 / -1;
+  }
+
+  .mode {
+    max-width: 40em;
+  }
+
+  .mode-fig {
+    margin-bottom: 56px;
+  }
 }

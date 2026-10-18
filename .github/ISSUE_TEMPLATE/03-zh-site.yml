@@ -1,0 +1,46 @@
+name: "網站問題"
+description: "介紹網站的錯字、翻譯、版面、功能或無障礙問題"
+title: "[site] "
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: "問題類型"
+      options:
+        - "內容或翻譯錯誤"
+        - "版面或功能異常"
+        - "無障礙問題"
+        - "其他"
+    validations:
+      required: true
+  - type: dropdown
+    id: lang
+    attributes:
+      label: "網站語言"
+      options:
+        - "繁體中文"
+        - "English"
+        - "日本語"
+        - "한국어"
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: "瀏覽器、裝置與輔助科技"
+      description: "例如瀏覽器和版本、手機或電腦、使用的螢幕閱讀器或其他輔助工具"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: "問題說明"
+      description: "在網站哪個區塊、怎麼操作會出現。可以附上截圖。"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "預期的結果"
+    validations:
+      required: false

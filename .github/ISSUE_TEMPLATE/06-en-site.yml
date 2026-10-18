@@ -1,0 +1,46 @@
+name: "Project site issue"
+description: "Typos, translations, layout, features or accessibility on the project site"
+title: "[site] "
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: "Type of problem"
+      options:
+        - "Content or translation error"
+        - "Layout or feature broken"
+        - "Accessibility barrier"
+        - "Other"
+    validations:
+      required: true
+  - type: dropdown
+    id: lang
+    attributes:
+      label: "Site language"
+      options:
+        - "繁體中文"
+        - "English"
+        - "日本語"
+        - "한국어"
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: "Browser, device and assistive technology"
+      description: "For example the browser and version, phone or computer, and any screen reader or other assistive tool"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: "Description"
+      description: "Which part of the site, and what you did when it happened. Screenshots are welcome."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "What you expected"
+    validations:
+      required: false

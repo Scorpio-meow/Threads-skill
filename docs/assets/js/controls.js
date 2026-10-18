@@ -2,7 +2,6 @@
   "use strict";
   const { $, $$ } = TAS;
   const t = (key) => TAS.i18n.t(key);
-
   function commandText(id) { const el = document.getElementById(id); return el.textContent.replace(/^\$\s*/, "").trim(); }
   $$("[data-copy]").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -10,7 +9,7 @@
       const text = commandText(id);
       const done = document.getElementById(btn.dataset.done);
       let ok = false;
-      try { await navigator.clipboard.writeText(text); ok = true; } catch {}
+      try { await navigator.clipboard.writeText(text); ok = true; } catch { }
       if (!ok) {
         const range = document.createRange();
         range.selectNodeContents(document.getElementById(id));
@@ -23,7 +22,10 @@
       }
     });
   });
-
+  new Set($$("[data-copy]").map((b) => b.dataset.done)).forEach((id) => {
+    const done = document.getElementById(id);
+    done.addEventListener("transitionend", () => { if (!done.classList.contains("is-on")) done.textContent = ""; });
+  });
   function bindSeg(seg, onChange) {
     const btns = $$('[role="radio"]', seg);
     const select = (b, focus) => {
@@ -42,17 +44,18 @@
       });
     });
   }
-
   const demo = $(".demo");
-  bindSeg($(".seg", demo), (b) => {
-    const v = b.dataset.variant;
+  const demoSeg = $(".seg", demo);
+  const showVariant = (v) => {
     $$("[data-stack] > [data-variant]", demo).forEach((el) => {
       const on = el.dataset.variant === v;
       el.toggleAttribute("inert", !on);
       if (on) el.removeAttribute("aria-hidden"); else el.setAttribute("aria-hidden", "true");
     });
-  });
-
+  };
+  bindSeg(demoSeg, (b) => showVariant(b.dataset.variant));
+  showVariant($('[aria-checked="true"]', demoSeg).dataset.variant);
+  $$("[data-stack]", demo).forEach((s) => s.classList.add("is-ready"));
   const dlg = $(".dialog");
   let scope = "global", runner = "bunx";
   function renderScope() {
@@ -63,7 +66,23 @@
   bindSeg($(".seg", dlg), (b) => { scope = b.dataset.scope; renderScope(); });
   $("#dlg-runner").addEventListener("click", () => { runner = runner === "bunx" ? "npx" : "bunx"; renderScope(); });
   document.addEventListener("tas:lang", renderScope);
-
+  dlg.addEventListener("focusin", () => { ["#dlg-cmd", "#dlg-hint"].forEach((s) => $(s).setAttribute("aria-live", "polite")); }, { once: true });
+  const scrollers = $$(".code, .tbl-wrap, .ck-pay pre, .qa-body pre");
+  const syncScrollers = () => scrollers.forEach((el) => {
+    if (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight) el.tabIndex = 0; else el.removeAttribute("tabindex");
+  });
+  const scrollRO = new ResizeObserver(syncScrollers);
+  scrollers.forEach((el) => scrollRO.observe(el));
+  document.addEventListener("tas:lang", syncScrollers);
+  document.addEventListener("input", syncScrollers);
+  const tlBar = $(".tl-bar");
+  const tlLabels = $$("span", tlBar);
+  const fitLabels = () => tlLabels.forEach((s) => {
+    s.classList.remove("is-clipped");
+    s.classList.toggle("is-clipped", s.scrollWidth > s.clientWidth);
+  });
+  new ResizeObserver(fitLabels).observe(tlBar);
+  document.addEventListener("tas:lang", fitLabels);
   const tabs = $$('.rules-tabs [role="tab"]');
   const panels = tabs.map((tab) => document.getElementById(tab.getAttribute("aria-controls")));
   function selectTab(tab, focus) {
