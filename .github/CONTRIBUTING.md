@@ -26,7 +26,7 @@ issue 和 PR 用繁中、英文、日文、韓文都可以。不論在哪裡發�
 | [`docs/`](/docs/) | 介紹網站，GitHub Pages 從 `main` 的 `/docs` 發佈 |
 | `README*.md` | 專案說明（四語） |
 | [`CHANGELOG*.md`](/CHANGELOG.md) | 變更記錄（四語） |
-| [`.github/`](/.github/) | 社群檔案（這份貢獻指南、行為準則、資安政策、無障礙聲明，各有四語）、issue 表單與 PR 範本 |
+| [`.github/`](/.github/) | 社群檔案（這份貢獻指南、行為準則、資安政策、無障礙聲明，各有四語）、issue 表單與 PR 範本。行為準則的英、日、韓文版放在 `i18n/`，因為 `.github/` 裡有多份行為準則時，GitHub 不一定顯示繁中版 |
 
 ## 修改技能
 

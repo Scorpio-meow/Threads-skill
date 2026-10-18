@@ -1,6 +1,6 @@
 # 行為準則
 
-**繁體中文** | [English](/.github/CODE_OF_CONDUCT.en.md) | [日本語](/.github/CODE_OF_CONDUCT.ja.md) | [한국어](/.github/CODE_OF_CONDUCT.ko.md)
+**繁體中文** | [English](/.github/i18n/CODE_OF_CONDUCT.en.md) | [日本語](/.github/i18n/CODE_OF_CONDUCT.ja.md) | [한국어](/.github/i18n/CODE_OF_CONDUCT.ko.md)
 
 本專案採用 [Contributor Covenant 3.0](https://www.contributor-covenant.org/version/3/0/code_of_conduct/) 作為行為準則。Contributor Covenant 3.0 目前沒有繁體中文版，以英文原文為準。下面補充本專案的適用範圍、特別在意的事和通報方式。
 

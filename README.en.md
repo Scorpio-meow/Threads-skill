@@ -262,7 +262,7 @@ For each round's eval setup, time and token usage, and the reason behind every l
 Reports of wrong rules, new pitfalls and improvements to the site are all welcome.
 
 - Workflow, repository layout and what to update together: [Contributing guide](.github/CONTRIBUTING.en.md)
-- [Code of Conduct](.github/CODE_OF_CONDUCT.en.md)
+- [Code of Conduct](.github/i18n/CODE_OF_CONDUCT.en.md)
 - Report security issues privately as described in the [Security Policy](.github/SECURITY.en.md), not in a public issue.
 - Accessibility of the project site: [Accessibility Statement](.github/ACCESSIBILITY.en.md)
 

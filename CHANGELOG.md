@@ -4,6 +4,13 @@
 
 本專案的重要變動都記在這裡，格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。版本號跟著 `threads-api/SKILL.md` 的 `metadata.version` 走，Agensi 上的版本也用同一個號碼；1.0 之前的變動依日期記錄。
 
+## 未發布
+
+### 修正
+
+- GitHub 首頁的 Contributing 等分頁會從 repo 根目錄解析社群檔案裡的相對連結，點了會 404；改用以 `/` 開頭、從 repo 根目錄算起的路徑。
+- GitHub 首頁的 Code of conduct 分頁顯示的是英文版：行為準則的英、日、韓文版移到 `.github/i18n/`，分頁改為顯示繁中版。
+
 ## 1.1 - 2026-10-18
 
 ### 新增

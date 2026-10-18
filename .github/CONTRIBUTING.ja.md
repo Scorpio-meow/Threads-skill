@@ -2,7 +2,7 @@
 
 [繁體中文](/.github/CONTRIBUTING.md) | [English](/.github/CONTRIBUTING.en.md) | **日本語** | [한국어](/.github/CONTRIBUTING.ko.md)
 
-ご協力ありがとうございます。このプロジェクトは、AI アシスタント向けのスキル（`threads-api/SKILL.md`）、評価データ、紹介サイトの 3 つでできています。参加する前に[行動規範](/.github/CODE_OF_CONDUCT.ja.md)をお読みください。
+ご協力ありがとうございます。このプロジェクトは、AI アシスタント向けのスキル（`threads-api/SKILL.md`）、評価データ、紹介サイトの 3 つでできています。参加する前に[行動規範](/.github/i18n/CODE_OF_CONDUCT.ja.md)をお読みください。
 
 ## 協力の方法
 
@@ -26,7 +26,7 @@ issue や PR は繁体字中国語、英語、日本語、韓国語のどれで�
 | [`docs/`](/docs/) | 紹介サイト。`main` の `/docs` から GitHub Pages に公開 |
 | `README*.md` | プロジェクトの説明（4 言語） |
 | [`CHANGELOG*.md`](/CHANGELOG.ja.md) | 変更履歴（4 言語） |
-| [`.github/`](/.github/) | コミュニティファイル（このガイド、行動規範、セキュリティポリシー、アクセシビリティ方針。それぞれ 4 言語）、issue フォーム、PR テンプレート |
+| [`.github/`](/.github/) | コミュニティファイル（このガイド、行動規範、セキュリティポリシー、アクセシビリティ方針。それぞれ 4 言語）、issue フォーム、PR テンプレート。`.github/` に行動規範が複数あると GitHub が繁体字中国語版を表示するとは限らないため、行動規範の英語・日本語・韓国語版は `i18n/` に配置 |
 
 ## スキルを修正する
 

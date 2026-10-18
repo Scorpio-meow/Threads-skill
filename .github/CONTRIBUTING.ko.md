@@ -2,7 +2,7 @@
 
 [繁體中文](/.github/CONTRIBUTING.md) | [English](/.github/CONTRIBUTING.en.md) | [日本語](/.github/CONTRIBUTING.ja.md) | **한국어**
 
-도와주셔서 고맙습니다. 이 프로젝트는 AI 어시스턴트용 스킬(`threads-api/SKILL.md`), 평가 데이터, 소개 사이트의 세 부분으로 이루어져 있습니다. 참여하기 전에 [행동 강령](/.github/CODE_OF_CONDUCT.ko.md)을 읽어 주세요.
+도와주셔서 고맙습니다. 이 프로젝트는 AI 어시스턴트용 스킬(`threads-api/SKILL.md`), 평가 데이터, 소개 사이트의 세 부분으로 이루어져 있습니다. 참여하기 전에 [행동 강령](/.github/i18n/CODE_OF_CONDUCT.ko.md)을 읽어 주세요.
 
 ## 도울 수 있는 방법
 
@@ -26,7 +26,7 @@ issue와 PR은 번체 중국어, 영어, 일본어, 한국어 중 어느 언어�
 | [`docs/`](/docs/) | 소개 사이트. `main`의 `/docs`에서 GitHub Pages로 게시 |
 | `README*.md` | 프로젝트 설명(4개 언어) |
 | [`CHANGELOG*.md`](/CHANGELOG.ko.md) | 변경 이력(4개 언어) |
-| [`.github/`](/.github/) | 커뮤니티 파일(이 가이드, 행동 강령, 보안 정책, 접근성 선언문, 각각 4개 언어), issue 양식과 PR 템플릿 |
+| [`.github/`](/.github/) | 커뮤니티 파일(이 가이드, 행동 강령, 보안 정책, 접근성 선언문, 각각 4개 언어), issue 양식과 PR 템플릿. `.github/`에 행동 강령이 여러 개 있으면 GitHub가 번체 중국어 버전을 보여 준다는 보장이 없어서, 행동 강령의 영어·일본어·한국어 버전은 `i18n/`에 둠 |
 
 ## 스킬 수정하기
 

@@ -1,6 +1,6 @@
 # 行動規範
 
-[繁體中文](/.github/CODE_OF_CONDUCT.md) | [English](/.github/CODE_OF_CONDUCT.en.md) | **日本語** | [한국어](/.github/CODE_OF_CONDUCT.ko.md)
+[繁體中文](/.github/CODE_OF_CONDUCT.md) | [English](/.github/i18n/CODE_OF_CONDUCT.en.md) | **日本語** | [한국어](/.github/i18n/CODE_OF_CONDUCT.ko.md)
 
 このプロジェクトは [Contributor Covenant 3.0](https://www.contributor-covenant.org/ja/version/3/0/code_of_conduct/) を行動規範として採用しています。以下では、このプロジェクトでの適用範囲、特に大切にしていること、報告の方法を補足します。
 

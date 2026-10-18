@@ -2,7 +2,7 @@
 
 [繁體中文](/.github/CONTRIBUTING.md) | **English** | [日本語](/.github/CONTRIBUTING.ja.md) | [한국어](/.github/CONTRIBUTING.ko.md)
 
-Thanks for helping out. This project has three parts: the skill for AI assistants (`threads-api/SKILL.md`), the evaluation data, and the project site. Please read the [Code of Conduct](/.github/CODE_OF_CONDUCT.en.md) before you take part.
+Thanks for helping out. This project has three parts: the skill for AI assistants (`threads-api/SKILL.md`), the evaluation data, and the project site. Please read the [Code of Conduct](/.github/i18n/CODE_OF_CONDUCT.en.md) before you take part.
 
 ## Ways to help
 
@@ -26,7 +26,7 @@ You can write issues and PRs in Traditional Chinese, English, Japanese or Korean
 | [`docs/`](/docs/) | Project site, published to GitHub Pages from `/docs` on `main` |
 | `README*.md` | Project overview (four languages) |
 | [`CHANGELOG*.md`](/CHANGELOG.en.md) | Change history (four languages) |
-| [`.github/`](/.github/) | Community files (this guide, the Code of Conduct, the Security Policy and the Accessibility Statement, each in four languages), issue forms and PR templates |
+| [`.github/`](/.github/) | Community files (this guide, the Code of Conduct, the Security Policy and the Accessibility Statement, each in four languages), issue forms and PR templates. The English, Japanese and Korean Code of Conduct live in `i18n/`, because GitHub doesn't always show the Traditional Chinese one when `.github/` holds more than one Code of Conduct |
 
 ## Changing the skill
 

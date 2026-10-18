@@ -262,7 +262,7 @@ python3 threads_client.py delete <media-id>           # 게시물 삭제, 되돌
 규칙 오류 제보, 실수하기 쉬운 지점 추가, 사이트 개선 모두 환영합니다.
 
 - 절차, 저장소 구성, 함께 업데이트해야 할 부분: [기여 가이드](.github/CONTRIBUTING.ko.md)
-- [행동 강령](.github/CODE_OF_CONDUCT.ko.md)
+- [행동 강령](.github/i18n/CODE_OF_CONDUCT.ko.md)
 - 보안 문제는 공개 issue가 아니라 [보안 정책](.github/SECURITY.ko.md)에 따라 비공개로 제보해 주세요.
 - 소개 사이트의 접근성: [접근성 선언문](.github/ACCESSIBILITY.ko.md)
 

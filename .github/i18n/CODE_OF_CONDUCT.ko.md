@@ -1,6 +1,6 @@
 # 행동 강령
 
-[繁體中文](/.github/CODE_OF_CONDUCT.md) | [English](/.github/CODE_OF_CONDUCT.en.md) | [日本語](/.github/CODE_OF_CONDUCT.ja.md) | **한국어**
+[繁體中文](/.github/CODE_OF_CONDUCT.md) | [English](/.github/i18n/CODE_OF_CONDUCT.en.md) | [日本語](/.github/i18n/CODE_OF_CONDUCT.ja.md) | **한국어**
 
 이 프로젝트는 [Contributor Covenant 3.0](https://www.contributor-covenant.org/ko/version/3/0/code_of_conduct/)을 행동 강령으로 채택합니다. 아래에서는 이 프로젝트의 적용 범위, 특히 중요하게 여기는 점, 신고 방법을 보충합니다.
 

@@ -4,6 +4,13 @@
 
 Notable changes to this project are recorded here, following the format of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version numbers follow `metadata.version` in `threads-api/SKILL.md`, and the Agensi listing uses the same numbers; changes before 1.0 are grouped by date.
 
+## Unreleased
+
+### Fixed
+
+- The Contributing and other tabs on the GitHub repository page resolve relative links in the community files from the repository root, so they returned 404; the links now use paths that start with `/`, counted from the repository root.
+- The Code of conduct tab on the GitHub repository page showed the English version: the English, Japanese and Korean versions moved to `.github/i18n/`, so the tab shows the Traditional Chinese version.
+
 ## 1.1 - 2026-10-18
 
 ### Added

@@ -1,6 +1,6 @@
 # Code of Conduct
 
-[繁體中文](/.github/CODE_OF_CONDUCT.md) | **English** | [日本語](/.github/CODE_OF_CONDUCT.ja.md) | [한국어](/.github/CODE_OF_CONDUCT.ko.md)
+[繁體中文](/.github/CODE_OF_CONDUCT.md) | **English** | [日本語](/.github/i18n/CODE_OF_CONDUCT.ja.md) | [한국어](/.github/i18n/CODE_OF_CONDUCT.ko.md)
 
 This project adopts the [Contributor Covenant 3.0](https://www.contributor-covenant.org/version/3/0/code_of_conduct/) as its code of conduct. The sections below add this project's scope, the things it cares about most, and how to report a problem.
 

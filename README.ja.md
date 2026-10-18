@@ -262,7 +262,7 @@ python3 threads_client.py delete <media-id>           # 投稿を削除（元に
 ルールの誤りの報告、間違えやすいポイントの追加、サイトの改善を歓迎します。
 
 - 手順、リポジトリの構成、あわせて更新が必要な箇所：[コントリビューションガイド](.github/CONTRIBUTING.ja.md)
-- [行動規範](.github/CODE_OF_CONDUCT.ja.md)
+- [行動規範](.github/i18n/CODE_OF_CONDUCT.ja.md)
 - セキュリティの問題は公開の issue ではなく、[セキュリティポリシー](.github/SECURITY.ja.md)に沿って非公開で報告してください。
 - 紹介サイトのアクセシビリティ：[アクセシビリティ方針](.github/ACCESSIBILITY.ja.md)
 
