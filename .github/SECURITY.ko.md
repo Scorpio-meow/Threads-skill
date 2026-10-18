@@ -1,6 +1,6 @@
 # 보안 정책
 
-[繁體中文](SECURITY.md) | [English](SECURITY.en.md) | [日本語](SECURITY.ja.md) | **한국어**
+[繁體中文](/.github/SECURITY.md) | [English](/.github/SECURITY.en.md) | [日本語](/.github/SECURITY.ja.md) | **한국어**
 
 ## 지원 버전
 
@@ -30,4 +30,4 @@
 
 ## 처리 절차
 
-이 프로젝트는 개인이 관리하며, 최대한 빨리 답하고 진행 상황은 해당 제보 안에서 업데이트합니다. 문제가 확인되면 `main`에서 수정하고, security advisory를 게시하고, [CHANGELOG.ko.md](../CHANGELOG.ko.md)에 기록합니다. 동의하시면 advisory에 감사의 말을 남깁니다.
+이 프로젝트는 개인이 관리하며, 최대한 빨리 답하고 진행 상황은 해당 제보 안에서 업데이트합니다. 문제가 확인되면 `main`에서 수정하고, security advisory를 게시하고, [CHANGELOG.ko.md](/CHANGELOG.ko.md)에 기록합니다. 동의하시면 advisory에 감사의 말을 남깁니다.

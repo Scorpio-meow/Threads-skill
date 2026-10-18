@@ -1,6 +1,6 @@
 # 資安政策
 
-**繁體中文** | [English](SECURITY.en.md) | [日本語](SECURITY.ja.md) | [한국어](SECURITY.ko.md)
+**繁體中文** | [English](/.github/SECURITY.en.md) | [日本語](/.github/SECURITY.ja.md) | [한국어](/.github/SECURITY.ko.md)
 
 ## 支援的版本
 
@@ -30,4 +30,4 @@
 
 ## 處理流程
 
-本專案由個人維護，會盡快回覆，處理進度都會更新在該則通報裡。確認問題後，會在 `main` 修正、發布 security advisory，並記錄在 [CHANGELOG.md](../CHANGELOG.md)。你同意的話，會在 advisory 裡致謝。
+本專案由個人維護，會盡快回覆，處理進度都會更新在該則通報裡。確認問題後，會在 `main` 修正、發布 security advisory，並記錄在 [CHANGELOG.md](/CHANGELOG.md)。你同意的話，會在 advisory 裡致謝。

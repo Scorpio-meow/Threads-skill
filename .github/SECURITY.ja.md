@@ -1,6 +1,6 @@
 # セキュリティポリシー
 
-[繁體中文](SECURITY.md) | [English](SECURITY.en.md) | **日本語** | [한국어](SECURITY.ko.md)
+[繁體中文](/.github/SECURITY.md) | [English](/.github/SECURITY.en.md) | **日本語** | [한국어](/.github/SECURITY.ko.md)
 
 ## サポート対象のバージョン
 
@@ -30,4 +30,4 @@
 
 ## 対応の流れ
 
-このプロジェクトは個人が管理しており、できるだけ早く返信し、進捗はその報告の中で更新します。問題が確認できたら、`main` で修正し、security advisory を公開して、[CHANGELOG.ja.md](../CHANGELOG.ja.md) に記録します。同意いただければ、advisory に謝辞を記載します。
+このプロジェクトは個人が管理しており、できるだけ早く返信し、進捗はその報告の中で更新します。問題が確認できたら、`main` で修正し、security advisory を公開して、[CHANGELOG.ja.md](/CHANGELOG.ja.md) に記録します。同意いただければ、advisory に謝辞を記載します。

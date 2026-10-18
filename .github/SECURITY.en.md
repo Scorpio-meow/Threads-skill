@@ -1,6 +1,6 @@
 # Security Policy
 
-[繁體中文](SECURITY.md) | **English** | [日本語](SECURITY.ja.md) | [한국어](SECURITY.ko.md)
+[繁體中文](/.github/SECURITY.md) | **English** | [日本語](/.github/SECURITY.ja.md) | [한국어](/.github/SECURITY.ko.md)
 
 ## Supported versions
 
@@ -30,4 +30,4 @@ Please don't open a public issue, PR or Discussion.
 
 ## What happens next
 
-This project is maintained by one person, who will reply as soon as possible and post progress updates in the report itself. Once the issue is confirmed, it will be fixed on `main`, a security advisory will be published, and the fix will be recorded in [CHANGELOG.en.md](../CHANGELOG.en.md). With your consent, you'll be credited in the advisory.
+This project is maintained by one person, who will reply as soon as possible and post progress updates in the report itself. Once the issue is confirmed, it will be fixed on `main`, a security advisory will be published, and the fix will be recorded in [CHANGELOG.en.md](/CHANGELOG.en.md). With your consent, you'll be credited in the advisory.

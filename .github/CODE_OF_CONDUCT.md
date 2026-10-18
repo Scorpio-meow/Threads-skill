@@ -1,6 +1,6 @@
 # 行為準則
 
-**繁體中文** | [English](CODE_OF_CONDUCT.en.md) | [日本語](CODE_OF_CONDUCT.ja.md) | [한국어](CODE_OF_CONDUCT.ko.md)
+**繁體中文** | [English](/.github/CODE_OF_CONDUCT.en.md) | [日本語](/.github/CODE_OF_CONDUCT.ja.md) | [한국어](/.github/CODE_OF_CONDUCT.ko.md)
 
 本專案採用 [Contributor Covenant 3.0](https://www.contributor-covenant.org/version/3/0/code_of_conduct/) 作為行為準則。Contributor Covenant 3.0 目前沒有繁體中文版，以英文原文為準。下面補充本專案的適用範圍、特別在意的事和通報方式。
 
@@ -20,7 +20,7 @@
 - **需要保密，或涉及騷擾**：寄信到 [yao921024@gmail.com](mailto:yao921024@gmail.com)，只有維護者會看到。請附上相關的連結或截圖。
 - **可以公開的情況**：在相關的 issue、PR 或 Discussion 標記 @Scorpio-meow，或開一則 issue 說明。
 - **也可以交給 GitHub 處理**：在留言右上角的「⋯」選單點選 **Report content**，或到對方的個人頁面點選 **Block or Report**，通報會送到 GitHub Support。詳細步驟見 [GitHub 文件](https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam)。
-- **資安問題**：照[資安政策](SECURITY.md)私下通報。
+- **資安問題**：照[資安政策](/.github/SECURITY.md)私下通報。
 
 ## 處理方式
 

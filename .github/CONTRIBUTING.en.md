@@ -1,8 +1,8 @@
 # Contributing
 
-[繁體中文](CONTRIBUTING.md) | **English** | [日本語](CONTRIBUTING.ja.md) | [한국어](CONTRIBUTING.ko.md)
+[繁體中文](/.github/CONTRIBUTING.md) | **English** | [日本語](/.github/CONTRIBUTING.ja.md) | [한국어](/.github/CONTRIBUTING.ko.md)
 
-Thanks for helping out. This project has three parts: the skill for AI assistants (`threads-api/SKILL.md`), the evaluation data, and the project site. Please read the [Code of Conduct](CODE_OF_CONDUCT.en.md) before you take part.
+Thanks for helping out. This project has three parts: the skill for AI assistants (`threads-api/SKILL.md`), the evaluation data, and the project site. Please read the [Code of Conduct](/.github/CODE_OF_CONDUCT.en.md) before you take part.
 
 ## Ways to help
 
@@ -12,7 +12,7 @@ Thanks for helping out. This project has three parts: the skill for AI assistant
 | Installation failed, the skill didn't activate, or the assistant still gets things wrong with the skill installed | Open an issue with “Problem using the skill”; reports like these often become new eval tasks |
 | Typos, translations, layout or accessibility problems on the project site | Open an issue with “Project site issue” |
 | Usage questions and feature ideas | [Discussions](https://github.com/Scorpio-meow/Threads-skill/discussions) |
-| Security issues | Don't post them publicly; report them privately as described in the [Security Policy](SECURITY.en.md) |
+| Security issues | Don't post them publicly; report them privately as described in the [Security Policy](/.github/SECURITY.en.md) |
 
 You can write issues and PRs in Traditional Chinese, English, Japanese or Korean. Wherever you post, never include access tokens, app secrets or any personal data, including your own.
 
@@ -20,13 +20,13 @@ You can write issues and PRs in Traditional Chinese, English, Japanese or Korean
 
 | Path | Contents |
 |---|---|
-| [`threads-api/SKILL.md`](../threads-api/SKILL.md) | The skill itself, in English, 14 sections |
-| [`evals/evals.json`](../evals/evals.json) | Eval tasks and their checklist items |
-| `evals/BENCHMARK*.md`, [`evals/benchmark.json`](../evals/benchmark.json) | Benchmark summary (four languages) and per-check verdicts |
-| [`docs/`](../docs/) | Project site, published to GitHub Pages from `/docs` on `main` |
+| [`threads-api/SKILL.md`](/threads-api/SKILL.md) | The skill itself, in English, 14 sections |
+| [`evals/evals.json`](/evals/evals.json) | Eval tasks and their checklist items |
+| `evals/BENCHMARK*.md`, [`evals/benchmark.json`](/evals/benchmark.json) | Benchmark summary (four languages) and per-check verdicts |
+| [`docs/`](/docs/) | Project site, published to GitHub Pages from `/docs` on `main` |
 | `README*.md` | Project overview (four languages) |
-| [`CHANGELOG*.md`](../CHANGELOG.en.md) | Change history (four languages) |
-| [`.github/`](./) | Community files (this guide, the Code of Conduct, the Security Policy and the Accessibility Statement, each in four languages), issue forms and PR templates |
+| [`CHANGELOG*.md`](/CHANGELOG.en.md) | Change history (four languages) |
+| [`.github/`](/.github/) | Community files (this guide, the Code of Conduct, the Security Policy and the Accessibility Statement, each in four languages), issue forms and PR templates |
 
 ## Changing the skill
 
@@ -34,7 +34,7 @@ You can write issues and PRs in Traditional Chinese, English, Japanese or Korean
 - Keep content from the official docs faithful to the original meaning. Mark engineering advice the docs don't cover as *(practice)*, and behavior you observed in live tests but the docs don't mention as *(observed)*, with the year and month of the observation.
 - When the official docs contradict themselves or are unclear, say so plainly instead of guessing.
 - The reference client `threads_client.py` in section 14 uses only the Python standard library and must run on Python 3.8 or later.
-- The site's “Check before you send” is a JS port of `check()` ([`docs/assets/js/client.js`](../docs/assets/js/client.js)). When you change `check()`, update the JS port too and confirm that both return the same errors, warnings, character counts and link counts for the same specs.
+- The site's “Check before you send” is a JS port of `check()` ([`docs/assets/js/client.js`](/docs/assets/js/client.js)). When you change `check()`, update the JS port too and confirm that both return the same errors, warnings, character counts and link counts for the same specs.
 - When you change the skill's content, raise `metadata.version` in the SKILL.md frontmatter (for example 1.1 → 1.2); the changelog and Agensi use the same number.
 
 ## Rerunning the evals
@@ -48,13 +48,13 @@ You can write issues and PRs in Traditional Chinese, English, Japanese or Korean
 - It's a static site with no build step. Open `docs/index.html` in a browser to preview it, or run `bunx serve docs` from the repository root for a local server.
 - The Traditional Chinese text lives directly in `docs/index.html`; the English, Japanese and Korean text lives in `docs/assets/js/lang/{en,ja,ko}.js`, matched by `data-i18n` keys. Traditional Chinese messages generated by scripts are in `docs/assets/js/lang/zh.js`.
 - The site also shows the test results, the docs snapshot date and key numbers from each section, so update it whenever those change.
-- Don't let any of the support listed in [ACCESSIBILITY.md](ACCESSIBILITY.en.md) regress when you change the site.
+- Don't let any of the support listed in [ACCESSIBILITY.md](/.github/ACCESSIBILITY.en.md) regress when you change the site.
 
 ## Docs and translations
 
 - The README, benchmark summary, changelog, this guide, the Code of Conduct, the Security Policy, the Accessibility Statement, the issue forms and the PR templates each exist in Traditional Chinese, English, Japanese and Korean; please update every version. If you can't write one of the languages, say so in the PR and the maintainer will help with the translation.
-- Record your changes under “Unreleased” in [CHANGELOG.en.md](../CHANGELOG.en.md) and the other three language versions.
-- When you add or move documents, update the links in [`docs/llms.txt`](../docs/llms.txt).
+- Record your changes under “Unreleased” in [CHANGELOG.en.md](/CHANGELOG.en.md) and the other three language versions.
+- When you add or move documents, update the links in [`docs/llms.txt`](/docs/llms.txt).
 
 ## Opening a pull request
 
@@ -65,4 +65,4 @@ You can write issues and PRs in Traditional Chinese, English, Japanese or Korean
 
 ## License
 
-Your contributions are released under the project's [MIT License](../LICENSE).
+Your contributions are released under the project's [MIT License](/LICENSE).
