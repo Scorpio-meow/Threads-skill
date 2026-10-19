@@ -4,7 +4,7 @@
 
 이 프로젝트의 주요 변경 사항을 여기에 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 참고했습니다. 버전 번호는 `threads-api/SKILL.md`의 `metadata.version`을 따르며, Agensi에서도 같은 번호를 씁니다. 1.0 이전 변경 사항은 날짜별로 정리합니다.
 
-## 미출시
+## 1.4 - 2026-10-19
 
 ### 추가
 

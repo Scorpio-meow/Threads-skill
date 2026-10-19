@@ -4,7 +4,7 @@
 
 本專案的重要變動都記在這裡，格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。版本號跟著 `threads-api/SKILL.md` 的 `metadata.version` 走，Agensi 上的版本也用同一個號碼；1.0 之前的變動依日期記錄。
 
-## 未發布
+## 1.4 - 2026-10-19
 
 ### 新增
 

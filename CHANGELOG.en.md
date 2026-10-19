@@ -4,7 +4,7 @@
 
 Notable changes to this project are recorded here, following the format of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version numbers follow `metadata.version` in `threads-api/SKILL.md`, and the Agensi listing uses the same numbers; changes before 1.0 are grouped by date.
 
-## Unreleased
+## 1.4 - 2026-10-19
 
 ### Added
 
