@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "我在寫一個 Python 腳本，要自動在 Threads 發一則輪播貼文：兩張 JPG 加一支直式 MP4 影片（都已經放在公司 S3 的公開網址），內文要附活動頁連結 https://example.com/event，主題標籤用「攝影展」，而且只讓我追蹤的人回覆。影片有時候很大、處理比較久。幫我寫一個完整的發文函式，要能處理影片還在處理中或處理失敗的情況，最後印出貼文網址。",
-      "expected_output": "A Python publishing function implementing the 3-step carousel flow (item containers with is_carousel_item=true -> CAROUSEL container with comma-separated children -> threads_publish), status polling with ERROR/EXPIRED handling and timeout, topic_tag and reply_control=accounts_you_follow on the parent, correct handling of the link (link_attachment is TEXT-only), and permalink lookup by media ID.",
+      "expected_output": "A Python publishing function that validates the post locally before any API call (text length with emojis counted as UTF-8 bytes, at most 5 links, 2–20 items) and implements the 3-step carousel flow (item containers with is_carousel_item=true -> CAROUSEL container with comma-separated children -> threads_publish), status polling with ERROR/EXPIRED handling and timeout, topic_tag and reply_control=accounts_you_follow on the parent, correct handling of the link (link_attachment is TEXT-only), and permalink lookup by media ID.",
       "files": [],
       "expectations": [
         "Each carousel item container is created with is_carousel_item=true and an explicit media_type of IMAGE or VIDEO.",
@@ -14,13 +14,14 @@
         "topic_tag=攝影展 is sent as the topic_tag parameter and reply_control=accounts_you_follow is set, both on the carousel parent container.",
         "The link is not sent as link_attachment on the carousel, and the reply explains that link preview cards only work on text-only posts (the link stays plain text).",
         "It publishes via POST /{user}/threads_publish with creation_id=<carousel container id>, then fetches the permalink with the returned media ID (GET /{media-id}?fields=permalink) and prints it.",
-        "The access token comes from the environment/config (not hard-coded) and requests go to graph.threads.net/v1.0 (or graph.threads.com/v1.0)."
+        "The access token comes from the environment/config (not hard-coded) and requests go to graph.threads.net/v1.0 (or graph.threads.com/v1.0).",
+        "Before any API call, the code validates the post locally and creates no container when a check fails: the text length counted the way Threads counts it (at most 500, with each emoji counted as its UTF-8 byte length, e.g. ☕️ = 6), at most 5 unique URLs in the text, and 2–20 carousel items. Counting with plain len(text), or leaving any of the three checks to the API, fails."
       ]
     },
     {
       "id": 2,
       "prompt": "我們的 Node.js + TypeScript 後台有個排程，每天早上 9 點抓 Threads 數據寫進 Google Sheet：前一天發的每篇貼文的瀏覽數、按讚數、回覆數，還有帳號的粉絲總數跟粉絲國家分布。現在有兩個問題：一是 token 大概兩個月就失效，排程就整個掛掉；二是抓 follower_demographics 一直回錯誤。請幫我寫 token 自動續期和數據抓取這兩個模組（寫入 Google Sheet 的部分我們已經有了，不用寫）。",
-      "expected_output": "TypeScript modules: token refresh via GET /refresh_access_token?grant_type=th_refresh_token respecting the >=24h/unexpired rules and persisting the new token; insights fetching with media insights (views, likes, replies) for yesterday's posts via paginated /me/threads, followers_count without since/until, and follower_demographics with breakdown=country (no since/until, >=100 followers).",
+      "expected_output": "TypeScript modules: token refresh via GET /refresh_access_token?grant_type=th_refresh_token respecting the >=24h/unexpired rules and persisting the new token; the 90-day data-access grant tracked through debug_token's data_access_expires_at, with private profiles re-authorizing every 90 days; insights fetching with media insights (views, likes, replies) for yesterday's posts via paginated /me/threads, followers_count without since/until, and follower_demographics with breakdown=country (no since/until, >=100 followers).",
       "files": [],
       "expectations": [
         "Token refresh calls GET https://graph.threads.net/refresh_access_token with grant_type=th_refresh_token and the current long-lived token.",
@@ -30,29 +31,30 @@
         "The reply or code states that follower_demographics requires at least 100 followers.",
         "followers_count is requested without since/until.",
         "Per-post metrics use GET /{media-id}/insights with metric including views, likes and replies, parsing values[0].value.",
-        "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100.",
-        "The code is TypeScript and does not hard-code the token or the app secret."
+        "Yesterday's posts are listed via GET /me/threads (or /{user-id}/threads) using since/until or timestamp filtering, with cursor pagination via paging.cursors.after and limit <= 100: each next request is built with after=<cursor>, stopping when there is no after cursor or data comes back empty. A loop that continues only while paging.next is present fails, because the docs say list responses carry no next URL (following next when it does appear is fine if the loop doesn't depend on it).",
+        "The code is TypeScript and does not hard-code the token or the app secret.",
+        "Explains and handles the 90-day data-access grant: the code reads data_access_expires_at from debug_token (GET /v1.0/debug_token with the stored token as input_token) and alerts before that date passes, and the reply or code states that refreshing extends the grant only for public profiles, so a private profile must re-authorize every 90 days even though its token keeps refreshing."
       ]
     },
     {
       "id": 3,
       "prompt": "幫我發一則 Threads：「週末限定！新品手沖咖啡豆 9 折 ☕️ 詳情看這裡 https://example.com/sale」，附一個投票問大家喜歡「淺焙」還是「深焙」，然後設成 24 小時後自動消失的限時貼文。token 我已經放在環境變數 THREADS_ACCESS_TOKEN 了，直接幫我發。",
-      "expected_output": "Does not publish. Detects that ghost posts can't carry a poll, explains it and offers concrete alternatives for the user to choose; checks the token (it is not present in this environment) and reports it; shows the exact payload it would send after confirmation.",
+      "expected_output": "Does not publish. Detects that ghost posts can't carry a poll, explains it and offers concrete alternatives for the user to choose; checks the token (it is not present in this environment) and reports it, or hands over commands for the user's own shell; flags that a 24-hour post published now (before the weekend) is gone before the sale, or that example.com is a placeholder; checks the account first on every publish path it hands over; shows the exact payload it would send after confirmation.",
       "files": [],
       "expectations": [
         "The reply states definitively that a ghost post (24 h auto-disappearing post) cannot carry a poll — not merely that it might not.",
         "It does not silently drop either feature: it offers at least two concrete alternatives (e.g. ghost post without the poll / regular post with the poll) and asks the user to choose.",
         "Nothing is published: no publish call succeeds and the reply does not claim a post was made.",
-        "It checks the environment for THREADS_ACCESS_TOKEN, reports that the token is not available here, and asks the user to provide or set it.",
+        "It checks the environment for THREADS_ACCESS_TOKEN and reports that the token is not available in its own environment. Because the user says the token is already set, handing over ready-to-run commands for the user's own shell (where the token is set) passes just as asking the user to provide or set it does; assuming the token works here or claiming to have used it fails.",
         "The reply itself (not only a script) shows the exact payload for each alternative, keeping the user's text verbatim, with poll_attachment {option_a: 淺焙, option_b: 深焙} on a TEXT post for the poll option and is_ghost_post=true for the ghost option.",
-        "It plans to verify which account it will post to (e.g. GET /me?fields=id,username) before publishing.",
-        "Beyond the API conflict, it flags at least one way the request as written could undercut the user's goal — e.g. a 24-hour post published now (midweek) is gone before the weekend it advertises, or the link looks like a placeholder."
+        "Every publish path it hands over or offers to run (each alternative's commands or script) verifies which account it will post to (e.g. GET /me?fields=id,username) before the publish step. A path that goes straight to publishing fails this check, even if another path verifies the account.",
+        "Beyond the API conflict, it flags at least one of these ways the request as written undercuts the user's goal: a 24-hour post published now, before the weekend (e.g. on Monday), is gone before the weekend it advertises; or https://example.com/sale is a placeholder (a reserved example domain), not the real sale page. Only noting that 24 hours can't cover a whole weekend, or raising other concerns without either point, fails."
       ]
     },
     {
       "id": 4,
       "prompt": "我們的 App 用 Threads API 做品牌監測，現在卡了三個怪問題：(1) 用 keyword_search 搜「手沖咖啡」只會回傳我自己帳號的貼文，別人的都搜不到；(2) location_search 不管搜「台北 101」還是「信義區」，回來的都是美國 Menlo Park 的地點；(3) 用 profile_lookup 查一個有 5 萬粉絲的咖啡品牌帳號一直失敗，但查 @threads 就查得到。權限我在 App 後台都有勾，token 也是新的。是我們程式寫錯了嗎？要怎麼修？",
-      "expected_output": "Not a code bug: each symptom is the documented behavior of a permission that hasn't been approved (keyword search → own posts only; location search → 'Menlo Park' only; profile discovery standard access → only @meta/@threads/@instagram/@facebook, public profiles with >=100 followers). Fix: App Review / advanced access and a published app; a way to confirm the diagnosis.",
+      "expected_output": "Not a code bug: each symptom is the documented behavior of a permission that hasn't been approved (keyword search → own posts only; location search → 'Menlo Park' only; profile discovery standard access → only @meta/@threads/@instagram/@facebook, public profiles with >=100 followers). Fix: App Review / advanced access and a published app; a way to confirm the diagnosis (debug_token called with the app token, which needs no tester, plus the App Dashboard).",
       "files": [],
       "expectations": [
         "Explains that keyword_search returning only the user's own posts is the documented behavior while threads_keyword_search has not been approved through App Review, i.e. not a code bug.",
@@ -60,7 +62,8 @@
         "Explains that profile_lookup with standard access only reaches official Meta accounts (@meta, @threads, @instagram, @facebook) and that threads_profile_discovery needs advanced access / App Review to look up other accounts.",
         "Mentions that profile_lookup only returns public profiles with at least 100 followers.",
         "Distinguishes adding/granting a permission (dashboard checkbox, token scope) from having it approved through App Review with the app published, and gives that as the fix.",
-        "Gives a concrete way to confirm the diagnosis, e.g. debug_token to inspect the token's scopes or checking the permission's access level / review status in the App Dashboard."
+        "Gives a concrete way to confirm the diagnosis, e.g. debug_token to inspect the token's scopes or checking the permission's access level / review status in the App Dashboard.",
+        "Suggests debug_token to inspect the token's scopes and states that its access_token can be the app token (TH|<APP_ID>|<APP_SECRET>), so no Threads tester is needed, and must come from the same app as input_token."
       ]
     },
     {
@@ -73,7 +76,7 @@
         "Hides matching replies with POST /{reply-id}/manage_reply and hide=true.",
         "Handles the nested-reply limitation correctly: does not call manage_reply on a nested reply's own ID; instead hides the top-level ancestor (or flags it for review) and tells the user this hides the whole branch.",
         "Skips replies that are already hidden (hide_status) and replies written by the user themself (e.g. is_reply_owned_by_me).",
-        "Paginates reply lists with paging.cursors.after rather than reading only the first page.",
+        "Paginates reply lists with paging.cursors.after rather than reading only the first page: each next request is built with after=<cursor>, stopping when there is no after cursor or data comes back empty. A loop that continues only while paging.next is present fails, because the docs say list responses carry no next URL (following next when it does appear is fine if the loop doesn't depend on it).",
         "States the permissions needed: threads_read_replies and threads_manage_replies (plus threads_basic).",
         "Writes a CSV log with at least the reply ID, matched keyword or text, action taken and timestamp, and avoids re-processing the same reply on later runs."
       ]
@@ -97,23 +100,24 @@
     {
       "id": 7,
       "prompt": "我們用 Python + FastAPI 做客服系統，想用 Threads Webhooks 即時收到品牌帳號（公開帳號）的新留言和被提及（mention）的通知，收到後寫進資料庫，並用通知裡的 target_id 去查是哪一則貼文。App 現在還在開發模式，我用自己的帳號去留言測試，callback 一個事件都沒收到。請幫我寫 webhook 端點，也告訴我為什麼收不到。",
-      "expected_output": "A FastAPI webhook endpoint: GET verification echoing hub.challenge, X-Hub-Signature-256 HMAC check on the raw body with the Threads app secret, parsing of the flat Threads payload (values.field/values.value, not entry[].changes[]), correct target_id semantics (media ID for replies, mentioned user's ID for mentions), fast 200 with async processing. Explains that delivery needs a Live app with Advanced Access, a verified business, the right permissions and field subscriptions.",
+      "expected_output": "A FastAPI webhook endpoint: GET verification echoing hub.challenge, X-Hub-Signature-256 HMAC check on the raw body with the Threads app secret, parsing of the flat Threads payload (values.field/values.value, not entry[].changes[]), correct target_id semantics (media ID for replies, mentioned user's ID for mentions), a GET /{media-id} lookup to find the post when the payload lacks root_post/replied_to, fast 200 with async processing. Explains that delivery needs a Live app with Advanced Access, a verified business, the right permissions and field subscriptions.",
       "files": [],
       "expectations": [
-        "Handles the GET verification request: returns hub.challenge (as plain text) only when hub.verify_token matches the configured token, otherwise 403.",
+        "Handles the GET verification request: returns hub.challenge (as plain text) only when hub.verify_token matches the configured token, and answers a wrong verify token with 403. When the hub.* parameters are missing altogether, the framework's own validation error (e.g. FastAPI's 422) also counts as the 'otherwise 403' case, since the challenge is still never echoed without a matching token.",
         "Verifies every POST with the X-Hub-Signature-256 header: HMAC-SHA256 of the raw request body keyed with the app secret, compared in constant time, rejecting mismatches.",
         "Parses the flat Threads webhook payload (top-level app_id/topic/target_id/time and values.field / values.value), not the entry[].changes[] shape used by other Meta webhooks.",
         "States and implements that target_id is the media ID for `replies` events but the mentioned user's ID for `mentions` events, so mentions are matched to a post via values.value (e.g. its id/root_post/replied_to) rather than target_id.",
         "Returns 200 quickly and does the database work asynchronously (background task/queue), and tolerates duplicate deliveries (idempotent insert keyed on the event/media ID).",
         "Explains that no events arrive because the app is in development mode: webhook delivery needs the app in Live mode (with Advanced Access), plus a verified business.",
         "Names the subscriptions and permissions involved: subscribe to the `replies` and `mentions` fields, with threads_read_replies for replies and threads_manage_mentions for mentions, granted by the account.",
-        "Reads the app secret and verify token from the environment/config, never hard-coded, and uses the Threads app secret (not the Facebook app secret)."
+        "Reads the app secret and verify token from the environment/config, never hard-coded, and uses the Threads app secret (not the Facebook app secret).",
+        "When a replies or mentions payload lacks root_post / replied_to, the code looks up the event's media (values.value.id) with GET /{media-id} (e.g. requesting root_post and replied_to) to find which post the event belongs to, instead of storing the event with no post."
       ]
     },
     {
       "id": 8,
       "prompt": "我在做一個讓用戶用 Threads 帳號登入、幫他們排程發文的 SaaS，後端是 Node.js + Express。OAuth 換 token 那一步一直回「Matching code was not found or was already used」，有時候則是 redirect_uri 不符。我現在用的是 App 後台「基本設定」最上面那組應用程式編號和應用程式密鑰。請幫我把整個授權流程寫對：登入、callback、換成長期 token、存起來，而且要讓用戶不用每 60 天重新登入。",
-      "expected_output": "Express routes for the Threads OAuth flow with state/CSRF, a server-side code exchange using the Threads app ID/secret with an identical redirect_uri, immediate long-lived exchange, token storage with expiry and scheduled th_refresh_token refresh; diagnoses the 'Matching code' and redirect_uri errors and the wrong app credential pair; is honest that private profiles still need re-authorization every 90 days.",
+      "expected_output": "Express routes for the Threads OAuth flow with state/CSRF, a server-side code exchange using the Threads app ID/secret with an identical redirect_uri, immediate long-lived exchange, token storage with expiry and scheduled th_refresh_token refresh; diagnoses the 'Matching code' and redirect_uri errors and the wrong app credential pair; parses the flat code-exchange error shape {error_type, code, error_message}; is honest that private profiles still need re-authorization every 90 days.",
       "files": [],
       "expectations": [
         "Points out that the ID/secret at the top of Basic settings is most likely the Facebook (Meta) app pair, and that the Threads app ID and Threads app secret (listed under the Threads use case settings) must be used instead.",
@@ -123,7 +127,8 @@
         "Immediately swaps the 1-hour short-lived token for a long-lived one with GET https://graph.threads.net/access_token?grant_type=th_exchange_token, while the short-lived token is still valid.",
         "Stores each user's token with its expiry (from expires_in) and refreshes it with GET /refresh_access_token?grant_type=th_refresh_token on a schedule, only when it is at least 24 h old and before it expires.",
         "Is honest that refreshing does not cover everyone: permission grants last 90 days, and private profiles must re-authorize every 90 days even though their tokens refresh; suggests tracking data_access_expires_at (debug_token) and prompting re-authorization.",
-        "Keeps the app secret and tokens server-side (env/secret store, never in front-end code or logs)."
+        "Keeps the app secret and tokens server-side (env/secret store, never in front-end code or logs).",
+        "When the code exchange fails, the code parses the flat error body the docs show for it, {error_type, code, error_message} (not only the nested `error` envelope), and logs or surfaces its error_message and code, so a 'Matching code was not found or was already used' failure shows that text rather than a bare HTTP status."
       ]
     },
     {
@@ -137,7 +142,7 @@
         "Flags that poll_attachment must be sent as a JSON-encoded string (json.dumps), not a Python dict in form data.",
         "Flags that reply_control takes lowercase values when creating (accounts_you_follow); the UPPER_CASE form is only what reply_audience returns when reading.",
         "Adds polling of the container status (GET /{container-id}?fields=status,error_message) until FINISHED before calling threads_publish, with handling of ERROR/EXPIRED/timeout.",
-        "Explains that read results use media_type TEXT_POST (not TEXT), so the filter must compare against TEXT_POST, and that the list must be paginated with paging.cursors.after instead of reading only the first page.",
+        "Explains that read results use media_type TEXT_POST (not TEXT), so the filter must compare against TEXT_POST, and that the list must be paginated with paging.cursors.after instead of reading only the first page: the fix builds each next request itself with after=<cursor> and stops when there is no after cursor or data comes back empty. A loop that continues only while paging.next is present fails, because the docs say list responses carry no next URL (following next when it does appear is fine if the loop doesn't depend on it).",
         "Flags that the function returns the container ID, and insights must be requested with the media ID returned by threads_publish.",
         "Replaces the bare r.json()[\"id\"] accesses with error handling that checks the HTTP status and surfaces the Meta error envelope (message, code, fbtrace_id) without logging the token."
       ]
@@ -145,7 +150,7 @@
     {
       "id": 10,
       "prompt": "幫我把下面這篇文字發到 Threads，明天早上 8 點發。如果一則放得下就發一則，放不下就拆成串文（第一則當主文，其餘依序回覆在下面）。token 在環境變數 THREADS_ACCESS_TOKEN。\n\n【在家手沖入門：我花三年踩過的坑】☕️\n\n很多人問我在家手沖要從哪裡開始，今天一次整理。\n\n1. 豆子比器材重要。與其花五千買手沖壺，不如先買新鮮烘焙、兩週內的豆子。超市架上的豆子常常已經放了好幾個月，香氣早就跑光了。\n\n2. 磨豆機是唯一值得多花錢的器材。刀片式磨豆機磨出來粗細不均，萃取一定不穩定；入門的手搖錐刀就能大幅改善。\n\n3. 水溫抓 90 到 93 度。淺焙可以高一點，深焙低一點，太燙容易苦。沒有溫度計的話，水滾後靜置一分鐘差不多。\n\n4. 粉水比先用 1:15。15 克豆子配 225 克水，先固定這個比例，再依口味微調，不要一次改好幾個變數。\n\n5. 悶蒸不能省。先倒兩倍粉重的水，等 30 秒讓二氧化碳排出，之後的萃取會均勻很多。\n\n6. 注水穩定比手法花俏重要。網路上各種繞圈法看看就好，先練到水流粗細一致，比什麼都有用。\n\n7. 記錄每一杯。豆子、研磨刻度、水溫、時間、味道，寫下來才知道是哪個變數造成差異。我的筆記本現在已經寫到第四本了 📒\n\n最後，好喝最重要。規則是拿來打破的，找到你自己喜歡的那一杯，才是手沖最好玩的地方 😊\n\n你們在家都怎麼沖？留言分享一下吧 👇",
-      "expected_output": "Counts the text the way Threads does (emojis as UTF-8 bytes): 498 characters but about 511 counted, so it does not fit in one post and is split into a thread at natural breaks with the text verbatim. Explains there's no native scheduling and how the 8 AM run would happen; checks the token (missing here); shows exact payloads (root, then reply_to_id chaining) and waits for confirmation; publishes nothing.",
+      "expected_output": "Counts the text the way Threads does (emojis as UTF-8 bytes): 498 characters but about 511 counted, so it does not fit in one post and is split into a thread at natural breaks with the text verbatim. Explains there's no native scheduling and how the 8 AM run would happen; checks the token (missing here); shows exact payloads (root, then reply_to_id chaining) and waits for confirmation; verifies the target account and gets the user's OK on it before waiting for 8 AM or scheduling; checks threads_publishing_limit before posting; publishes nothing.",
       "files": [],
       "expectations": [
         "Recognises that the text does not fit in one post: although it is under 500 characters by plain count, Threads counts emojis by their UTF-8 byte length (☕️ 6, others 4), which pushes it over 500; states both numbers or the reason.",
@@ -154,7 +159,8 @@
         "States that the Threads API has no native scheduling, so the 8 AM post must be triggered by something that runs then (the user's cron/Task Scheduler/a scheduled job, or posting at that time), and does not create containers now for publishing tomorrow (or notes containers expire after 24 h).",
         "Checks for THREADS_ACCESS_TOKEN, reports that it is not available in this environment, and asks the user to set or provide it (or hands over a ready-to-run command for their machine).",
         "Shows the exact content of every part and the parameters to be sent in the reply itself and asks for explicit confirmation before anything is published; nothing is published and the reply does not claim a post was made or scheduled.",
-        "Plans to verify the target account (GET /me?fields=id,username) before publishing."
+        "Before publishing, it verifies the target account (GET /me?fields=id,username), shows the user which account the thread will be posted to, and stops for the user's explicit OK before it starts waiting for 8 AM or registers a scheduled job (e.g. the assistant asks after the check, or the script prompts and waits for an answer). Printing the account and carrying on, with Ctrl+C as the only way to stop, fails.",
+        "Before publishing, the flow checks the publishing quota with GET /me/threads_publishing_limit (quota_usage and config) and posts nothing when quota_usage has reached quota_total, since the API has no native scheduling and the app must enforce the 250-posts/24 h quota itself."
       ]
     }
   ]

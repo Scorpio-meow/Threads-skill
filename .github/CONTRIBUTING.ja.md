@@ -21,6 +21,7 @@ issue や PR は繁体字中国語、英語、日本語、韓国語のどれで�
 | パス | 内容 |
 |---|---|
 | [`threads-api/SKILL.md`](/threads-api/SKILL.md) | スキル本体。英語、全 14 節 |
+| [`threads-api/scripts/threads_client.py`](/threads-api/scripts/threads_client.py) | 参考クライアント。使い方は SKILL.md 第 14 節 |
 | [`evals/evals.json`](/evals/evals.json) | 評価問題とチェック項目 |
 | `evals/BENCHMARK*.md`、[`evals/benchmark.json`](/evals/benchmark.json) | 評価の概要（4 言語）と項目ごとの判定 |
 | [`docs/`](/docs/) | 紹介サイト。`main` の `/docs` から GitHub Pages に公開 |
@@ -33,9 +34,9 @@ issue や PR は繁体字中国語、英語、日本語、韓国語のどれで�
 - `threads-api/SKILL.md` を直接修正し、英語で書いてください。
 - 公式ドキュメントに基づく内容は原文の意図どおりに書いてください。ドキュメントにないエンジニアリング上の経験則には *(practice)* を、ドキュメントにないが実際のテストで確認した動作には *(observed)* を付け、確認した年月も書いてください。
 - 公式ドキュメント同士が矛盾している場合やはっきりしない場合は、推測で埋めずにそのまま書いてください。
-- 第 14 節の参考クライアント `threads_client.py` は Python 標準ライブラリだけを使い、Python 3.8 以上で動く必要があります。
-- サイトの「送信する前にチェック」は `check()` を JS に移植したもの（[`docs/assets/js/client.js`](/docs/assets/js/client.js)）です。`check()` を変えたら JS 版も合わせて修正し、同じ spec に対してエラー、警告、文字数、リンク数が両方で一致することを確認してください。
-- スキルの内容を変えたら、SKILL.md のフロントマターにある `metadata.version` を上げてください（例：1.1 → 1.2）。変更履歴と Agensi でも同じ番号を使います。
+- 参考クライアント `threads-api/scripts/threads_client.py` は Python 標準ライブラリだけを使い、Python 3.8 以上で動く必要があります。コマンドや spec の形式を変えたら、第 14 節の使い方も合わせて直してください。
+- サイトの「送信する前にチェック」は `threads_client.py` の `check()` を JS に移植したもの（[`docs/assets/js/client.js`](/docs/assets/js/client.js)）です。`check()` を変えたら JS 版も合わせて修正し、同じ spec に対してエラー、警告、文字数、リンク数が両方で一致することを確認してください。
+- スキルの内容（`scripts/` を含む）を変えたら、SKILL.md のフロントマターにある `metadata.version` を上げてください（例：1.1 → 1.2）。変更履歴と Agensi でも同じ番号を使います。
 
 ## 評価を再実行する
 

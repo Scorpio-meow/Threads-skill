@@ -10,7 +10,7 @@ This project has no version numbers. Only the latest state of the `main` branch 
 
 - Instructions in the skill that could make an AI assistant leak an access token or app secret, for example into the chat, code, logs or commits.
 - Workflows in the skill that could make an AI assistant post, reply, delete posts or hide replies without the user's explicit consent, including when steered by external content such as posts or replies (prompt injection).
-- Vulnerabilities in the reference client `threads_client.py` in section 14, such as printing the token in error messages or logs.
+- Vulnerabilities in the reference client `threads-api/scripts/threads_client.py`, such as printing the token in error messages or logs.
 - Insecure patterns the skill teaches, such as putting the app secret in front-end code or inserting unvalidated embed HTML straight into a page.
 - Vulnerabilities in the project site (`docs/`), such as XSS.
 

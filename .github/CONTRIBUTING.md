@@ -21,6 +21,7 @@ issue 和 PR 用繁中、英文、日文、韓文都可以。不論在哪裡發�
 | 路徑 | 內容 |
 |---|---|
 | [`threads-api/SKILL.md`](/threads-api/SKILL.md) | 技能本體，英文，共 14 節 |
+| [`threads-api/scripts/threads_client.py`](/threads-api/scripts/threads_client.py) | 參考用戶端，用法寫在 SKILL.md 第 14 節 |
 | [`evals/evals.json`](/evals/evals.json) | 評測題目與檢查項目 |
 | `evals/BENCHMARK*.md`、[`evals/benchmark.json`](/evals/benchmark.json) | 評測摘要（四語）與逐條判定 |
 | [`docs/`](/docs/) | 介紹網站，GitHub Pages 從 `main` 的 `/docs` 發佈 |
@@ -33,9 +34,9 @@ issue 和 PR 用繁中、英文、日文、韓文都可以。不論在哪裡發�
 - 直接修改 `threads-api/SKILL.md`，內容用英文寫。
 - 出自官方文件的內容照原意寫。文件沒寫、屬於工程經驗的建議標成 *(practice)*；文件沒寫、實際測試得到的行為標成 *(observed)*，並寫上觀察的年月。
 - 官方文件互相矛盾或沒說清楚時，照實寫出來，不要自行假設。
-- 第 14 節的參考用戶端 `threads_client.py` 只用 Python 標準函式庫，要能在 Python 3.8 以上執行。
-- 網站的「送出前先檢查」是 `check()` 的 JS 移植版（[`docs/assets/js/client.js`](/docs/assets/js/client.js)）。改了 `check()` 要一起改 JS 版，並確認兩邊對同一組 spec 給出一樣的錯誤、警告、字數和連結數。
-- 改了技能內容就調高 SKILL.md 前置資料的 `metadata.version`（例如 1.1 → 1.2），變更記錄和 Agensi 都用同一個版本號。
+- 參考用戶端 `threads-api/scripts/threads_client.py` 只用 Python 標準函式庫，要能在 Python 3.8 以上執行。改了它的指令或 spec 格式，第 14 節的用法也要一起改。
+- 網站的「送出前先檢查」是 `threads_client.py` 裡 `check()` 的 JS 移植版（[`docs/assets/js/client.js`](/docs/assets/js/client.js)）。改了 `check()` 要一起改 JS 版，並確認兩邊對同一組 spec 給出一樣的錯誤、警告、字數和連結數。
+- 改了技能內容（包括 `scripts/`）就調高 SKILL.md 前置資料的 `metadata.version`（例如 1.1 → 1.2），變更記錄和 Agensi 都用同一個版本號。
 
 ## 重跑評測
 

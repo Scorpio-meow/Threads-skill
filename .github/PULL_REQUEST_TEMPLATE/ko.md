@@ -4,7 +4,7 @@
 
 ## 변경 범위
 
-- [ ] 스킬 내용(`threads-api/SKILL.md`)
+- [ ] 스킬 내용(`threads-api/SKILL.md`, `threads-api/scripts/`)
 - [ ] 평가(`evals/`)
 - [ ] 소개 사이트(`docs/`)
 - [ ] 문서(README, CHANGELOG, `.github/` 등)

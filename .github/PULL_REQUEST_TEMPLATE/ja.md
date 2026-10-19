@@ -4,7 +4,7 @@
 
 ## 変更範囲
 
-- [ ] スキルの内容（`threads-api/SKILL.md`）
+- [ ] スキルの内容（`threads-api/SKILL.md`、`threads-api/scripts/`）
 - [ ] 評価（`evals/`）
 - [ ] 紹介サイト（`docs/`）
 - [ ] ドキュメント（README、CHANGELOG、`.github/` など）

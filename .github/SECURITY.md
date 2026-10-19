@@ -10,7 +10,7 @@
 
 - 技能的指示可能讓 AI 助理洩漏 access token 或 App secret，例如寫進對話、程式碼、log 或 commit。
 - 技能的流程可能讓 AI 助理在使用者沒有明確同意時發文、回覆、刪文或隱藏留言，包括被貼文、留言等外部內容誘導（prompt injection）。
-- 第 14 節參考用戶端 `threads_client.py` 的漏洞，例如在錯誤訊息或 log 印出 token。
+- 參考用戶端 `threads-api/scripts/threads_client.py` 的漏洞，例如在錯誤訊息或 log 印出 token。
 - 技能教的寫法本身有漏洞，例如把 App secret 放進前端程式，或把未驗證的嵌入 HTML 直接塞進網頁。
 - 介紹網站（`docs/`）的漏洞，例如 XSS。
 

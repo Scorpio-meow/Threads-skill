@@ -11,7 +11,7 @@ English: add &template=en.md to the end of the compare page URL (the URL needs ?
 
 ## 修改範圍
 
-- [ ] 技能內容（`threads-api/SKILL.md`）
+- [ ] 技能內容（`threads-api/SKILL.md`、`threads-api/scripts/`）
 - [ ] 評測（`evals/`）
 - [ ] 介紹網站（`docs/`）
 - [ ] 說明文件（README、CHANGELOG、`.github/` 等）

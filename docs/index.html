@@ -289,7 +289,7 @@ poll_attachment={"option_a": "淺焙", "option_b": "深焙"}</code></pre>
                     <p class="checks-sum" data-i18n="g.sumWithout">其餘 5 項都通過</p>
                   </div>
                 </div>
-                <a class="grader-link" href="#benchmark" data-i18n="g.more">看五輪評測的結果</a>
+                <a class="grader-link" href="#benchmark" data-i18n="g.more">看七輪評測的結果</a>
               </div>
             </div>
           </div>
@@ -335,7 +335,7 @@ poll_attachment={"option_a": "淺焙", "option_b": "深焙"}</code></pre>
           </article>
           <figure class="mode-fig is-active" data-step="0" data-reveal="fig">
             <div class="panel" data-ui>
-              <p class="panel-tab"><b>threads_client.py</b><span data-i18n="m1.tab">技能第 14 節的參考用戶端・publish()</span></p>
+              <p class="panel-tab"><b>threads_client.py</b><span data-i18n="m1.tab">技能內建的參考用戶端・publish()</span></p>
               <pre class="code"><code>container = call(<span class="s">"POST"</span>, <span class="s">f"{user}/threads"</span>, spec)
 log(<span class="s">f"created container {container['id']}"</span>)
 <span class="k">if</span> spec.get(<span class="s">"auto_publish_text"</span>):
@@ -642,15 +642,15 @@ is_ghost_post=true</code></pre>
               <button type="button" class="ck-more" id="ck-more" aria-expanded="false" aria-controls="ck-side"
                 data-i18n="ck.more">顯示其他 5 個選項</button>
               <a class="ck-link"
-                href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/SKILL.md#14-reference-client-python-38-standard-library-only"
+                href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/scripts/threads_client.py"
                 data-i18n="ck.src">看 check() 的原始碼</a>
             </div>
           </div>
         </div>
         <p class="checker-foot" data-i18n="ck.foot">改一下內文、關掉限時貼文，或把貼文類型換成 IMAGE，看看哪些功能會被擋下。</p>
         <p class="checker-foot nojs">這個檢查工具需要 JavaScript。可以直接讀 <a
-            href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/SKILL.md#14-reference-client-python-38-standard-library-only">check()
-            的原始碼</a>，或在自己的電腦執行 <code>python3 threads_client.py check spec.json</code>。</p>
+            href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/scripts/threads_client.py">check()
+            的原始碼</a>，或在自己的電腦執行 <code>python3 threads-api/scripts/threads_client.py check spec.json</code>。</p>
       </div>
     </section>
 
@@ -673,6 +673,14 @@ is_ghost_post=true</code></pre>
                 data-i18n="b.r5">個百分點，第 5 輪</b><span data-i18n="b.r5n">100% 對 87%。新增 4 題：webhook、OAuth
                 登入、程式碼審查、代發串文；這輪沒技能的設定可以查官方文件</span></span>
           </li>
+          <li data-reveal style="--i:5"><span class="fig" data-count="16">16</span><span class="cap"><b
+                data-i18n="b.r6">個百分點，第 6 輪</b><span data-i18n="b.r6n">100% 對 84%。重跑第 2、4、7、8 題，驗證 webhook
+                去重和 debug_token 的修改；這輪兩邊都不能上網</span></span>
+          </li>
+          <li data-reveal style="--i:6"><span class="fig" data-count="23">23</span><span class="cap"><b
+                data-i18n="b.r7">個百分點，第 7 輪</b><span data-i18n="b.r7n">100% 對 77%。參考用戶端搬到 scripts/
+                後重跑全部 10 題，有技能 77 項全過；這輪兩邊同樣不能上網</span></span>
+          </li>
         </ol>
 
         <div class="bench-detail">
@@ -687,6 +695,8 @@ is_ghost_post=true</code></pre>
                   <th scope="col" data-i18n="b.c3">第 3 輪</th>
                   <th scope="col" data-i18n="b.c4">第 4 輪</th>
                   <th scope="col" data-i18n="b.c5">第 5 輪</th>
+                  <th scope="col" data-i18n="b.c6">第 6 輪</th>
+                  <th scope="col" data-i18n="b.c7">第 7 輪</th>
                 </tr>
               </thead>
               <tbody>
@@ -697,6 +707,8 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>8/8</b><span>8/8</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q2">TypeScript 每日數據排程與 token 續期</th>
@@ -705,6 +717,8 @@ is_ghost_post=true</code></pre>
                   <td><b>9/9</b><span>9/9</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>9/9</b><span>8/9</span></td>
+                  <td><b>9/9</b><span>7/9</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q3">代發附投票的限時貼文</th>
@@ -713,6 +727,8 @@ is_ghost_post=true</code></pre>
                   <td><b>7/7</b><span>5/7</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>7/7</b><span>6/7</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q4">搜尋、地點、查帳號結果異常的原因</th>
@@ -721,6 +737,8 @@ is_ghost_post=true</code></pre>
                   <td><b>6/6</b><span>5/6</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>6/6</b><span>5/6</span></td>
+                  <td><b>7/7</b><span>5/7</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q5">自動隱藏含關鍵字的留言</th>
@@ -729,6 +747,8 @@ is_ghost_post=true</code></pre>
                   <td><b>7/7</b><span>6/7</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>7/7</b><span>6/7</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q6">60 則貼文牆與每週檢查被刪貼文</th>
@@ -737,6 +757,8 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>8/8</b><span>2/8</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>8/8</b><span>3/8</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q7">FastAPI 接收留言與提及的 webhook</th>
@@ -745,6 +767,8 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>8/8</b><span>8/8</span></td>
+                  <td><b>8/8</b><span>6/8</span></td>
+                  <td><b>8/8</b><span>6/8</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q8">Express 的 OAuth 登入與長期 token 續期</th>
@@ -753,12 +777,16 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>8/8</b><span>7/8</span></td>
+                  <td><b>8/8</b><span>7/8</span></td>
+                  <td><b>8/8</b><span>7/8</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q9">審查一段出錯的 Python 發文程式</th>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>8/8</b><span>6/8</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>8/8</b><span>6/8</span></td>
                 </tr>
@@ -769,6 +797,8 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>7/7</b><span>6/7</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>7/7</b><span>5/7</span></td>
                 </tr>
               </tbody>
               <tfoot>
@@ -779,6 +809,8 @@ is_ghost_post=true</code></pre>
                   <td><b>100%</b><span>85%</span></td>
                   <td><b>100%</b><span>25%</span></td>
                   <td><b>100%</b><span>87%</span></td>
+                  <td><b>100%</b><span>84%</span></td>
+                  <td><b>100%</b><span>77%</span></td>
                 </tr>
               </tfoot>
             </table>
@@ -786,7 +818,7 @@ is_ghost_post=true</code></pre>
           <div class="bench-notes" data-reveal style="--i:1">
             <p data-i18n="b.n1">每題在兩種設定下各跑一次，再由沒參與作答的評分者，照事先寫好的檢查項目逐條判定，並附上證據。作答、評分都用 <code>claude-opus-5-5</code>。</p>
             <p data-i18n="b.n2">樣本很小，數字只能看方向：第 2 題沒技能的版本前兩輪都在翻頁和 token 續期上失分，第 3 輪卻拿到滿分。測試只在 Claude 上跑過；第 1–4 輪的 API
-              呼叫都打在評分者架的模擬伺服器上，第 5 輪則由評分者閱讀程式碼判定。技能本身要讀進約 1.1 萬 token，所以第 1 輪有技能比較慢；第 2、3 輪反而比較快，評分者認為是少了試錯。</p>
+              呼叫都打在評分者架的模擬伺服器上，第 5 輪則由評分者閱讀程式碼判定，第 6、7 輪則由評分者重跑作答者的測試，再用自己寫的模擬實測。技能本身要讀進約 1.1 萬 token，所以第 1 輪有技能比較慢；第 2、3 輪反而比較快，評分者認為是少了試錯。</p>
             <p class="links"><a class="link-arrow"
                 href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md" data-bench><b
                   data-i18n="b.l1" style="font-weight:600">Benchmark 摘要與每個失分原因</b><span

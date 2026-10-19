@@ -2,10 +2,10 @@
 name: threads-api
 description: "Use for Meta's Threads API and embedding Threads posts: code that posts, reads, searches, moderates, pulls insights or handles tokens/webhooks, and posting, replying or pulling stats for the user."
 license: MIT
-compatibility: "Operate mode runs the bundled Python 3.8+ client (standard library only) and needs HTTPS access to graph.threads.net plus THREADS_ACCESS_TOKEN from the environment or a .env file in the working folder. Build and Embed don't need the client or a token."
+compatibility: "Operate mode runs the bundled client scripts/threads_client.py (Python 3.8+, standard library only) and needs HTTPS access to graph.threads.net plus THREADS_ACCESS_TOKEN from the environment or a .env file in the working folder. Build and Embed don't run it and need no token."
 metadata:
   author: Scorpio-meow
-  version: "1.3"
+  version: "1.4"
 ---
 
 # Threads API
@@ -18,7 +18,7 @@ Playbook for Meta's Threads API, distilled from the official docs (snapshot cove
 
 Statements are from the docs unless tagged *(practice)*, which marks engineering advice. If the API behaves differently from what's written here, or the user asks about something newer than the snapshot, check the live changelog (https://developers.facebook.com/documentation/threads/changelog), or the user's local copy of the docs if one is available. Threads ads live in the Marketing API and are out of scope.
 
-Contents: 1 Core facts · 2 Build mode · 3 Operate mode · 4 Publishing · 5 Reading & search · 6 Replies & moderation · 7 Insights · 8 Auth & permissions · 9 Quotas · 10 Webhooks · 11 Embedding, oEmbed & Web Intents · 12 Troubleshooting · 13 Doc examples not to copy · 14 Reference client
+Contents: 1 Core facts · 2 Build mode · 3 Operate mode · 4 Publishing · 5 Reading & search · 6 Replies & moderation · 7 Insights · 8 Auth & permissions · 9 Quotas · 10 Webhooks · 11 Embedding, oEmbed & Web Intents · 12 Troubleshooting · 13 Doc examples not to copy · 14 Reference client (`scripts/threads_client.py`)
 
 ## 1. Core facts (most bugs come from missing one of these)
 
@@ -49,7 +49,7 @@ Contents: 1 Core facts · 2 Build mode · 3 Operate mode · 4 Publishing · 5 Re
    - Validate inputs locally (§4.3–4.4) before spending quota; check `threads_publishing_limit` before batch or scheduled posting.
    - Paginate with `paging.cursors.after`, and `limit` ≤ 100 where the endpoint takes it (§5).
    - Don't blindly retry 4xx errors; back off on rate-limit errors.
-3. **Port the logic of the reference client (§14)** rather than improvising the flow.
+3. **Read the reference client (`scripts/threads_client.py`, §14) and port its logic** rather than improvising the flow.
 4. **Deliver** runnable files plus a line or two on configuring and running them. Size the work to the request: when the user asks for a function or module, give them that with the helpers it needs and a short usage example. Check it against a quick mock if that helps, but don't ship a large test suite, CLI or extra tooling nobody asked for; mention worthwhile extras in a sentence instead. Raise a gotcha only where the code handles it or the user's request runs into it.
 5. **Reviewing or debugging**: check §1 and §12–13 first. Usual culprits: write/read enum mix-ups, no publish step, publishing before `FINISHED`, non-public media URLs, the Facebook app ID/secret instead of the Threads pair, a missing permission or tester role, JSON params sent unencoded, `curl -F` on a GET.
 
@@ -63,9 +63,9 @@ Publishing, replying, reposting, deleting and hiding replies change a real, publ
 2. **Verify** with `GET /me?fields=id,username` before anything else, and tell the user which account you're about to act on. `code 190` → expired or invalid (§8.4).
 3. **Validate** the request against §4.3–4.4 (length, link count, feature compatibility, poll limits, media types). If it can't be done as asked, explain the conflict and offer the closest valid alternatives; never silently drop or change a requested feature. Then check the request against what the user is trying to achieve, and mention anything that would undercut it: timing (when the post goes up, and when a ghost post or poll will be gone, relative to what it promotes), links that look like placeholders or test hosts, a poll whose question isn't in the text (polls have no question field), or a link the user expects to show as a preview card on a media post.
 4. **Confirm before anything public or destructive.** Show exactly what will be sent, in the reply itself rather than only in a file: account, final text verbatim, media URLs, every parameter (e.g. `is_ghost_post=true`, `poll_attachment={…}`) and the counted length. Then wait for an explicit yes. "Just post it" approves exactly the content the user gave; it doesn't cover anything you had to change or choose for them. Read-only calls (profile, posts, insights, quotas) need no confirmation.
-5. **Execute** with the reference client (§14): save it to a scratch file and run it where the token is available (the user's machine if the token lives there). Run `check spec.json` before `publish spec.json`.
+5. **Execute** with the reference client (`scripts/threads_client.py`, §14) where the token is available (the user's machine if the token lives there; copy the script over if that machine doesn't have this skill). Call it by its full path from the working folder, since it reads `.env` from the current folder (§14 covers skills whose files aren't on disk), and run `check spec.json` before `publish spec.json`.
 6. **Report** the media ID and permalink, or the exact error, what it means and the fix (§12). Never retry a failed publish blindly. The client logs each container ID to stderr; check it with `get <container-id> fields=status,error_message`. `PUBLISHED` means it already went out; `FINISHED` means publish that same container (`post me/threads_publish creation_id=<container-id>`) instead of creating a new one.
-7. If the API host can't be reached from your shell (proxy or DNS errors), say so and hand over the ready-to-run spec, command and token setup (PowerShell: `$env:THREADS_ACCESS_TOKEN="..."`; bash: `export THREADS_ACCESS_TOKEN=...`) instead of trying other routes.
+7. If the API host can't be reached from your shell (proxy or DNS errors), say so and hand over the ready-to-run spec, command and token setup (PowerShell: `$env:THREADS_ACCESS_TOKEN="..."`; bash: `export THREADS_ACCESS_TOKEN=...`) instead of trying other routes. The command needs `scripts/threads_client.py`: give its full path if this skill is installed on the user's machine, otherwise hand over the file too.
 
 ## 4. Publishing
 
@@ -189,6 +189,7 @@ Here `since`/`until` must be Unix timestamps ≥ `1712991600` (2024-04-13); the 
 - Create the app with the **Access the Threads API** use case; add permissions under Use cases → Customize. Settings holds the Threads app ID/secret, valid OAuth redirect URIs, and the deauthorize and data-deletion callback URLs.
 - Test with **Threads Testers**: App roles → Roles → Add People → Threads Tester; the person accepts under Threads → Settings → Account → Website permissions. Testers can grant every permission; test tokens can come from the Graph API Explorer or the OAuth flow.
 - Until a permission is approved (App Review, app published): publishing works only for your own and tester accounts; `GET /{media-id}` only reads testers' posts; keyword search only finds the user's own posts; location search only answers the query "Menlo Park"; mentions only come from testers; profile discovery only reaches some official Meta accounts (including @meta, @threads, @instagram, @facebook).
+- To see what a user granted, call `debug_token` (§8.4) with the app token (`TH|<APP_ID>|<APP_SECRET>`) as `access_token`; it works for any user of the same app, tester or not. `scopes` shows grants, not App Review approval.
 
 ### 8.3 OAuth flow
 
@@ -280,7 +281,7 @@ These are *(practice)* items from a production gallery of hundreds of posts.
 | "Matching code was not found or was already used" | Code reused, older than 1 h, or `#_` left on → restart authorization |
 | Code exchange rejects `redirect_uri` | Not identical to the authorize step and dashboard entry (watch trailing slashes) |
 | OAuth fails although the app ID looks right | Facebook app ID/secret used instead of the Threads pair |
-| Permission errors or unexpectedly empty results | Scope not requested/granted, account not a Threads Tester, or permission not approved yet (§8.2) |
+| Permission errors or unexpectedly empty results | Scope not requested/granted, account not a Threads Tester, or permission not approved yet → check `scopes` with `debug_token` and the app token, approval in the App Dashboard (§8.2) |
 | Container `ERROR` + `FAILED_DOWNLOADING_VIDEO`, or an image never processes | Media URL not publicly downloadable (auth, expired signature, blocked host) |
 | `INVALID_*` video errors | File outside the spec → transcode (§4.4) |
 | `EXPIRED` | Container older than 24 h → create a new one |
@@ -288,7 +289,7 @@ These are *(practice)* items from a production gallery of hundreds of posts.
 | `THREADS_API__LINK_LIMIT_EXCEEDED` | More than 5 unique links |
 | `THREADS_API__FEATURE_NOT_AVAILABLE` | The account lacks the feature (e.g. geo-gating) |
 | `THREADS_API__GEO_GATING_INVALID_COUNTRY_CODES` | Unsupported country code → ISO 3166-1 alpha-2 |
-| Keyword search finds only own posts / location search only "Menlo Park" | Permission not approved yet |
+| Keyword search finds only own posts / location search only "Menlo Park" | Permission not approved yet (§8.2) |
 | `profile_lookup` fails | Private account, < 100 followers, inexact username, or standard access only |
 | A post's insights are empty | It's a repost (`REPOST_FACADE`) |
 | `follower_demographics` errors | Missing or multiple `breakdown`, `since`/`until` sent, or < 100 followers |
@@ -311,266 +312,23 @@ Several official examples are broken; write correct requests instead:
 
 ## 14. Reference client (Python 3.8+, standard library only)
 
-Run it directly in operate mode and port its logic in build mode. Save as `threads_client.py`:
+The client is `scripts/threads_client.py` (paths here are relative to this skill's folder). Run it directly in operate mode; in build mode, read it and port its logic: `call()` (token, §1 encoding, typed errors), `check()` (§4.3–4.4 validation), `wait_ready()` (status polling, §4.5) and `publish()` (the whole flow, ending with the permalink lookup).
 
-```python
-#!/usr/bin/env python3
-"""Minimal Threads API client: Python 3.8+, standard library only.
+It takes the token from `THREADS_ACCESS_TOKEN` or from `.env` in the current folder, so run it from the working folder and give the script's full path:
 
-Token: THREADS_ACCESS_TOKEN env var, or a .env file in the current folder.
-  python3 threads_client.py get me fields=id,username
-  python3 threads_client.py get me/threads fields=id,text,permalink,timestamp limit=5
-  python3 threads_client.py check spec.json     # local validation only, no API call
-  python3 threads_client.py publish spec.json   # validate, create, wait, publish, print permalink
-  python3 threads_client.py post <media-id>/repost
-  python3 threads_client.py post <reply-id>/manage_reply hide=true
-  python3 threads_client.py delete <media-id>
-spec.json holds container params; for a carousel put the item params in "children"
-(a list of dicts) and the client creates the item containers first.
-publish logs every container ID to stderr. If it stops midway, inspect the container with
-`get <container-id> fields=status,error_message` before retrying: PUBLISHED means it already
-went out; FINISHED means `post me/threads_publish creation_id=<container-id>`.
-"""
-import json
-import os
-import re
-import sys
-import time
-import urllib.error
-import urllib.parse
-import urllib.request
-
-BASE = os.environ.get("THREADS_API_BASE", "https://graph.threads.net/v1.0")
-TEXT_ONLY = ("link_attachment", "poll_attachment", "gif_attachment",
-             "text_attachment", "is_ghost_post", "auto_publish_text")
-GHOST_BLOCKED = ("poll_attachment", "gif_attachment", "link_attachment", "text_attachment",
-                 "quote_post_id", "reply_to_id", "enable_reply_approvals")
-GHOST_DOUBTFUL = ("topic_tag", "location_id", "allowlisted_country_codes",
-                  "crossreshare_to_ig", "crossreshare_to_ig_dark_mode")
-EMOJI_RANGES = ((0xA9, 0xA9), (0xAE, 0xAE), (0x200D, 0x200D), (0x203C, 0x203C), (0x2049, 0x2049),
-                (0x20E3, 0x20E3), (0x2122, 0x2122), (0x2139, 0x2139), (0x2190, 0x21FF),
-                (0x2300, 0x23FF), (0x24C2, 0x24C2), (0x25AA, 0x25FE), (0x2600, 0x27BF),
-                (0x2934, 0x2935), (0x2B00, 0x2BFF), (0x3030, 0x3030), (0x303D, 0x303D),
-                (0x3297, 0x3297), (0x3299, 0x3299), (0xFE0F, 0xFE0F), (0x1F000, 0x1FAFF),
-                (0xE0020, 0xE007F))
-VS16 = chr(0xFE0F)  # emoji presentation selector
-URL = re.compile("(?:https?://|www[.])[-A-Za-z0-9._~:/?#@!$&'()*+,;=%]+", re.I)
-QUOTES = "'" + '"'
-
-
-class ThreadsError(Exception):
-    def __init__(self, status, body):
-        err = body.get("error", body) if isinstance(body, dict) else {}
-        err = err if isinstance(err, dict) else {"message": str(err)}
-        self.status, self.code = status, err.get("code")
-        self.type = err.get("type") or err.get("error_type")
-        self.message = err.get("message") or err.get("error_message") or str(body)
-        self.fbtrace_id = err.get("fbtrace_id")
-        super().__init__(f"HTTP {status} code={self.code} {self.type}: "
-                         f"{self.message} (fbtrace_id={self.fbtrace_id})")
-
-
-def token():
-    tok = os.environ.get("THREADS_ACCESS_TOKEN")
-    if not tok and os.path.exists(".env"):
-        with open(".env", encoding="utf-8") as f:
-            for line in f:
-                key, _, val = line.strip().partition("=")
-                if (key.split() or [""])[-1] == "THREADS_ACCESS_TOKEN":
-                    tok = val.strip().strip(QUOTES)
-    if not tok:
-        raise SystemExit("THREADS_ACCESS_TOKEN not found (env var or .env)")
-    return tok
-
-
-def encode(v):
-    if isinstance(v, bool):
-        return "true" if v else "false"
-    if isinstance(v, dict) or (isinstance(v, list) and v and isinstance(v[0], dict)):
-        return json.dumps(v, ensure_ascii=False)  # poll, text_entities, text/gif attachment
-    if isinstance(v, (list, tuple)):
-        return ",".join(map(str, v))              # children, allowlisted_country_codes
-    return str(v)
-
-
-def call(method, path, params=None):
-    q = {k: encode(v) for k, v in (params or {}).items() if v is not None}
-    q["access_token"] = token()
-    data = urllib.parse.urlencode(q)
-    url = f"{BASE}/{path.lstrip('/')}"
-    req = (urllib.request.Request(f"{url}?{data}", method=method)
-           if method in ("GET", "DELETE") else
-           urllib.request.Request(url, data=data.encode(), method=method))
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            return json.loads(r.read() or b"{}")
-    except urllib.error.HTTPError as e:
-        raw = e.read().decode("utf-8", "replace")
-        try:
-            body = json.loads(raw)
-        except ValueError:
-            body = {"message": raw[:300]}
-        raise ThreadsError(e.code, body) from None
-
-
-def is_emoji(c):
-    return any(lo <= ord(c) <= hi for lo, hi in EMOJI_RANGES)
-
-
-def text_len(s):
-    """Docs: 500-char limit, emojis count as their UTF-8 bytes. Conservative estimate:
-    emoji-range characters, and anything followed by U+FE0F, count in full."""
-    return sum(len(c.encode("utf-8")) if is_emoji(c) or s[i + 1:i + 2] == VS16 else 1
-               for i, c in enumerate(s))
-
-
-def links(spec):
-    found = {u.rstrip(".,!?;:)}" + QUOTES) for u in URL.findall(spec.get("text") or "")}
-    for extra in (spec.get("link_attachment"),
-                  (spec.get("text_attachment") or {}).get("link_attachment_url")):
-        if extra:
-            found.add(extra)
-    return found
-
-
-def check(spec, child=False):
-    """Return (errors, warnings) for a container spec. Errors block publishing."""
-    p, w, mt, text = [], [], spec.get("media_type"), spec.get("text") or ""
-    allowed = ("IMAGE", "VIDEO") if child else ("TEXT", "IMAGE", "VIDEO", "CAROUSEL")
-    if mt not in allowed:
-        p.append(f"media_type must be one of {', '.join(allowed)}")
-    if mt == "TEXT" and not text:
-        p.append("TEXT posts need text")
-    if text_len(text) > 500:
-        p.append(f"text counts ~{text_len(text)} (limit 500; emojis count as UTF-8 bytes)")
-    if len(links(spec)) > 5:
-        p.append("more than 5 unique links (THREADS_API__LINK_LIMIT_EXCEEDED)")
-    if mt != "TEXT":
-        p += [f"{k} only works on TEXT posts" for k in TEXT_ONLY if spec.get(k)]
-    else:
-        p += [f"{k} is not for TEXT posts" for k in ("alt_text", "is_spoiler_media") if spec.get(k)]
-    for kind, key in (("IMAGE", "image_url"), ("VIDEO", "video_url")):
-        if mt == kind and not spec.get(key):
-            p.append(f"{kind} needs {key}")
-    if len(spec.get("alt_text") or "") > 1000:
-        p.append("alt_text is limited to 1,000 chars")
-    tag = spec.get("topic_tag")
-    if tag is not None and (not 1 <= len(tag) <= 50 or "." in tag or "&" in tag):
-        p.append("topic_tag must be 1-50 chars without '.' or '&'")
-    if len(spec.get("text_entities") or []) > 10:
-        p.append("at most 10 text spoiler entities")
-    poll = spec.get("poll_attachment")
-    if poll:
-        if not (poll.get("option_a") and poll.get("option_b")):
-            p.append("poll needs option_a and option_b")
-        p += [f"poll {k} must be 1-25 chars" for k in ("option_a", "option_b", "option_c", "option_d")
-              if k in poll and not 1 <= len(str(poll[k])) <= 25]
-        if spec.get("text_attachment"):
-            p.append("a poll can't be combined with text_attachment")
-    att = spec.get("text_attachment")
-    if att:
-        if len(att.get("plaintext") or "") > 10000:
-            p.append("text_attachment.plaintext is limited to 10,000 chars")
-        if att.get("link_attachment_url") and spec.get("link_attachment"):
-            p.append("no text_attachment.link_attachment_url when the post has link_attachment")
-    if spec.get("is_ghost_post"):
-        bad = [k for k in GHOST_BLOCKED if spec.get(k)]
-        if bad:
-            p.append("ghost posts only support text spoilers, not " + ", ".join(bad))
-        doubtful = [k for k in GHOST_DOUBTFUL if spec.get(k)]
-        if doubtful:
-            w.append("docs say ghost posts support only text spoilers; the API may reject or ignore "
-                     + ", ".join(doubtful))
-    if mt == "CAROUSEL":
-        kids = spec.get("children") or []
-        if not 2 <= len(kids) <= 20:
-            p.append("a carousel needs 2-20 children")
-        for i, kid in enumerate(kids):
-            kid_errors, kid_warnings = check(kid, child=True)
-            p += [f"child {i}: {msg}" for msg in kid_errors]
-            w += [f"child {i}: {msg}" for msg in kid_warnings]
-    return p, w
-
-
-def wait_ready(container_id, timeout=300):
-    """Poll until FINISHED. Docs: ~30 s on average, poll ~once a minute for up to 5 min.
-    Starts with short intervals (text/images are usually quick) and backs off to 60 s."""
-    start, delay = time.time(), 3
-    while True:
-        st = call("GET", container_id, {"fields": "status,error_message"})
-        status = st.get("status")
-        if status == "FINISHED":
-            return
-        if status in ("ERROR", "EXPIRED", "PUBLISHED"):
-            raise RuntimeError(f"container {container_id} is {status} "
-                               f"{st.get('error_message') or ''}".strip())
-        if time.time() - start > timeout:
-            raise TimeoutError(f"container {container_id} still {status} after {timeout}s")
-        time.sleep(delay)
-        delay = min(delay * 2, 60)
-
-
-def log(msg):
-    print(msg, file=sys.stderr, flush=True)
-
-
-def publish(spec, user="me"):
-    errors, warnings = check(spec)
-    for msg in warnings:
-        log(f"warning: {msg}")
-    if errors:
-        raise ValueError("; ".join(errors))
-    spec = dict(spec)
-    if spec["media_type"] == "CAROUSEL":
-        ids = []
-        for kid in spec["children"]:
-            ids.append(call("POST", f"{user}/threads", dict(kid, is_carousel_item=True))["id"])
-            log(f"created item container {ids[-1]}")
-        for cid in ids:
-            wait_ready(cid)
-        spec["children"] = ids
-    container = call("POST", f"{user}/threads", spec)
-    log(f"created container {container['id']}")
-    if spec.get("auto_publish_text"):
-        return container  # already live; the docs don't document this response
-    wait_ready(container["id"])
-    media = call("POST", f"{user}/threads_publish", {"creation_id": container["id"]})
-    log(f"published media {media['id']}")
-    result = {k: v for k, v in container.items() if k != "id"}  # e.g. crossreshare_to_ig_status
-    result.update(media)
-    try:
-        result.update(call("GET", media["id"], {"fields": "permalink"}))
-    except ThreadsError as err:  # the post is live; don't turn a lookup failure into an error
-        result["permalink_error"] = str(err)
-    return result
-
-
-def main(argv):
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")
-    if len(argv) < 2 or argv[0] not in ("get", "post", "delete", "check", "publish"):
-        raise SystemExit(__doc__)
-    cmd, target = argv[0], argv[1]
-    if cmd in ("check", "publish"):
-        with open(target, encoding="utf-8") as f:
-            spec = json.load(f)
-        if cmd == "check":
-            errors, warnings = check(spec)
-            out = {"errors": errors, "warnings": warnings,
-                   "text_length": text_len(spec.get("text") or ""), "links": sorted(links(spec))}
-        else:
-            out = publish(spec)
-    else:
-        out = call(cmd.upper(), target, dict(a.split("=", 1) for a in argv[2:]))
-    print(json.dumps(out, ensure_ascii=False, indent=2))
-
-
-if __name__ == "__main__":
-    try:
-        main(sys.argv[1:])
-    except (ThreadsError, RuntimeError, TimeoutError, ValueError, urllib.error.URLError) as e:
-        raise SystemExit(f"ERROR: {e}")
+```bash
+python3 scripts/threads_client.py get me fields=id,username
+python3 scripts/threads_client.py get me/threads fields=id,text,permalink,timestamp limit=5
+python3 scripts/threads_client.py check spec.json     # local validation only, no API call
+python3 scripts/threads_client.py publish spec.json   # validate, create, wait, publish, print permalink
+python3 scripts/threads_client.py post <media-id>/repost
+python3 scripts/threads_client.py post <reply-id>/manage_reply hide=true
+python3 scripts/threads_client.py delete <media-id>
 ```
+
+If this skill's files aren't on disk (some hosts serve them on request and don't allow saving them), get `scripts/threads_client.py` from wherever you loaded this skill and feed it to Python on stdin instead of saving it: `python3 - check spec.json`, with the script as stdin (a heredoc in bash). The arguments are the same.
+
+Results print as JSON on stdout. Failures exit with status 1 and print the reason on stderr; for API errors that's `ERROR: HTTP <status> code=<code> <type>: <message> (fbtrace_id=…)`. `spec.json` holds container params; for a carousel, put the item params in `"children"` (a list of dicts) and the client creates the item containers first. `publish` logs every container ID to stderr; if it stops midway, follow §3 step 6 before retrying.
 
 Spec examples for `check` / `publish`:
 

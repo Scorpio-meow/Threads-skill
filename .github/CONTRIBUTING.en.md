@@ -21,6 +21,7 @@ You can write issues and PRs in Traditional Chinese, English, Japanese or Korean
 | Path | Contents |
 |---|---|
 | [`threads-api/SKILL.md`](/threads-api/SKILL.md) | The skill itself, in English, 14 sections |
+| [`threads-api/scripts/threads_client.py`](/threads-api/scripts/threads_client.py) | The reference client; section 14 of SKILL.md explains how to run it |
 | [`evals/evals.json`](/evals/evals.json) | Eval tasks and their checklist items |
 | `evals/BENCHMARK*.md`, [`evals/benchmark.json`](/evals/benchmark.json) | Benchmark summary (four languages) and per-check verdicts |
 | [`docs/`](/docs/) | Project site, published to GitHub Pages from `/docs` on `main` |
@@ -33,9 +34,9 @@ You can write issues and PRs in Traditional Chinese, English, Japanese or Korean
 - Edit `threads-api/SKILL.md` directly and write in English.
 - Keep content from the official docs faithful to the original meaning. Mark engineering advice the docs don't cover as *(practice)*, and behavior you observed in live tests but the docs don't mention as *(observed)*, with the year and month of the observation.
 - When the official docs contradict themselves or are unclear, say so plainly instead of guessing.
-- The reference client `threads_client.py` in section 14 uses only the Python standard library and must run on Python 3.8 or later.
-- The site's “Check before you send” is a JS port of `check()` ([`docs/assets/js/client.js`](/docs/assets/js/client.js)). When you change `check()`, update the JS port too and confirm that both return the same errors, warnings, character counts and link counts for the same specs.
-- When you change the skill's content, raise `metadata.version` in the SKILL.md frontmatter (for example 1.1 → 1.2); the changelog and Agensi use the same number.
+- The reference client `threads-api/scripts/threads_client.py` uses only the Python standard library and must run on Python 3.8 or later. When you change its commands or spec format, update the usage in section 14 too.
+- The site's “Check before you send” is a JS port of `check()` in `threads_client.py` ([`docs/assets/js/client.js`](/docs/assets/js/client.js)). When you change `check()`, update the JS port too and confirm that both return the same errors, warnings, character counts and link counts for the same specs.
+- When you change the skill's content (`scripts/` included), raise `metadata.version` in the SKILL.md frontmatter (for example 1.1 → 1.2); the changelog and Agensi use the same number.
 
 ## Rerunning the evals
 

@@ -94,6 +94,8 @@ Some tools have their own install commands:
   $skill-installer install https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api
   ```
 
+  The installer puts it in `~/.codex/skills/threads-api` (`$CODEX_HOME/skills/` if you set `CODEX_HOME`), not in `~/.agents/skills/` from the table. Codex reads both, but its docs list only `~/.agents/skills/` as the personal folder, and its source code marks `~/.codex/skills/` as deprecated and kept for backward compatibility; to use `~/.agents/skills/`, install with `bunx skills` or copy by hand instead. Don't keep a copy in both: Codex doesn't merge skills with the same name, so both show up in the skill selectors.
+
   Codex runs commands in a sandbox with network access off by default, so it asks before operate mode reaches the Threads API. To always allow it, add this to `~/.codex/config.toml`:
 
   ```toml
@@ -101,14 +103,14 @@ Some tools have their own install commands:
   network_access = true
   ```
 
-- **GitHub Copilot CLI**: after cloning, run `copilot skill add Threads-skill/threads-api`; if you add it mid-session, load it with `/skills reload`. Put it in a repository's `.github/skills/` and commit it, and the Copilot cloud agent uses it too.
+- **GitHub Copilot CLI**: after cloning, run `copilot skill add Threads-skill/threads-api`; if you add it mid-session, load it with `/skills reload`. Adding a folder registers its location rather than copying it, so keep the cloned folder. Put it in a repository's `.github/skills/` and commit it, and the Copilot cloud agent uses it too.
 - **Gemini CLI**: installs for your user by default; add `--scope workspace` to install into the current project only.
 
   ```bash
   gemini skills install https://github.com/Scorpio-meow/Threads-skill.git --path threads-api
   ```
 
-- **Kiro**: in the Kiro panel, open **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub**, and paste a URL that points to the skill's subfolder: `https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`.
+- **Kiro**: in the Kiro panel, open **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub**, and paste a URL that points to the skill's subfolder: `https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`. Kiro's docs don't say whether importing brings along subfolders, so after importing, check that the skill folder contains `scripts/threads_client.py`; if it doesn't, copy the whole `threads-api` folder by hand instead.
 - **Devin Desktop**: manage skills from **⋯** → **Skills** at the top right of the Cascade panel.
 - **Cline**: new skills are on by default; toggle them in the **Skills** tab at the bottom of the Cline panel.
 
@@ -136,6 +138,8 @@ Skills don't sync between ChatGPT and Codex yet, so install it in Codex separate
 
 The skill is also listed for free on [Agensi](https://agensi.io/skills/threads-api). On the skill page, click "Copy prompt to install" and paste the copied prompt into your AI assistant; it connects to Agensi and installs the skill. Assistants already connected to the Agensi connector load the latest version from Agensi each time they use it.
 
+Agensi doesn't store the skill on your computer, and its license doesn't allow saving any part of it, so the `scripts/threads_client.py` that Operate mode runs isn't on your machine. In that case the skill tells the AI assistant to fetch the file from Agensi and pass it to Python on standard input (stdin) instead of saving it. If you rely on Operate mode, install with one of the methods above instead.
+
 Updates to this repository reach Agensi only after Agensi approves them, so this repository always has the latest content.
 
 ### Updating and removing
@@ -144,9 +148,15 @@ Updates to this repository reach Agensi only after Agensi approves them, so this
 |---|---|---|
 | `bunx skills` | `bunx skills update threads-api` | `bunx skills remove threads-api` |
 | `gh skill` | `gh skill update` | Delete the `threads-api` folder |
+| Codex (`$skill-installer`) | Delete the `~/.codex/skills/threads-api` folder, then install again (the installer stops if the folder already exists) | Delete the `~/.codex/skills/threads-api` folder |
+| Copilot CLI (`copilot skill add`) | Run `git pull` in the `Threads-skill` folder; in a running session, also run `/skills reload` | `copilot skill remove` with the path of the `threads-api` folder (this only unregisters it; the files stay) |
 | Gemini CLI | Uninstall, then install again | `gemini skills uninstall threads-api` |
+| Kiro | Delete `threads-api` from the skills folder, then import again | Delete `threads-api` from the skills folder |
 | Manual copy | Run `git pull` in the `Threads-skill` folder, then copy again | Delete the `threads-api` folder |
 | Claude apps, ChatGPT | Delete the old one, then upload the new ZIP | Delete it on the Skills page |
+| Agensi | Nothing to do: it loads the latest version from Agensi each time | Nothing is stored on your computer, so there's nothing to remove |
+
+Kiro's docs don't cover updating or removing; imported skills are copied into the skills folder (`~/.kiro/skills/` or `.kiro/skills/`), so the table deletes that folder.
 
 ### Official docs for each tool
 
@@ -268,7 +278,7 @@ The skill itself is [`threads-api/SKILL.md`](threads-api/SKILL.md), organized in
 | 11 | Embedding posts: oEmbed, how embed.js loads embeds, pacing and failure handling for many embeds; Web Intents |
 | 12 | Troubleshooting: causes and fixes for common errors |
 | 13 | Mistakes in the official examples that shouldn't be copied |
-| 14 | Reference client `threads_client.py` |
+| 14 | How to run the reference client [`scripts/threads_client.py`](threads-api/scripts/threads_client.py), with spec examples |
 
 Apart from the engineering advice marked *(practice)* and the live test results marked *(observed)*, everything comes from the official documentation.
 
@@ -276,13 +286,13 @@ The change history is in [CHANGELOG.en.md](CHANGELOG.en.md).
 
 ### Reference client
 
-The `threads_client.py` in section 14 uses only the Python standard library (3.8 or later), so there's nothing to install. In Operate mode, Claude uses it to call the API; in Build mode, Claude uses its logic as a reference and ports it to your project's language. To use it yourself, save that code as `threads_client.py` (on Windows, replace `python3` with `python`):
+The reference client is [`threads-api/scripts/threads_client.py`](threads-api/scripts/threads_client.py). It uses only the Python standard library (3.8 or later), so there's nothing to install, and section 14 of SKILL.md explains how to run it. In Operate mode, Claude runs it to call the API; in Build mode, Claude reads its logic and ports it to your project's language. To use it yourself, run the file directly; it reads the token from `THREADS_ACCESS_TOKEN` or from a `.env` in the current folder. The examples below run from the repository root; if you installed the skill, use the path in your skills folder instead (on Windows, replace `python3` with `python`):
 
 ```bash
-python3 threads_client.py get me fields=id,username   # Confirm the account
-python3 threads_client.py check spec.json             # Check content locally only, no API calls
-python3 threads_client.py publish spec.json           # Check → create container → wait for processing → publish → print URL
-python3 threads_client.py delete <media-id>           # Delete a post; cannot be undone
+python3 threads-api/scripts/threads_client.py get me fields=id,username   # Confirm the account
+python3 threads-api/scripts/threads_client.py check spec.json             # Check content locally only, no API calls
+python3 threads-api/scripts/threads_client.py publish spec.json           # Check → create container → wait for processing → publish → print URL
+python3 threads-api/scripts/threads_client.py delete <media-id>           # Delete a post; cannot be undone
 ```
 
 `spec.json` holds the container parameters. For example, a post with a poll:
@@ -293,27 +303,27 @@ python3 threads_client.py delete <media-id>           # Delete a post; cannot be
 
 ## Test results
 
-We compared "with skill" and "without skill" using the same model: each task ran once under each setup, and a grader that took no part in answering checked every result against a predefined checklist, item by item. The skill was revised between rounds based on the grader's feedback, for five rounds in total; round 4 ran only the new task 6, after the skill gained the embedding section, and round 5 ran only the new tasks 7–10. The tasks and checklists are in [`evals/evals.json`](evals/evals.json).
+We compared "with skill" and "without skill" using the same model: each task ran once under each setup, and a grader that took no part in answering checked every result against a predefined checklist, item by item. The skill was revised between rounds based on the grader's feedback, for seven rounds in total; round 4 ran only the new task 6, after the skill gained the embedding section, round 5 ran only the new tasks 7–10, and round 6 reran tasks 2, 4, 7 and 8 to check the webhook deduplication and `debug_token` changes, and round 7 reran all 10 tasks after the reference client moved to `scripts/threads_client.py`. The tasks and checklists are in [`evals/evals.json`](evals/evals.json).
 
 Each cell shows the number of checklist items passed, formatted as "with skill vs without skill":
 
-| Task | Round 1 | Round 2 | Round 3 | Round 4 | Round 5 |
-|---|---|---|---|---|---|
-| 1. Python carousel post (two images + one video) | 8/8 vs 8/8 | — | — | — | — |
-| 2. TypeScript daily insights job with token refresh | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — |
-| 3. Publishing a ghost post with a poll on the user's behalf | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — |
-| 4. Diagnosing unexpected search, location, and profile lookup results | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — |
-| 5. Auto-hiding replies that contain keywords | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — |
-| 6. A 60-post Threads wall plus a weekly check for deleted posts | — | — | — | 8/8 vs 2/8 | — |
-| 7. FastAPI webhook for replies and mentions | — | — | — | — | 8/8 vs 8/8 |
-| 8. Express OAuth login with long-lived token refresh | — | — | — | — | 8/8 vs 7/8 |
-| 9. Reviewing a buggy Python posting script | — | — | — | — | 8/8 vs 6/8 |
-| 10. Posting a thread with emoji at 8 AM the next day on the user's behalf | — | — | — | — | 7/7 vs 6/7 |
-| **Average pass rate** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** |
+| Task | Round 1 | Round 2 | Round 3 | Round 4 | Round 5 | Round 6 | Round 7 |
+|---|---|---|---|---|---|---|---|
+| 1. Python carousel post (two images + one video) | 8/8 vs 8/8 | — | — | — | — | — | 8/8 vs 8/8 |
+| 2. TypeScript daily insights job with token refresh | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — | 9/9 vs 8/9 | 9/9 vs 7/9 |
+| 3. Publishing a ghost post with a poll on the user's behalf | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — | — | 7/7 vs 6/7 |
+| 4. Diagnosing unexpected search, location, and profile lookup results | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — | 6/6 vs 5/6 | 7/7 vs 5/7 |
+| 5. Auto-hiding replies that contain keywords | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — | — | 7/7 vs 6/7 |
+| 6. A 60-post Threads wall plus a weekly check for deleted posts | — | — | — | 8/8 vs 2/8 | — | — | 8/8 vs 3/8 |
+| 7. FastAPI webhook for replies and mentions | — | — | — | — | 8/8 vs 8/8 | 8/8 vs 6/8 | 8/8 vs 6/8 |
+| 8. Express OAuth login with long-lived token refresh | — | — | — | — | 8/8 vs 7/8 | 8/8 vs 7/8 | 8/8 vs 7/8 |
+| 9. Reviewing a buggy Python posting script | — | — | — | — | 8/8 vs 6/8 | — | 8/8 vs 6/8 |
+| 10. Posting a thread with emoji at 8 AM the next day on the user's behalf | — | — | — | — | 7/7 vs 6/7 | — | 7/7 vs 5/7 |
+| **Average pass rate** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** | **100% vs 84%** | **100% vs 77%** |
 
-- The average pass rate is the mean of the per-task pass rates. Task 1 scored full marks on both sides and didn't separate them, so rounds 2 onward use tasks 2–5; task 3 gained one checklist item starting in round 2.
+- The average pass rate is the mean of the per-task pass rates. Task 1 scored full marks on both sides and didn't separate them, so rounds 2 onward use tasks 2–5; task 3 gained one checklist item starting in round 2. Task 4 gained a seventh checklist item in round 7.
 - Each task ran only once per setup, so the sample is tiny and the numbers only indicate direction. For example, the without-skill version of task 2 lost points on pagination and token refresh in the first two rounds, then scored full marks in round 3.
-- Nearly every point lost without the skill came from not knowing the rules in the docs, not from being unable to write the code; the examples in "What difference does the skill make" all come from these tests. In round 5 the without-skill setup could search the web for the official docs, and did, so the gap narrowed to 100% vs 87%.
+- Nearly every point lost without the skill came from not knowing the rules in the docs, not from being unable to write the code; the examples in "What difference does the skill make" all come from these tests. In round 5 the without-skill setup could search the web for the official docs, and did, so the gap narrowed to 100% vs 87%. In round 6 neither setup could use the web; with the skill, all 31 checklist items passed. Round 7, again without web access, reran all 10 tasks: with the skill all 77 checklist items passed, without it the average was 77%, and no task regressed after the reference client moved out of SKILL.md.
 
 For each round's eval setup, time and token usage, and the reason behind every lost point, see the [benchmark summary](evals/BENCHMARK.en.md); item-by-item verdicts and the grader's evidence are in [evals/benchmark.json](evals/benchmark.json).
 

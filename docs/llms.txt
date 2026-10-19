@@ -2,7 +2,7 @@
 
 > An Agent Skill that teaches AI assistants Meta's Threads API: writing and debugging integration code, acting on the user's own account (post, reply, moderate, pull insights), and embedding Threads posts on websites. Distilled from Meta's official docs, covering the changelog through 2026-08-18. Not an official Meta project.
 
-The whole skill is one English Markdown file in the Agent Skills format (a `threads-api/` folder holding `SKILL.md`). Statements come from Meta's docs unless tagged *(practice)* (engineering advice) or *(observed)* (live test results). Threads ads belong to the Marketing API and are out of scope.
+The skill is in the Agent Skills format: a `threads-api/` folder holding `SKILL.md` (English Markdown) and `scripts/threads_client.py` (the Python reference client). Statements come from Meta's docs unless tagged *(practice)* (engineering advice) or *(observed)* (live test results). Threads ads belong to the Marketing API and are out of scope.
 
 Key concepts:
 
@@ -12,7 +12,8 @@ Key concepts:
 
 ## Skill
 
-- [SKILL.md](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/threads-api/SKILL.md): The skill itself, in 14 sections: core facts, build and operate workflows, publishing, reading and search, replies and moderation, insights, auth and permissions, quotas, webhooks, embedding, troubleshooting, doc examples not to copy, and a standard-library Python reference client
+- [SKILL.md](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/threads-api/SKILL.md): The skill itself, in 14 sections: core facts, build and operate workflows, publishing, reading and search, replies and moderation, insights, auth and permissions, quotas, webhooks, embedding, troubleshooting, doc examples not to copy, and how to run the reference client
+- [threads_client.py](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/threads-api/scripts/threads_client.py): The reference client (Python 3.8+, standard library only) that operate mode runs and build mode ports: request helper, local `check()` validation, status polling and the publish flow
 
 ## Usage
 
@@ -21,7 +22,7 @@ Key concepts:
 
 ## Evaluation
 
-- [Benchmark summary](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/BENCHMARK.en.md): With-skill vs without-skill results over five rounds, with time, token usage and the reason behind every failed check
+- [Benchmark summary](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/BENCHMARK.en.md): With-skill vs without-skill results over seven rounds, with time, token usage and the reason behind every failed check
 - [Eval set](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/evals.json): Task prompts and the checklist items each answer is graded against
 
 ## Optional

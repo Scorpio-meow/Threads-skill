@@ -21,6 +21,7 @@ issue와 PR은 번체 중국어, 영어, 일본어, 한국어 중 어느 언어�
 | 경로 | 내용 |
 |---|---|
 | [`threads-api/SKILL.md`](/threads-api/SKILL.md) | 스킬 본체. 영어, 총 14개 섹션 |
+| [`threads-api/scripts/threads_client.py`](/threads-api/scripts/threads_client.py) | 참고 클라이언트. 사용법은 SKILL.md 14절 |
 | [`evals/evals.json`](/evals/evals.json) | 평가 문제와 체크 항목 |
 | `evals/BENCHMARK*.md`, [`evals/benchmark.json`](/evals/benchmark.json) | 평가 요약(4개 언어)과 항목별 판정 |
 | [`docs/`](/docs/) | 소개 사이트. `main`의 `/docs`에서 GitHub Pages로 게시 |
@@ -33,9 +34,9 @@ issue와 PR은 번체 중국어, 영어, 일본어, 한국어 중 어느 언어�
 - `threads-api/SKILL.md`를 직접 수정하고, 영어로 작성하세요.
 - 공식 문서에 근거한 내용은 원래 의미대로 적으세요. 문서에 없는 엔지니어링 경험에 따른 권장 사항에는 *(practice)*를, 문서에는 없지만 실제 테스트에서 확인한 동작에는 *(observed)*를 붙이고 확인한 연월도 적어 주세요.
 - 공식 문서끼리 서로 맞지 않거나 분명하지 않은 부분은 추측으로 채우지 말고 그대로 적으세요.
-- 14절의 참고 클라이언트 `threads_client.py`는 Python 표준 라이브러리만 사용하며, Python 3.8 이상에서 동작해야 합니다.
-- 사이트의 "보내기 전에 먼저 검사"는 `check()`를 JS로 옮긴 것([`docs/assets/js/client.js`](/docs/assets/js/client.js))입니다. `check()`를 바꾸면 JS 버전도 함께 수정하고, 같은 spec에 대해 오류, 경고, 글자 수, 링크 수가 양쪽에서 같게 나오는지 확인하세요.
-- 스킬 내용을 바꾸면 SKILL.md 프런트매터의 `metadata.version`을 올리세요(예: 1.1 → 1.2). 변경 이력과 Agensi에서도 같은 번호를 씁니다.
+- 참고 클라이언트 `threads-api/scripts/threads_client.py`는 Python 표준 라이브러리만 사용하며, Python 3.8 이상에서 동작해야 합니다. 명령어나 spec 형식을 바꾸면 14절의 사용법도 함께 고치세요.
+- 사이트의 "보내기 전에 먼저 검사"는 `threads_client.py`의 `check()`를 JS로 옮긴 것([`docs/assets/js/client.js`](/docs/assets/js/client.js))입니다. `check()`를 바꾸면 JS 버전도 함께 수정하고, 같은 spec에 대해 오류, 경고, 글자 수, 링크 수가 양쪽에서 같게 나오는지 확인하세요.
+- 스킬 내용(`scripts/` 포함)을 바꾸면 SKILL.md 프런트매터의 `metadata.version`을 올리세요(예: 1.1 → 1.2). 변경 이력과 Agensi에서도 같은 번호를 씁니다.
 
 ## 평가 다시 실행하기
 

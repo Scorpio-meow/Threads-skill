@@ -94,6 +94,8 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
   $skill-installer install https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api
   ```
 
+  安裝器會放到 `~/.codex/skills/threads-api`（有設定 `CODEX_HOME` 時是 `$CODEX_HOME/skills/`），不是上表的 `~/.agents/skills/`。Codex 兩個位置都會讀，但官方文件列的個人資料夾只有 `~/.agents/skills/`，Codex 原始碼則把 `~/.codex/skills/` 標為已淘汰、為了相容才保留的位置；想放在 `~/.agents/skills/` 的話，改用 `bunx skills` 或手動複製。兩個位置不要各放一份：Codex 不會合併同名技能，兩個都會出現在選單裡。
+
   Codex 預設在沙箱裡執行指令、不開網路，代操作要連到 Threads API 時會先請你核准。想一律允許，在 `~/.codex/config.toml` 加上：
 
   ```toml
@@ -101,14 +103,14 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
   network_access = true
   ```
 
-- **GitHub Copilot CLI**：clone 之後執行 `copilot skill add Threads-skill/threads-api`；工作階段中途加入的，用 `/skills reload` 載入。放在 repo 的 `.github/skills/` 並 commit 的話，雲端的 Copilot cloud agent 也會用到。
+- **GitHub Copilot CLI**：clone 之後執行 `copilot skill add Threads-skill/threads-api`；工作階段中途加入的，用 `/skills reload` 載入。加入資料夾只會登記位置、不會複製，clone 下來的資料夾要留著。放在 repo 的 `.github/skills/` 並 commit 的話，雲端的 Copilot cloud agent 也會用到。
 - **Gemini CLI**：預設裝到個人範圍，加上 `--scope workspace` 只裝到目前專案。
 
   ```bash
   gemini skills install https://github.com/Scorpio-meow/Threads-skill.git --path threads-api
   ```
 
-- **Kiro**：Kiro 面板的 **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub**，網址要指到技能所在的子資料夾：`https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`。
+- **Kiro**：Kiro 面板的 **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub**，網址要指到技能所在的子資料夾：`https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`。Kiro 的文件沒說匯入時會不會帶上子資料夾，匯入後請確認技能資料夾裡有 `scripts/threads_client.py`，沒有的話改用手動複製整個 `threads-api` 資料夾。
 - **Devin Desktop**：Cascade 面板右上角的 **⋯** → **Skills** 可以管理技能。
 - **Cline**：新技能預設啟用，可以在 Cline 面板底部的 **Skills** 分頁切換。
 
@@ -136,6 +138,8 @@ ChatGPT 和 Codex 的技能目前不會同步，用 Codex 的話要另外安裝�
 
 這個技能也免費上架在 [Agensi](https://agensi.io/skills/threads-api)。在技能頁面按「Copy prompt to install」，把複製的提示貼給你的 AI 助理，它會連上 Agensi 並安裝技能。已經連接 Agensi connector 的助理，每次使用都會從 Agensi 載入最新版本。
 
+Agensi 不會把技能存到你的電腦，它的授權也不允許存檔，所以代操作要執行的 `scripts/threads_client.py` 不在本機。這時技能會請 AI 助理向 Agensi 取得這個檔案，從標準輸入（stdin）交給 Python 執行，不另外存檔。要穩定使用代操作的話，建議改用前面的方式安裝。
+
 這個 repo 的更新要等 Agensi 審核通過才會出現在 Agensi 上，最新內容以這個 repo 為準。
 
 ### 更新與移除
@@ -144,9 +148,15 @@ ChatGPT 和 Codex 的技能目前不會同步，用 Codex 的話要另外安裝�
 |---|---|---|
 | `bunx skills` | `bunx skills update threads-api` | `bunx skills remove threads-api` |
 | `gh skill` | `gh skill update` | 刪除 `threads-api` 資料夾 |
+| Codex（`$skill-installer`） | 刪除 `~/.codex/skills/threads-api` 資料夾，再安裝一次（資料夾已存在時安裝器會中止） | 刪除 `~/.codex/skills/threads-api` 資料夾 |
+| Copilot CLI（`copilot skill add`） | 在 `Threads-skill` 資料夾執行 `git pull`；工作階段進行中的話，再執行 `/skills reload` | `copilot skill remove` 加上 `threads-api` 資料夾的路徑（只取消登記，檔案會留著） |
 | Gemini CLI | 移除後重新安裝 | `gemini skills uninstall threads-api` |
+| Kiro | 刪除技能資料夾裡的 `threads-api`，再匯入一次 | 刪除技能資料夾裡的 `threads-api` |
 | 手動複製 | 在 `Threads-skill` 資料夾執行 `git pull`，再複製一次 | 刪除 `threads-api` 資料夾 |
 | Claude 應用程式、ChatGPT | 刪掉舊的，再上傳新的 ZIP | 在 Skills 頁面刪除 |
+| Agensi | 不用手動更新，每次使用都會從 Agensi 載入最新版本 | 沒有存到電腦，不用移除 |
+
+Kiro 的文件沒寫怎麼更新或移除；匯入的技能會複製到技能資料夾（`~/.kiro/skills/` 或 `.kiro/skills/`），所以上表用刪除資料夾的方式。
 
 ### 各工具官方說明
 
@@ -268,7 +278,7 @@ token 要有對應的權限：
 | 11 | 嵌入貼文：oEmbed、embed.js 的載入方式、大量嵌入時的節流與失敗處理；Web Intents |
 | 12 | 疑難排解：常見錯誤的原因和修法 |
 | 13 | 官方範例裡不能照抄的錯誤 |
-| 14 | 參考用戶端 `threads_client.py` |
+| 14 | 參考用戶端 [`scripts/threads_client.py`](threads-api/scripts/threads_client.py) 的用法與 spec 範例 |
 
 除了標成 *(practice)* 的工程建議，以及標成 *(observed)* 的實測結果，其餘內容都出自官方文件。
 
@@ -276,13 +286,13 @@ token 要有對應的權限：
 
 ### 參考用戶端
 
-第 14 節的 `threads_client.py` 只用 Python 標準函式庫（3.8 以上），不必安裝套件。代操作時 Claude 用它呼叫 API；開發模式則參考它的邏輯，改寫成你專案的語言。想自己用的話，把那段程式碼存成 `threads_client.py`（Windows 把 `python3` 換成 `python`）：
+參考用戶端是 [`threads-api/scripts/threads_client.py`](threads-api/scripts/threads_client.py)，只用 Python 標準函式庫（3.8 以上），不必安裝套件，用法寫在 SKILL.md 第 14 節。代操作時 Claude 直接執行它呼叫 API；開發模式則讀它的邏輯，改寫成你專案的語言。想自己用的話，直接執行這個檔案，token 從環境變數 `THREADS_ACCESS_TOKEN` 或目前資料夾的 `.env` 讀取。下面的例子在 repo 根目錄執行，裝在技能資料夾的話換成那裡的路徑（Windows 把 `python3` 換成 `python`）：
 
 ```bash
-python3 threads_client.py get me fields=id,username   # 確認帳號
-python3 threads_client.py check spec.json             # 只在本機檢查內容，不呼叫 API
-python3 threads_client.py publish spec.json           # 檢查 → 建立 container → 等處理完成 → 發佈 → 印出網址
-python3 threads_client.py delete <media-id>           # 刪文，無法復原
+python3 threads-api/scripts/threads_client.py get me fields=id,username   # 確認帳號
+python3 threads-api/scripts/threads_client.py check spec.json             # 只在本機檢查內容，不呼叫 API
+python3 threads-api/scripts/threads_client.py publish spec.json           # 檢查 → 建立 container → 等處理完成 → 發佈 → 印出網址
+python3 threads-api/scripts/threads_client.py delete <media-id>           # 刪文，無法復原
 ```
 
 `spec.json` 放 container 的參數，例如一則附投票的貼文：
@@ -293,27 +303,27 @@ python3 threads_client.py delete <media-id>           # 刪文，無法復原
 
 ## 測試結果
 
-用同一個模型比較「有技能」和「沒技能」：每題在兩種設定下各跑一次，再由沒參與作答的評分者，依事先寫好的檢查項目逐條判定。每輪之間依評分意見修改技能，共跑五輪；第 4 輪是技能加入嵌入貼文的內容後，只測新增的第 6 題，第 5 輪只測新增的第 7–10 題。題目和檢查項目在 [`evals/evals.json`](evals/evals.json)。
+用同一個模型比較「有技能」和「沒技能」：每題在兩種設定下各跑一次，再由沒參與作答的評分者，依事先寫好的檢查項目逐條判定。每輪之間依評分意見修改技能，共跑七輪；第 4 輪是技能加入嵌入貼文的內容後，只測新增的第 6 題，第 5 輪只測新增的第 7–10 題，第 6 輪重跑第 2、4、7、8 題，驗證 webhook 去重和 `debug_token` 的修改，第 7 輪則在參考用戶端搬到 `scripts/threads_client.py` 之後重跑全部 10 題。題目和檢查項目在 [`evals/evals.json`](evals/evals.json)。
 
 每格是通過的檢查項目數，格式為「有技能 vs 沒技能」：
 
-| 題目 | 第 1 輪 | 第 2 輪 | 第 3 輪 | 第 4 輪 | 第 5 輪 |
-|---|---|---|---|---|---|
-| 1. Python 輪播貼文（兩張圖＋一支影片） | 8/8 vs 8/8 | — | — | — | — |
-| 2. TypeScript 每日數據排程與 token 續期 | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — |
-| 3. 代發附投票的限時貼文 | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — |
-| 4. 搜尋、地點、查帳號結果異常的原因 | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — |
-| 5. 自動隱藏含關鍵字的留言 | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — |
-| 6. 60 則貼文牆與每週檢查被刪貼文 | — | — | — | 8/8 vs 2/8 | — |
-| 7. FastAPI 接收留言與提及的 webhook | — | — | — | — | 8/8 vs 8/8 |
-| 8. Express 的 OAuth 登入與長期 token 續期 | — | — | — | — | 8/8 vs 7/8 |
-| 9. 審查一段出錯的 Python 發文程式 | — | — | — | — | 8/8 vs 6/8 |
-| 10. 隔天早上 8 點代發含 emoji 的串文 | — | — | — | — | 7/7 vs 6/7 |
-| **平均通過率** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** |
+| 題目 | 第 1 輪 | 第 2 輪 | 第 3 輪 | 第 4 輪 | 第 5 輪 | 第 6 輪 | 第 7 輪 |
+|---|---|---|---|---|---|---|---|
+| 1. Python 輪播貼文（兩張圖＋一支影片） | 8/8 vs 8/8 | — | — | — | — | — | 8/8 vs 8/8 |
+| 2. TypeScript 每日數據排程與 token 續期 | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — | 9/9 vs 8/9 | 9/9 vs 7/9 |
+| 3. 代發附投票的限時貼文 | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — | — | 7/7 vs 6/7 |
+| 4. 搜尋、地點、查帳號結果異常的原因 | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — | 6/6 vs 5/6 | 7/7 vs 5/7 |
+| 5. 自動隱藏含關鍵字的留言 | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — | — | 7/7 vs 6/7 |
+| 6. 60 則貼文牆與每週檢查被刪貼文 | — | — | — | 8/8 vs 2/8 | — | — | 8/8 vs 3/8 |
+| 7. FastAPI 接收留言與提及的 webhook | — | — | — | — | 8/8 vs 8/8 | 8/8 vs 6/8 | 8/8 vs 6/8 |
+| 8. Express 的 OAuth 登入與長期 token 續期 | — | — | — | — | 8/8 vs 7/8 | 8/8 vs 7/8 | 8/8 vs 7/8 |
+| 9. 審查一段出錯的 Python 發文程式 | — | — | — | — | 8/8 vs 6/8 | — | 8/8 vs 6/8 |
+| 10. 隔天早上 8 點代發含 emoji 的串文 | — | — | — | — | 7/7 vs 6/7 | — | 7/7 vs 5/7 |
+| **平均通過率** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** | **100% vs 84%** | **100% vs 77%** |
 
-- 平均通過率是各題通過率的平均。第 1 題兩邊都拿滿分、分不出差別，所以第 2 輪起改用第 2–5 題；第 3 題從第 2 輪起多了一個檢查項目。
+- 平均通過率是各題通過率的平均。第 1 題兩邊都拿滿分、分不出差別，所以第 2 輪起改用第 2–5 題；第 3 題從第 2 輪起多了一個檢查項目。第 4 題從第 7 輪起多了第 7 個檢查項目。
 - 每題每種設定只跑一次，樣本很小，數字只能看方向。例如第 2 題沒技能的版本前兩輪都在翻頁和 token 續期上失分，第 3 輪卻拿到滿分。
-- 沒技能時的失分幾乎都是不知道文件裡的規則，而不是程式寫不出來；「裝了有什麼差別」列的例子都來自這些測試。第 5 輪沒技能的設定可以上網查官方文件，也實際查了，差距因此縮小到 100% vs 87%。
+- 沒技能時的失分幾乎都是不知道文件裡的規則，而不是程式寫不出來；「裝了有什麼差別」列的例子都來自這些測試。第 5 輪沒技能的設定可以上網查官方文件，也實際查了，差距因此縮小到 100% vs 87%。第 6 輪兩種設定都不能上網，有技能 31 項全部通過。第 7 輪同樣不能上網，重跑全部 10 題，有技能 77 項全部通過，沒技能平均 77%；參考用戶端搬出 SKILL.md 之後，沒有任何一題退步。
 
 各輪的評測設定、耗時與 token 用量、每個失分項目的原因，見 [benchmark 摘要](evals/BENCHMARK.md)；逐條判定和評分者附的證據在 [evals/benchmark.json](evals/benchmark.json)。
 

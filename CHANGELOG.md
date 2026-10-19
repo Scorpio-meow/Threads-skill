@@ -4,6 +4,37 @@
 
 本專案的重要變動都記在這裡，格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。版本號跟著 `threads-api/SKILL.md` 的 `metadata.version` 走，Agensi 上的版本也用同一個號碼；1.0 之前的變動依日期記錄。
 
+## 未發布
+
+### 新增
+
+- 第 6 輪評測：用 1.3 版的技能重跑第 2、4、7、8 題，驗證 1.2 和 1.3 兩項還沒評測過的變更；這一輪兩種設定都不能上網。有技能 31 項全部通過，沒技能通過 26 項（各題平均 84%），有技能的分數沒有任何一題比前幾輪低。結果記在四語版 benchmark 摘要和 `evals/benchmark.json`，README 四語版的「測試結果」、介紹網站的評測數字和 `docs/llms.txt` 一併更新。
+  - 第 10 節 webhook 去重的規則（1.2）：第 7 題有技能的版本改以 `(field, media_id)` 為唯一鍵。
+  - 第 8 節 `debug_token` 可以用 App token（1.3）：第 2、8 題有技能的版本改用 App token 呼叫，90 天權限授權的檢查不再只限測試人員帳號；第 4 題有技能的回覆仍說 token 擁有者必須是測試人員，沒有檢查項目涵蓋這一點。
+- `evals/evals.json` 第 4 題新增第 7 個檢查項目：建議用 `debug_token` 檢查 token 的 `scopes`，並說明 `access_token` 可以用 App token（不需要測試人員），且必須和 `input_token` 來自同一個 App。前幾輪的第 4 題都是用原本的 6 個檢查項目判定。
+- 第 7 輪評測：用 1.4 版的技能重跑全部 10 題，確認把參考用戶端搬到 `scripts/threads_client.py` 之後沒有退步；技能以整個 `threads-api` 資料夾安裝，兩種設定都不能上網。有技能 77 項全部通過，沒技能通過 59 項（各題平均 77%），有技能的分數沒有任何一題比前幾輪低。結果記在四語版 benchmark 摘要和 `evals/benchmark.json`，README 四語版的「測試結果」、介紹網站的評測數字和 `docs/llms.txt` 一併更新。
+  - 參考用戶端：10 題有技能的版本都在寫程式前先讀了 `scripts/threads_client.py`，開發模式的第 1、9 題照第 2 節移植了它的邏輯。代操作的第 3 題照第 3 節在工作資料夾用完整路徑執行用戶端，交給使用者的指令也用完整路徑；第 10 題則把用戶端複製到工作資料夾，由自己寫的串文腳本匯入，交出沒改過的複本。沒有任何一題把用戶端的程式碼另存成暫存檔。
+  - 第 8.2 節的 App token 說明：第 4 題有技能的版本改用 App token 呼叫 `debug_token`，新增的第 7 個檢查項目通過；沒技能的版本沒有提到。
+  - 這一輪的技能快照早於第 14 節新增「從標準輸入執行用戶端」的說明，這段說明還沒評測。翻頁沿用第 6 輪起的判定標準，這一輪也套用到第 5、9 題。
+- `evals/evals.json` 依第 7 輪評分者的建議修改 8 題的檢查項目，收緊或補上兩種設定都通過、分不出差別的地方，檢查項目從 77 項增為 82 項。前幾輪都是用修改前的檢查項目判定；改完還沒重跑評測，第 7 輪的分數不能直接和新的檢查項目對照。
+  - 第 1 題新增第 9 項：呼叫 API 前先在本機驗證內文長度（emoji 依 UTF-8 位元組計數）、最多 5 個連結、輪播 2–20 項。沒有加發文配額的檢查，因為 SKILL.md 只要求批次或排程發文前查 `threads_publishing_limit`，這題只發一則。
+  - 第 2 題新增第 10 項：用 `debug_token` 讀 `data_access_expires_at`，在 90 天權限授權到期前提醒，並說明私人帳號每 90 天要重新授權。
+  - 第 3 題：第 4 項明確接受在使用者說 token 已設定時，交出可在使用者 shell 執行的指令；第 6 項改成每一條交出去的發文路徑都要先確認帳號；第 7 項改成必須點出現在（例如週一）發出的 24 小時貼文會在週末前消失，或 `example.com` 是占位網址。
+  - 第 7 題：第 1 項註明缺少 `hub.*` 參數時框架回的 422 也算「否則 403」；新增第 9 項：payload 沒有 `root_post`／`replied_to` 時，用 `GET /{media-id}` 查出事件屬於哪則貼文。
+  - 第 8 題新增第 9 項：換 code 失敗時，能解析文件列出的扁平錯誤格式 `{error_type, code, error_message}` 並記錄訊息。
+  - 第 2 題第 8 項、第 5 題第 5 項、第 9 題第 6 項：寫明要用 `paging.cursors.after` 自己組下一頁，只靠 `paging.next` 翻頁的迴圈不通過（第 6、7 輪已照這個標準判定，但只寫在評分說明裡）。
+  - 第 10 題：第 7 項改成要讓使用者看到會發到哪個帳號，並在開始等待或排程前停下來等使用者確認；新增第 8 項：發文前用 `GET /me/threads_publishing_limit` 檢查發文配額，配額用完就不發。API 沒有排程功能，SKILL.md 要求排程發文前由程式自己檢查配額。
+
+### 變更
+
+- SKILL.md 第 14 節的 Python 參考用戶端（256 行）原樣搬到 `threads-api/scripts/threads_client.py`，SKILL.md 因此少了 245 行（1.3 版是 579 行），回到 [Agent Skills 規範](https://agentskills.io/specification)建議的 500 行以內。第 14 節保留用途、指令用法和 spec 範例，改為指向這個檔案，並補上輸出格式。開頭的目錄、前置資料的 `compatibility`、第 2 節第 3 步（開發模式先讀這個檔案，再移植它的邏輯）、第 3 節第 5 步（代操作在工作資料夾用完整路徑執行它，不再存成暫存檔）和第 7 步（連不到 API 時，連同用戶端的路徑或檔案一起交給使用者）一併改寫。搬移後模型要另外讀取這個檔案，載入技能內容的方式跟著改變；結構調整後的評測已在第 7 輪重跑（見「新增」）。
+- SKILL.md 第 8.2 節（Before App Review）新增一條：要確認使用者授權了哪些權限，用 App token（`TH|<APP_ID>|<APP_SECRET>`）當 `access_token` 呼叫 `debug_token`，同一個 App 的使用者不論是不是測試人員都能查；`scopes` 只代表使用者的授權，不代表通過 App Review。第 12 節「權限錯誤或結果意外為空」那列補上同樣的確認方法，「keyword search 只找到自己的貼文」那列加上指向第 8.2 節的參照。這是第 6 輪第 4 題有技能的回覆漏掉的地方；第 7 輪第 4 題有技能的版本已改用 App token，新增的第 7 個檢查項目通過。
+- `threads-api/SKILL.md` 的 `metadata.version` 調高為 1.4。
+- README 四語版的「文件」「參考用戶端」、參與貢獻指南、資安政策、PR 範本、`docs/llms.txt`，以及介紹網站的參考用戶端標籤和 `check()` 原始碼連結，改為指向 `threads-api/scripts/threads_client.py`。
+- 安裝說明：README 四語版的 Kiro 補上匯入後要確認 `scripts/threads_client.py` 有沒有跟著進來（Kiro 的文件沒寫）；Agensi 補上技能不會存到使用者的電腦、授權也不允許存檔，代操作要執行的用戶端得由 AI 助理另外向 Agensi 取得。其他方式（`bunx skills`、`gh skill`、Codex、Copilot CLI、Gemini CLI、手動複製、Claude 應用程式和 ChatGPT 的 ZIP）依原始碼或官方文件，都會用到整個 `threads-api` 資料夾。
+- SKILL.md 第 14 節新增技能檔案不在磁碟上時的做法（有些平台只在要求時提供檔案、不允許存檔）：向載入技能的地方取得 `scripts/threads_client.py`，用 `python3 - <參數>` 從標準輸入交給 Python 執行，不另外存檔；第 3 節第 5 步加上指向第 14 節的參照。README 四語版的 Agensi 一節改成同樣的說法。修改後還沒重跑評測。
+- 安裝說明（README 四語版）：Codex 的 `$skill-installer` 補上它會裝到 `~/.codex/skills/`（有設定 `CODEX_HOME` 時是 `$CODEX_HOME/skills/`），不是表格裡的 `~/.agents/skills/`；Codex 兩處都會讀，但原始碼把前者標為已淘汰、為了相容才保留的位置，所以提醒不要兩處各放一份。Copilot CLI 補上加入資料夾只會登記位置、不會複製。「更新與移除」表新增 Codex（目的地已存在時安裝器會中止，要先刪掉舊資料夾）、Copilot CLI、Kiro（文件沒寫，用刪除再匯入）、Agensi 四列。依據是 openai/codex 原始碼（2026-10-19 `main` 的 `host_roots.rs` 和 skill-installer 的 `install-skill-from-github.py`），以及 Codex、GitHub Copilot CLI、Kiro 的官方文件。
+
 ## 1.3 - 2026-10-19
 
 ### 變更

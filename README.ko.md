@@ -94,6 +94,8 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
   $skill-installer install https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api
   ```
 
+  설치 프로그램은 `~/.codex/skills/threads-api`(`CODEX_HOME`을 설정했다면 `$CODEX_HOME/skills/`)에 설치하며, 표의 `~/.agents/skills/`가 아닙니다. Codex는 두 위치를 모두 읽지만, 공식 문서에 나온 개인 폴더는 `~/.agents/skills/`뿐이고 Codex 소스 코드는 `~/.codex/skills/`를 호환성을 위해 남겨 둔 지원 중단 위치로 표시합니다. `~/.agents/skills/`에 두려면 `bunx skills`나 수동 복사로 설치하세요. 두 위치에 하나씩 두지 마세요. Codex는 이름이 같은 스킬을 합치지 않아 둘 다 스킬 선택 목록에 나타납니다.
+
   Codex는 기본적으로 샌드박스에서 명령어를 실행하고 네트워크를 쓰지 않으므로, 대행 모드가 Threads API에 접속할 때 먼저 승인을 요청합니다. 항상 허용하려면 `~/.codex/config.toml`에 다음을 추가하세요.
 
   ```toml
@@ -101,14 +103,14 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
   network_access = true
   ```
 
-- **GitHub Copilot CLI**: clone한 뒤 `copilot skill add Threads-skill/threads-api`를 실행합니다. 세션 중간에 추가했다면 `/skills reload`로 불러오세요. 저장소의 `.github/skills/`에 넣고 commit하면 클라우드의 Copilot cloud agent도 사용합니다.
+- **GitHub Copilot CLI**: clone한 뒤 `copilot skill add Threads-skill/threads-api`를 실행합니다. 세션 중간에 추가했다면 `/skills reload`로 불러오세요. 폴더를 추가하면 복사하지 않고 위치만 등록하므로, clone한 폴더는 남겨 두세요. 저장소의 `.github/skills/`에 넣고 commit하면 클라우드의 Copilot cloud agent도 사용합니다.
 - **Gemini CLI**: 기본적으로 개인 범위에 설치되며, `--scope workspace`를 붙이면 현재 프로젝트에만 설치됩니다.
 
   ```bash
   gemini skills install https://github.com/Scorpio-meow/Threads-skill.git --path threads-api
   ```
 
-- **Kiro**: Kiro 패널에서 **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub**를 선택하고, 스킬이 있는 하위 폴더를 가리키는 URL을 붙여 넣습니다: `https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`
+- **Kiro**: Kiro 패널에서 **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub**를 선택하고, 스킬이 있는 하위 폴더를 가리키는 URL을 붙여 넣습니다: `https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`. Kiro 문서에는 가져올 때 하위 폴더도 함께 들어오는지 나와 있지 않으므로, 가져온 뒤 스킬 폴더에 `scripts/threads_client.py`가 있는지 확인하세요. 없다면 `threads-api` 폴더 전체를 직접 복사하세요.
 - **Devin Desktop**: Cascade 패널 오른쪽 위의 **⋯** → **Skills**에서 스킬을 관리할 수 있습니다.
 - **Cline**: 새 스킬은 기본으로 켜져 있으며, Cline 패널 아래쪽의 **Skills** 탭에서 켜고 끌 수 있습니다.
 
@@ -136,6 +138,8 @@ ChatGPT와 Codex의 스킬은 아직 동기화되지 않으므로, Codex에는 �
 
 이 스킬은 [Agensi](https://agensi.io/skills/threads-api)에도 무료로 올라가 있습니다. 스킬 페이지에서 "Copy prompt to install"을 누르고 복사한 프롬프트를 AI 어시스턴트에 붙여 넣으면, Agensi에 연결해 스킬을 설치합니다. Agensi 커넥터에 이미 연결된 어시스턴트는 사용할 때마다 Agensi에서 최신 버전을 불러옵니다.
 
+Agensi는 스킬을 컴퓨터에 저장하지 않으며, 라이선스상 저장도 허용되지 않습니다. 그래서 대행 모드에서 실행하는 `scripts/threads_client.py`는 로컬에 없습니다. 이때는 스킬의 안내에 따라 AI 어시스턴트가 Agensi에서 이 파일을 가져와, 저장하지 않고 표준 입력(stdin)으로 Python에 넘겨 실행합니다. 대행 모드를 안정적으로 쓰려면 위의 다른 방법으로 설치하세요.
+
 이 저장소의 업데이트는 Agensi 심사를 통과한 뒤에야 Agensi에 반영되므로, 최신 내용은 이 저장소를 기준으로 하세요.
 
 ### 업데이트와 삭제
@@ -144,9 +148,15 @@ ChatGPT와 Codex의 스킬은 아직 동기화되지 않으므로, Codex에는 �
 |---|---|---|
 | `bunx skills` | `bunx skills update threads-api` | `bunx skills remove threads-api` |
 | `gh skill` | `gh skill update` | `threads-api` 폴더 삭제 |
+| Codex(`$skill-installer`) | `~/.codex/skills/threads-api` 폴더를 삭제한 뒤 다시 설치(폴더가 이미 있으면 설치 프로그램이 중단됨) | `~/.codex/skills/threads-api` 폴더 삭제 |
+| Copilot CLI(`copilot skill add`) | `Threads-skill` 폴더에서 `git pull` 실행. 세션 중이라면 `/skills reload`도 실행 | `copilot skill remove`에 `threads-api` 폴더 경로 지정(등록만 해제하고 파일은 남음) |
 | Gemini CLI | 삭제 후 다시 설치 | `gemini skills uninstall threads-api` |
+| Kiro | 스킬 폴더의 `threads-api`를 삭제한 뒤 다시 가져오기 | 스킬 폴더의 `threads-api` 삭제 |
 | 수동 복사 | `Threads-skill` 폴더에서 `git pull`을 실행한 뒤 다시 복사 | `threads-api` 폴더 삭제 |
 | Claude 앱, ChatGPT | 이전 것을 삭제하고 새 ZIP 업로드 | Skills 페이지에서 삭제 |
+| Agensi | 필요 없음. 사용할 때마다 Agensi에서 최신 버전을 불러옴 | 컴퓨터에 저장되지 않으므로 필요 없음 |
+
+Kiro 문서에는 업데이트와 삭제 방법이 나와 있지 않습니다. 가져온 스킬은 스킬 폴더(`~/.kiro/skills/` 또는 `.kiro/skills/`)에 복사되므로, 표에서는 그 폴더를 삭제하는 방법으로 적었습니다.
 
 ### 도구별 공식 문서
 
@@ -268,7 +278,7 @@ App Review를 통과하기 전에는 권한을 본인과 테스터 계정에만 
 | 11 | 게시물 임베드: oEmbed, embed.js 로딩 방식, 대량 임베드 시 속도 조절과 실패 처리, Web Intents |
 | 12 | 문제 해결: 자주 발생하는 오류의 원인과 해결 방법 |
 | 13 | 공식 예제 중 그대로 따라 하면 안 되는 오류 |
-| 14 | 참조 클라이언트 `threads_client.py` |
+| 14 | 참조 클라이언트 [`scripts/threads_client.py`](threads-api/scripts/threads_client.py) 사용법과 spec 예시 |
 
 *(practice)*로 표시된 엔지니어링 권장 사항과 *(observed)*로 표시된 실측 결과를 제외한 나머지 내용은 모두 공식 문서에 근거합니다.
 
@@ -276,13 +286,13 @@ App Review를 통과하기 전에는 권한을 본인과 테스터 계정에만 
 
 ### 참조 클라이언트
 
-14번 섹션의 `threads_client.py`는 Python 표준 라이브러리(3.8 이상)만 사용하므로 패키지를 설치할 필요가 없습니다. 대행 모드에서는 Claude가 이 클라이언트로 API를 호출하고, 개발 모드에서는 이 로직을 참고해 프로젝트의 언어로 다시 작성합니다. 직접 쓰고 싶다면 해당 코드를 `threads_client.py`로 저장하세요(Windows에서는 `python3` 대신 `python`).
+참조 클라이언트는 [`threads-api/scripts/threads_client.py`](threads-api/scripts/threads_client.py)입니다. Python 표준 라이브러리(3.8 이상)만 사용하므로 패키지를 설치할 필요가 없고, 사용법은 SKILL.md 14번 섹션에 있습니다. 대행 모드에서는 Claude가 이 파일을 직접 실행해 API를 호출하고, 개발 모드에서는 이 로직을 읽고 프로젝트의 언어로 다시 작성합니다. 직접 쓰고 싶다면 이 파일을 그대로 실행하세요. 토큰은 `THREADS_ACCESS_TOKEN`이나 현재 폴더의 `.env`에서 읽습니다. 아래 예시는 저장소 루트에서 실행하는 경우이며, 스킬 폴더에 설치했다면 그 경로로 바꾸세요(Windows에서는 `python3` 대신 `python`).
 
 ```bash
-python3 threads_client.py get me fields=id,username   # 계정 확인
-python3 threads_client.py check spec.json             # 로컬에서 내용만 검사, API 호출 없음
-python3 threads_client.py publish spec.json           # 검사 → container 생성 → 처리 완료 대기 → 게시 → URL 출력
-python3 threads_client.py delete <media-id>           # 게시물 삭제, 되돌릴 수 없음
+python3 threads-api/scripts/threads_client.py get me fields=id,username   # 계정 확인
+python3 threads-api/scripts/threads_client.py check spec.json             # 로컬에서 내용만 검사, API 호출 없음
+python3 threads-api/scripts/threads_client.py publish spec.json           # 검사 → container 생성 → 처리 완료 대기 → 게시 → URL 출력
+python3 threads-api/scripts/threads_client.py delete <media-id>           # 게시물 삭제, 되돌릴 수 없음
 ```
 
 `spec.json`에는 container 파라미터를 넣습니다. 예를 들어 투표가 붙은 게시물은 다음과 같습니다.
@@ -293,27 +303,27 @@ python3 threads_client.py delete <media-id>           # 게시물 삭제, 되돌
 
 ## 테스트 결과
 
-같은 모델로 "스킬 있음"과 "스킬 없음"을 비교했습니다. 각 문제를 두 설정에서 한 번씩 실행하고, 답변에 참여하지 않은 채점자가 미리 정해 둔 체크 항목에 따라 하나씩 판정했습니다. 라운드 사이마다 채점 의견을 반영해 스킬을 수정했고, 총 다섯 라운드를 진행했습니다. 4라운드는 스킬에 게시물 임베드 내용을 추가한 뒤 새로 만든 6번 문제만, 5라운드는 새로 만든 7–10번 문제만 실행했습니다. 문제와 체크 항목은 [`evals/evals.json`](evals/evals.json)에 있습니다.
+같은 모델로 "스킬 있음"과 "스킬 없음"을 비교했습니다. 각 문제를 두 설정에서 한 번씩 실행하고, 답변에 참여하지 않은 채점자가 미리 정해 둔 체크 항목에 따라 하나씩 판정했습니다. 라운드 사이마다 채점 의견을 반영해 스킬을 수정했고, 총 일곱 라운드를 진행했습니다. 4라운드는 스킬에 게시물 임베드 내용을 추가한 뒤 새로 만든 6번 문제만, 5라운드는 새로 만든 7–10번 문제만 실행했습니다. 6라운드에서는 webhook 중복 제거와 `debug_token` 수정을 검증하려고 2, 4, 7, 8번 문제를 다시 실행했습니다. 7라운드에서는 참조 클라이언트를 `scripts/threads_client.py`로 옮긴 뒤 10개 문제를 모두 다시 실행했습니다. 문제와 체크 항목은 [`evals/evals.json`](evals/evals.json)에 있습니다.
 
 각 칸은 통과한 체크 항목 수이며, "스킬 있음 vs 스킬 없음" 형식입니다.
 
-| 문제 | 1라운드 | 2라운드 | 3라운드 | 4라운드 | 5라운드 |
-|---|---|---|---|---|---|
-| 1. Python 캐러셀 게시물(이미지 2장 + 동영상 1개) | 8/8 vs 8/8 | — | — | — | — |
-| 2. TypeScript 일일 인사이트 스케줄러와 토큰 갱신 | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — |
-| 3. 투표가 붙은 고스트 게시물 대리 게시 | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — |
-| 4. 검색, 위치, 계정 조회 결과가 이상한 원인 | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — |
-| 5. 키워드가 포함된 답글 자동 숨기기 | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — |
-| 6. 게시물 60개짜리 Threads 월과 삭제된 게시물 주간 점검 | — | — | — | 8/8 vs 2/8 | — |
-| 7. 답글과 멘션을 받는 FastAPI webhook | — | — | — | — | 8/8 vs 8/8 |
-| 8. Express OAuth 로그인과 장기 토큰 갱신 | — | — | — | — | 8/8 vs 7/8 |
-| 9. 문제가 많은 Python 게시 코드 리뷰 | — | — | — | — | 8/8 vs 6/8 |
-| 10. 이모지가 들어간 스레드를 다음 날 오전 8시에 대리 게시 | — | — | — | — | 7/7 vs 6/7 |
-| **평균 통과율** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** |
+| 문제 | 1라운드 | 2라운드 | 3라운드 | 4라운드 | 5라운드 | 6라운드 | 7라운드 |
+|---|---|---|---|---|---|---|---|
+| 1. Python 캐러셀 게시물(이미지 2장 + 동영상 1개) | 8/8 vs 8/8 | — | — | — | — | — | 8/8 vs 8/8 |
+| 2. TypeScript 일일 인사이트 스케줄러와 토큰 갱신 | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — | 9/9 vs 8/9 | 9/9 vs 7/9 |
+| 3. 투표가 붙은 고스트 게시물 대리 게시 | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — | — | 7/7 vs 6/7 |
+| 4. 검색, 위치, 계정 조회 결과가 이상한 원인 | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — | 6/6 vs 5/6 | 7/7 vs 5/7 |
+| 5. 키워드가 포함된 답글 자동 숨기기 | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — | — | 7/7 vs 6/7 |
+| 6. 게시물 60개짜리 Threads 월과 삭제된 게시물 주간 점검 | — | — | — | 8/8 vs 2/8 | — | — | 8/8 vs 3/8 |
+| 7. 답글과 멘션을 받는 FastAPI webhook | — | — | — | — | 8/8 vs 8/8 | 8/8 vs 6/8 | 8/8 vs 6/8 |
+| 8. Express OAuth 로그인과 장기 토큰 갱신 | — | — | — | — | 8/8 vs 7/8 | 8/8 vs 7/8 | 8/8 vs 7/8 |
+| 9. 문제가 많은 Python 게시 코드 리뷰 | — | — | — | — | 8/8 vs 6/8 | — | 8/8 vs 6/8 |
+| 10. 이모지가 들어간 스레드를 다음 날 오전 8시에 대리 게시 | — | — | — | — | 7/7 vs 6/7 | — | 7/7 vs 5/7 |
+| **평균 통과율** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** | **100% vs 84%** | **100% vs 77%** |
 
-- 평균 통과율은 문제별 통과율의 평균입니다. 1번 문제는 양쪽 모두 만점이라 차이를 가릴 수 없어서 2라운드부터는 2–5번 문제를 사용했습니다. 3번 문제는 2라운드부터 체크 항목이 하나 늘었습니다.
+- 평균 통과율은 문제별 통과율의 평균입니다. 1번 문제는 양쪽 모두 만점이라 차이를 가릴 수 없어서 2라운드부터는 2–5번 문제를 사용했습니다. 3번 문제는 2라운드부터 체크 항목이 하나 늘었습니다. 4번 문제는 7라운드에서 체크 항목이 하나 늘어 7개가 됐습니다.
 - 문제마다 설정별로 한 번씩만 실행해 표본이 매우 작으므로, 수치는 경향 정도로만 봐 주세요. 예를 들어 2번 문제의 스킬 없는 버전은 처음 두 라운드에서 페이지네이션과 토큰 갱신에서 감점됐지만, 3라운드에서는 만점을 받았습니다.
-- 스킬이 없을 때의 감점은 거의 모두 코드를 못 짜서가 아니라 문서에 있는 규칙을 몰라서 생겼습니다. "설치하면 달라지는 점"에 나온 예시는 모두 이 테스트에서 나온 것입니다. 5라운드에서는 스킬 없음 설정도 웹에서 공식 문서를 검색할 수 있었고 실제로 찾아봤기 때문에, 차이가 100% vs 87%로 줄었습니다.
+- 스킬이 없을 때의 감점은 거의 모두 코드를 못 짜서가 아니라 문서에 있는 규칙을 몰라서 생겼습니다. "설치하면 달라지는 점"에 나온 예시는 모두 이 테스트에서 나온 것입니다. 5라운드에서는 스킬 없음 설정도 웹에서 공식 문서를 검색할 수 있었고 실제로 찾아봤기 때문에, 차이가 100% vs 87%로 줄었습니다. 6라운드에서는 두 설정 모두 웹을 쓸 수 없었고, 스킬 있음은 31개 항목을 모두 통과했습니다. 7라운드에서도 웹 없이 10개 문제를 모두 다시 실행했고, 스킬 있음은 77개 항목을 모두 통과, 스킬 없음은 평균 77%였습니다. 참조 클라이언트를 SKILL.md에서 옮긴 뒤에도 점수가 떨어진 문제는 없습니다.
 
 라운드별 평가 설정, 소요 시간과 토큰 사용량, 감점 항목별 원인은 [benchmark 요약](evals/BENCHMARK.ko.md)을, 항목별 판정과 채점자가 첨부한 근거는 [evals/benchmark.json](evals/benchmark.json)을 참고하세요.
 

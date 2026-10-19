@@ -94,6 +94,8 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
   $skill-installer install https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api
   ```
 
+  インストーラは `~/.codex/skills/threads-api`（`CODEX_HOME` を設定している場合は `$CODEX_HOME/skills/`）に置きます。表の `~/.agents/skills/` ではありません。Codex はどちらも読み込みますが、公式ドキュメントに載っている個人フォルダは `~/.agents/skills/` だけで、Codex のソースコードでは `~/.codex/skills/` は互換性のために残された非推奨の場所とされています。`~/.agents/skills/` に置きたい場合は、`bunx skills` か手動コピーでインストールしてください。両方に置かないでください。Codex は同じ名前のスキルをまとめず、どちらもスキルの選択肢に表示されます。
+
   Codex はデフォルトでサンドボックス内でコマンドを実行し、ネットワークを使いません。代行操作で Threads API に接続するときは事前に承認を求められます。常に許可したい場合は `~/.codex/config.toml` に次を追加します。
 
   ```toml
@@ -101,14 +103,14 @@ Copy-Item -Recurse -Force Threads-skill\threads-api "$TARGET\"
   network_access = true
   ```
 
-- **GitHub Copilot CLI**：clone したあと `copilot skill add Threads-skill/threads-api` を実行します。セッションの途中で追加した場合は `/skills reload` で読み込みます。リポジトリの `.github/skills/` に置いて commit すれば、クラウドの Copilot cloud agent でも使われます。
+- **GitHub Copilot CLI**：clone したあと `copilot skill add Threads-skill/threads-api` を実行します。セッションの途中で追加した場合は `/skills reload` で読み込みます。フォルダを追加すると、コピーではなく場所として登録されるため、clone したフォルダは残しておいてください。リポジトリの `.github/skills/` に置いて commit すれば、クラウドの Copilot cloud agent でも使われます。
 - **Gemini CLI**：デフォルトではユーザー単位でインストールされます。`--scope workspace` を付けると現在のプロジェクトにだけインストールされます。
 
   ```bash
   gemini skills install https://github.com/Scorpio-meow/Threads-skill.git --path threads-api
   ```
 
-- **Kiro**：Kiro パネルの **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub** を選び、スキルのサブフォルダを指す URL を貼り付けます：`https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`
+- **Kiro**：Kiro パネルの **Agent Steering & Skills** → **+** → **Import a skill** → **GitHub** を選び、スキルのサブフォルダを指す URL を貼り付けます：`https://github.com/Scorpio-meow/Threads-skill/tree/main/threads-api`。Kiro のドキュメントにはインポート時にサブフォルダも取り込まれるかどうかが書かれていないため、インポート後にスキルフォルダに `scripts/threads_client.py` があるか確認してください。ない場合は `threads-api` フォルダごと手動でコピーしてください。
 - **Devin Desktop**：Cascade パネル右上の **⋯** → **Skills** でスキルを管理できます。
 - **Cline**：新しいスキルはデフォルトで有効です。Cline パネル下部の **Skills** タブで切り替えられます。
 
@@ -136,6 +138,8 @@ ChatGPT と Codex のスキルはまだ同期されないため、Codex には�
 
 このスキルは [Agensi](https://agensi.io/skills/threads-api) でも無料で公開しています。スキルのページで「Copy prompt to install」を押し、コピーしたプロンプトを AI アシスタントに貼り付けると、Agensi に接続してスキルをインストールします。Agensi コネクタに接続済みのアシスタントは、使うたびに Agensi から最新版を読み込みます。
 
+Agensi はスキルを PC に保存せず、ライセンスでも保存は認められていません。そのため代行操作で実行する `scripts/threads_client.py` はローカルにありません。この場合、スキルの指示に従って AI アシスタントが Agensi からこのファイルを取得し、保存せずに標準入力（stdin）で Python に渡して実行します。代行操作を確実に使いたい場合は、上のいずれかの方法でインストールしてください。
+
 このリポジトリの更新は Agensi の審査を通ってから Agensi に反映されるため、最新の内容はこのリポジトリを基準にしてください。
 
 ### 更新と削除
@@ -144,9 +148,15 @@ ChatGPT と Codex のスキルはまだ同期されないため、Codex には�
 |---|---|---|
 | `bunx skills` | `bunx skills update threads-api` | `bunx skills remove threads-api` |
 | `gh skill` | `gh skill update` | `threads-api` フォルダを削除 |
+| Codex（`$skill-installer`） | `~/.codex/skills/threads-api` フォルダを削除してからもう一度インストール（フォルダがすでにあるとインストーラは中止します） | `~/.codex/skills/threads-api` フォルダを削除 |
+| Copilot CLI（`copilot skill add`） | `Threads-skill` フォルダで `git pull` を実行。セッション中なら `/skills reload` も実行 | `copilot skill remove` に `threads-api` フォルダのパスを指定（登録を解除するだけで、ファイルは残ります） |
 | Gemini CLI | 削除してからもう一度インストール | `gemini skills uninstall threads-api` |
+| Kiro | スキルフォルダの `threads-api` を削除してからもう一度インポート | スキルフォルダの `threads-api` を削除 |
 | 手動コピー | `Threads-skill` フォルダで `git pull` を実行してからもう一度コピー | `threads-api` フォルダを削除 |
 | Claude アプリ、ChatGPT | 古いものを削除して新しい ZIP をアップロード | Skills ページで削除 |
+| Agensi | 不要。使うたびに Agensi から最新版を読み込みます | PC に保存されないため不要 |
+
+Kiro のドキュメントには更新と削除の方法が書かれていません。インポートしたスキルはスキルフォルダ（`~/.kiro/skills/` または `.kiro/skills/`）にコピーされるため、表ではそのフォルダを削除する方法にしています。
 
 ### 各ツールの公式ドキュメント
 
@@ -268,7 +278,7 @@ App Review を通過するまでは、権限は自分とテスターのアカウ
 | 11 | 投稿の埋め込み：oEmbed、embed.js の読み込みの仕組み、大量に埋め込むときのペース調整と失敗時の処理、Web Intents |
 | 12 | トラブルシューティング：よくあるエラーの原因と対処法 |
 | 13 | 公式サンプルのうちそのまま真似してはいけない誤り |
-| 14 | リファレンスクライアント `threads_client.py` |
+| 14 | リファレンスクライアント [`scripts/threads_client.py`](threads-api/scripts/threads_client.py) の使い方と spec の例 |
 
 *(practice)* と付いたエンジニアリング上の推奨事項と、*(observed)* と付いた実測結果を除き、内容はすべて公式ドキュメントに基づいています。
 
@@ -276,13 +286,13 @@ App Review を通過するまでは、権限は自分とテスターのアカウ
 
 ### リファレンスクライアント
 
-第 14 節の `threads_client.py` は Python の標準ライブラリ（3.8 以上）だけで動くため、パッケージのインストールは不要です。代行操作では Claude がこれを使って API を呼び出し、開発モードではそのロジックを参考に、プロジェクトの言語で書き直します。自分で使いたい場合は、そのコードを `threads_client.py` として保存してください（Windows では `python3` を `python` に置き換えます）。
+リファレンスクライアントは [`threads-api/scripts/threads_client.py`](threads-api/scripts/threads_client.py) です。Python の標準ライブラリ（3.8 以上）だけで動くためパッケージのインストールは不要で、使い方は SKILL.md 第 14 節に書いてあります。代行操作では Claude がこれを直接実行して API を呼び出し、開発モードではそのロジックを読んで、プロジェクトの言語で書き直します。自分で使いたい場合は、このファイルをそのまま実行してください。トークンは `THREADS_ACCESS_TOKEN` か、カレントフォルダの `.env` から読み込みます。下の例はリポジトリのルートで実行する場合で、スキルフォルダにインストールした場合はそこのパスに置き換えます（Windows では `python3` を `python` に置き換えます）。
 
 ```bash
-python3 threads_client.py get me fields=id,username   # アカウントを確認
-python3 threads_client.py check spec.json             # ローカルで内容をチェックするだけで、API は呼び出さない
-python3 threads_client.py publish spec.json           # チェック → container を作成 → 処理完了を待つ → 公開 → URL を表示
-python3 threads_client.py delete <media-id>           # 投稿を削除（元に戻せない）
+python3 threads-api/scripts/threads_client.py get me fields=id,username   # アカウントを確認
+python3 threads-api/scripts/threads_client.py check spec.json             # ローカルで内容をチェックするだけで、API は呼び出さない
+python3 threads-api/scripts/threads_client.py publish spec.json           # チェック → container を作成 → 処理完了を待つ → 公開 → URL を表示
+python3 threads-api/scripts/threads_client.py delete <media-id>           # 投稿を削除（元に戻せない）
 ```
 
 `spec.json` には container のパラメータを書きます。たとえばアンケート付きの投稿なら次のとおりです。
@@ -293,27 +303,27 @@ python3 threads_client.py delete <media-id>           # 投稿を削除（元に
 
 ## テスト結果
 
-同じモデルで「スキルあり」と「スキルなし」を比較しました。各問題を両方の設定で 1 回ずつ実行し、回答に関わっていない採点者が、あらかじめ用意したチェック項目に沿って 1 項目ずつ判定しています。ラウンドの合間に採点者の指摘をもとにスキルを修正し、計 5 ラウンド実施しました。ラウンド 4 は、スキルに投稿の埋め込みの内容を加えたあと、新しく追加した問題 6 だけを、ラウンド 5 は新しく追加した問題 7–10 だけを実行しています。問題とチェック項目は [`evals/evals.json`](evals/evals.json) にあります。
+同じモデルで「スキルあり」と「スキルなし」を比較しました。各問題を両方の設定で 1 回ずつ実行し、回答に関わっていない採点者が、あらかじめ用意したチェック項目に沿って 1 項目ずつ判定しています。ラウンドの合間に採点者の指摘をもとにスキルを修正し、計 7 ラウンド実施しました。ラウンド 4 は、スキルに投稿の埋め込みの内容を加えたあと、新しく追加した問題 6 だけを、ラウンド 5 は新しく追加した問題 7–10 だけを実行しています。ラウンド 6 では、webhook の重複排除と `debug_token` の修正を検証するため、問題 2、4、7、8 を再実行しました。ラウンド 7 では、リファレンスクライアントを `scripts/threads_client.py` に移したあとに全 10 問を再実行しています。問題とチェック項目は [`evals/evals.json`](evals/evals.json) にあります。
 
 各セルは合格したチェック項目の数で、「スキルあり vs スキルなし」の形式です。
 
-| 問題 | ラウンド 1 | ラウンド 2 | ラウンド 3 | ラウンド 4 | ラウンド 5 |
-|---|---|---|---|---|---|
-| 1. Python でカルーセル投稿（画像 2 枚＋動画 1 本） | 8/8 vs 8/8 | — | — | — | — |
-| 2. TypeScript で毎日のインサイト取得スケジュールとトークン延長 | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — |
-| 3. アンケート付きゴースト投稿の代行 | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — |
-| 4. 検索・場所・アカウント検索で結果がおかしい原因 | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — |
-| 5. キーワードを含むリプライの自動非表示 | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — |
-| 6. 60 件の Threads 投稿ウォールと削除済み投稿の毎週チェック | — | — | — | 8/8 vs 2/8 | — |
-| 7. FastAPI でリプライとメンションを受け取る webhook | — | — | — | — | 8/8 vs 8/8 |
-| 8. Express での OAuth ログインと長期トークンの延長 | — | — | — | — | 8/8 vs 7/8 |
-| 9. 不具合のある Python 投稿コードのレビュー | — | — | — | — | 8/8 vs 6/8 |
-| 10. 絵文字を含むスレッドを翌朝 8 時に代理投稿 | — | — | — | — | 7/7 vs 6/7 |
-| **平均合格率** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** |
+| 問題 | ラウンド 1 | ラウンド 2 | ラウンド 3 | ラウンド 4 | ラウンド 5 | ラウンド 6 | ラウンド 7 |
+|---|---|---|---|---|---|---|---|
+| 1. Python でカルーセル投稿（画像 2 枚＋動画 1 本） | 8/8 vs 8/8 | — | — | — | — | — | 8/8 vs 8/8 |
+| 2. TypeScript で毎日のインサイト取得スケジュールとトークン延長 | 9/9 vs 7/9 | 9/9 vs 7/9 | 9/9 vs 9/9 | — | — | 9/9 vs 8/9 | 9/9 vs 7/9 |
+| 3. アンケート付きゴースト投稿の代行 | 6/6 vs 3/6 | 7/7 vs 4/7 | 7/7 vs 5/7 | — | — | — | 7/7 vs 6/7 |
+| 4. 検索・場所・アカウント検索で結果がおかしい原因 | — | 6/6 vs 5/6 | 6/6 vs 5/6 | — | — | 6/6 vs 5/6 | 7/7 vs 5/7 |
+| 5. キーワードを含むリプライの自動非表示 | — | 7/7 vs 6/7 | 7/7 vs 6/7 | — | — | — | 7/7 vs 6/7 |
+| 6. 60 件の Threads 投稿ウォールと削除済み投稿の毎週チェック | — | — | — | 8/8 vs 2/8 | — | — | 8/8 vs 3/8 |
+| 7. FastAPI でリプライとメンションを受け取る webhook | — | — | — | — | 8/8 vs 8/8 | 8/8 vs 6/8 | 8/8 vs 6/8 |
+| 8. Express での OAuth ログインと長期トークンの延長 | — | — | — | — | 8/8 vs 7/8 | 8/8 vs 7/8 | 8/8 vs 7/8 |
+| 9. 不具合のある Python 投稿コードのレビュー | — | — | — | — | 8/8 vs 6/8 | — | 8/8 vs 6/8 |
+| 10. 絵文字を含むスレッドを翌朝 8 時に代理投稿 | — | — | — | — | 7/7 vs 6/7 | — | 7/7 vs 5/7 |
+| **平均合格率** | **100% vs 76%** | **100% vs 76%** | **100% vs 85%** | **100% vs 25%** | **100% vs 87%** | **100% vs 84%** | **100% vs 77%** |
 
-- 平均合格率は、各問題の合格率の平均です。問題 1 は両方とも満点で差が出なかったため、ラウンド 2 からは問題 2–5 を使っています。問題 3 はラウンド 2 からチェック項目が 1 つ増えています。
+- 平均合格率は、各問題の合格率の平均です。問題 1 は両方とも満点で差が出なかったため、ラウンド 2 からは問題 2–5 を使っています。問題 3 はラウンド 2 からチェック項目が 1 つ増えています。問題 4 はラウンド 7 でチェック項目が 1 つ増えて 7 つになりました。
 - 各問題・各設定とも 1 回しか実行しておらずサンプルが少ないため、数字は傾向を見る程度にとどめてください。たとえば問題 2 のスキルなし版は、最初の 2 ラウンドではページングとトークン延長で失点しましたが、ラウンド 3 では満点でした。
-- スキルなしでの失点はほぼすべて、コードが書けないからではなく、ドキュメントのルールを知らないことが原因でした。「導入すると何が変わるか」に挙げた例は、すべてこのテストから取っています。ラウンド 5 ではスキルなしの設定でも Web で公式ドキュメントを検索でき、実際に調べていたため、差は 100% vs 87% に縮まりました。
+- スキルなしでの失点はほぼすべて、コードが書けないからではなく、ドキュメントのルールを知らないことが原因でした。「導入すると何が変わるか」に挙げた例は、すべてこのテストから取っています。ラウンド 5 ではスキルなしの設定でも Web で公式ドキュメントを検索でき、実際に調べていたため、差は 100% vs 87% に縮まりました。ラウンド 6 はどちらの設定も Web を使えず、スキルありは 31 項目すべてに合格しました。ラウンド 7 も Web を使えない条件で全 10 問を再実行し、スキルありは 77 項目すべてに合格、スキルなしは平均 77% でした。リファレンスクライアントを SKILL.md から移したあとも、点数が下がった問題はありません。
 
 各ラウンドの評価設定、所要時間とトークン使用量、失点した項目ごとの原因は [benchmark の概要](evals/BENCHMARK.ja.md)を、項目ごとの判定と採点者が添えた根拠は [evals/benchmark.json](evals/benchmark.json) を参照してください。
 

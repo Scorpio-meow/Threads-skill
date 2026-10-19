@@ -4,7 +4,7 @@
 
 ## Scope
 
-- [ ] Skill content (`threads-api/SKILL.md`)
+- [ ] Skill content (`threads-api/SKILL.md`, `threads-api/scripts/`)
 - [ ] Evals (`evals/`)
 - [ ] Project site (`docs/`)
 - [ ] Docs (README, CHANGELOG, `.github/` and so on)
