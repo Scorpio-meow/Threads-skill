@@ -1,6 +1,6 @@
 # Benchmark 概要
 
-[繁體中文](BENCHMARK.md) | [English](BENCHMARK.en.md) | **日本語** | [한국어](BENCHMARK.ko.md)
+[繁體中文](BENCHMARK.md) | [English](BENCHMARK_en.md) | **日本語** | [한국어](BENCHMARK_ko.md)
 
 threads-api スキルの「スキルあり vs スキルなし」を 7 ラウンドにわたって評価した結果の概要です。問題とチェック項目は [`evals.json`](evals.json) に、各実行の項目ごとの判定と採点者が添えた根拠は [`benchmark.json`](benchmark.json) にあります。
 

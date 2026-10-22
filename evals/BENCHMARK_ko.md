@@ -1,6 +1,6 @@
 # Benchmark 요약
 
-[繁體中文](BENCHMARK.md) | [English](BENCHMARK.en.md) | [日本語](BENCHMARK.ja.md) | **한국어**
+[繁體中文](BENCHMARK.md) | [English](BENCHMARK_en.md) | [日本語](BENCHMARK_ja.md) | **한국어**
 
 threads-api 스킬의 "스킬 있음 vs 스킬 없음" 7라운드 평가 요약입니다. 문제와 체크 항목은 [`evals.json`](evals.json)에, 실행별 항목 판정과 채점자가 첨부한 근거는 [`benchmark.json`](benchmark.json)에 있습니다.
 

@@ -1,8 +1,8 @@
 # コントリビューション
 
-[繁體中文](/.github/CONTRIBUTING.md) | [English](/.github/CONTRIBUTING.en.md) | **日本語** | [한국어](/.github/CONTRIBUTING.ko.md)
+[繁體中文](/.github/CONTRIBUTING.md) | [English](/.github/CONTRIBUTING_en.md) | **日本語** | [한국어](/.github/CONTRIBUTING_ko.md)
 
-ご協力ありがとうございます。このプロジェクトは、AI アシスタント向けのスキル（`threads-api/SKILL.md`）、評価データ、紹介サイトの 3 つでできています。参加する前に[行動規範](/.github/i18n/CODE_OF_CONDUCT.ja.md)をお読みください。
+ご協力ありがとうございます。このプロジェクトは、AI アシスタント向けのスキル（`threads-api/SKILL.md`）、評価データ、紹介サイトの 3 つでできています。参加する前に[行動規範](/.github/i18n/CODE_OF_CONDUCT_ja.md)をお読みください。
 
 ## 協力の方法
 
@@ -12,7 +12,7 @@
 | インストールに失敗した、スキルが有効にならない、スキルを入れても AI アシスタントが間違える | issue を作成し、「スキル使用時の問題」を選ぶ。こうした報告は新しい評価問題になることがよくあります |
 | 紹介サイトの誤字、翻訳、レイアウト、アクセシビリティの問題 | issue を作成し、「サイトの問題」を選ぶ |
 | 使い方の質問、新機能のアイデア | [Discussions](https://github.com/Scorpio-meow/Threads-skill/discussions) |
-| セキュリティの問題 | 公開せず、[セキュリティポリシー](/.github/SECURITY.ja.md)に沿って非公開で報告する |
+| セキュリティの問題 | 公開せず、[セキュリティポリシー](/.github/SECURITY_ja.md)に沿って非公開で報告する |
 
 issue や PR は繁体字中国語、英語、日本語、韓国語のどれで書いてもかまいません。どこに投稿する場合も、トークン、App シークレット、個人情報は（自分のものも含めて）貼らないでください。
 
@@ -26,7 +26,7 @@ issue や PR は繁体字中国語、英語、日本語、韓国語のどれで�
 | `evals/BENCHMARK*.md`、[`evals/benchmark.json`](/evals/benchmark.json) | 評価の概要（4 言語）と項目ごとの判定 |
 | [`docs/`](/docs/) | 紹介サイト。`main` の `/docs` から GitHub Pages に公開 |
 | `README*.md` | プロジェクトの説明（4 言語） |
-| [`CHANGELOG*.md`](/CHANGELOG.ja.md) | 変更履歴（4 言語） |
+| [`CHANGELOG*.md`](/CHANGELOG_ja.md) | 変更履歴（4 言語） |
 | [`.github/`](/.github/) | コミュニティファイル（このガイド、行動規範、セキュリティポリシー、アクセシビリティ方針。それぞれ 4 言語）、issue フォーム、PR テンプレート。`.github/` に行動規範が複数あると GitHub が繁体字中国語版を表示するとは限らないため、行動規範の英語・日本語・韓国語版は `i18n/` に配置 |
 
 ## スキルを修正する
@@ -49,12 +49,12 @@ issue や PR は繁体字中国語、英語、日本語、韓国語のどれで�
 - ビルド手順のない静的サイトです。`docs/index.html` をブラウザで直接開けばプレビューできます。ローカルサーバーを使う場合は、リポジトリのルートで `bunx serve docs` を実行してください。
 - 繁体字中国語のテキストは `docs/index.html` に直接書かれています。英語・日本語・韓国語のテキストは `docs/assets/js/lang/{en,ja,ko}.js` にあり、`data-i18n` のキーで対応しています。スクリプトが生成する繁体字中国語のメッセージは `docs/assets/js/lang/zh.js` にあります。
 - サイトにもテスト結果、ドキュメントのスナップショット日、各節の主な数値を載せているので、これらが変わったらサイトも更新してください。
-- サイトを修正するときは、[ACCESSIBILITY.md](/.github/ACCESSIBILITY.ja.md) に挙げた対応項目を後退させないでください。
+- サイトを修正するときは、[ACCESSIBILITY.md](/.github/ACCESSIBILITY_ja.md) に挙げた対応項目を後退させないでください。
 
 ## ドキュメントと翻訳
 
 - README、benchmark の概要、変更履歴、このガイド、行動規範、セキュリティポリシー、アクセシビリティ方針、issue フォーム、PR テンプレートには、繁体字中国語、英語、日本語、韓国語の 4 つの版があります。修正するときはすべての版を更新してください。書けない言語がある場合は PR でその旨を伝えてもらえれば、メンテナーが翻訳を手伝います。
-- 変更は [CHANGELOG.ja.md](/CHANGELOG.ja.md) の「未リリース」に記録し、ほかの 3 言語の版も更新してください。
+- 変更は [CHANGELOG_ja.md](/CHANGELOG_ja.md) の「未リリース」に記録し、ほかの 3 言語の版も更新してください。
 - ドキュメントを追加・移動したら、[`docs/llms.txt`](/docs/llms.txt) のリンクも更新してください。
 
 ## プルリクエストを送る

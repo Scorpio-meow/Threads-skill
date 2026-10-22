@@ -1,6 +1,6 @@
 # 無障礙聲明
 
-**繁體中文** | [English](ACCESSIBILITY.en.md) | [日本語](ACCESSIBILITY.ja.md) | [한국어](ACCESSIBILITY.ko.md)
+**繁體中文** | [English](ACCESSIBILITY_en.md) | [日本語](ACCESSIBILITY_ja.md) | [한국어](ACCESSIBILITY_ko.md)
 
 我們希望不論用什麼裝置、輸入方式或輔助科技，都能讀到[介紹網站](https://scorpio-meow.github.io/Threads-skill/)的內容，並操作上面的工具。網站以 WCAG 2.2 AA 為參考標準；還沒解決的問題都列在下方。
 

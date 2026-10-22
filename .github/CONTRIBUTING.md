@@ -1,6 +1,6 @@
 # 參與貢獻
 
-**繁體中文** | [English](/.github/CONTRIBUTING.en.md) | [日本語](/.github/CONTRIBUTING.ja.md) | [한국어](/.github/CONTRIBUTING.ko.md)
+**繁體中文** | [English](/.github/CONTRIBUTING_en.md) | [日本語](/.github/CONTRIBUTING_ja.md) | [한국어](/.github/CONTRIBUTING_ko.md)
 
 謝謝你願意幫忙。這個專案由三部分組成：給 AI 助理用的技能（`threads-api/SKILL.md`）、評測資料，以及介紹網站。參與前請先讀[行為準則](/.github/CODE_OF_CONDUCT.md)。
 
@@ -12,7 +12,7 @@
 | 安裝失敗、技能沒有啟用，或裝了技能 AI 助理還是出錯 | 開 issue，選「使用問題」；這類回報常常能變成新的評測題 |
 | 介紹網站的錯字、翻譯、版面或無障礙問題 | 開 issue，選「網站問題」 |
 | 用法問題、新功能的想法 | [Discussions](https://github.com/Scorpio-meow/Threads-skill/discussions) |
-| 資安問題 | 不要公開，照[資安政策](/.github/SECURITY.md)私下通報 |
+| 資安問題 | 不要公開，照[安全政策](/.github/SECURITY.md)私下通報 |
 
 issue 和 PR 用繁中、英文、日文、韓文都可以。不論在哪裡發言，都不要貼出 token、App secret 或任何私人資料，包括你自己的。
 
@@ -27,7 +27,7 @@ issue 和 PR 用繁中、英文、日文、韓文都可以。不論在哪裡發�
 | [`docs/`](/docs/) | 介紹網站，GitHub Pages 從 `main` 的 `/docs` 發佈 |
 | `README*.md` | 專案說明（四語） |
 | [`CHANGELOG*.md`](/CHANGELOG.md) | 變更記錄（四語） |
-| [`.github/`](/.github/) | 社群檔案（這份貢獻指南、行為準則、資安政策、無障礙聲明，各有四語）、issue 表單與 PR 範本。行為準則的英、日、韓文版放在 `i18n/`，因為 `.github/` 裡有多份行為準則時，GitHub 不一定顯示繁中版 |
+| [`.github/`](/.github/) | 社群檔案（這份貢獻指南、行為準則、安全政策、無障礙聲明，各有四語）、issue 表單與 PR 範本。行為準則的英、日、韓文版放在 `i18n/`，因為 `.github/` 裡有多份行為準則時，GitHub 不一定顯示繁中版 |
 
 ## 修改技能
 
@@ -53,7 +53,7 @@ issue 和 PR 用繁中、英文、日文、韓文都可以。不論在哪裡發�
 
 ## 文件與翻譯
 
-- README、benchmark 摘要、變更記錄、這份貢獻指南、行為準則、資安政策、無障礙聲明，以及 issue 表單和 PR 範本，都有繁中、英文、日文、韓文四個版本，修改時請一併更新。不會寫某個語言的話，在 PR 裡說明，維護者會協助翻譯。
+- README、benchmark 摘要、變更記錄、這份貢獻指南、行為準則、安全政策、無障礙聲明，以及 issue 表單和 PR 範本，都有繁中、英文、日文、韓文四個版本，修改時請一併更新。不會寫某個語言的話，在 PR 裡說明，維護者會協助翻譯。
 - 把變動記在 [CHANGELOG.md](/CHANGELOG.md) 的「未發布」區塊，英、日、韓文版也要一起更新。
 - 新增或搬移文件時，一併更新 [`docs/llms.txt`](/docs/llms.txt) 的連結。
 

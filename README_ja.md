@@ -1,6 +1,6 @@
 # Threads API Skill
 
-[繁體中文](README.md) | [English](README.en.md) | **日本語** | [한국어](README.ko.md)
+[繁體中文](README.md) | [English](README_en.md) | **日本語** | [한국어](README_ko.md)
 
 AI アシスタントが Meta Threads API を使いこなせるようにするスキルです。連携コードの作成・レビュー・デバッグを手伝うほか、あなたのトークンを使って投稿、リプライ、インサイトの取得を直接行うこともできます。Threads の投稿を自分のサイトに埋め込む作業も手伝います。
 
@@ -282,7 +282,7 @@ App Review を通過するまでは、権限は自分とテスターのアカウ
 
 *(practice)* と付いたエンジニアリング上の推奨事項と、*(observed)* と付いた実測結果を除き、内容はすべて公式ドキュメントに基づいています。
 
-変更履歴は [CHANGELOG.ja.md](CHANGELOG.ja.md) にあります。
+変更履歴は [CHANGELOG_ja.md](CHANGELOG_ja.md) にあります。
 
 ### リファレンスクライアント
 
@@ -325,7 +325,7 @@ python3 threads-api/scripts/threads_client.py delete <media-id>           # 投�
 - 各問題・各設定とも 1 回しか実行しておらずサンプルが少ないため、数字は傾向を見る程度にとどめてください。たとえば問題 2 のスキルなし版は、最初の 2 ラウンドではページングとトークン延長で失点しましたが、ラウンド 3 では満点でした。
 - スキルなしでの失点はほぼすべて、コードが書けないからではなく、ドキュメントのルールを知らないことが原因でした。「導入すると何が変わるか」に挙げた例は、すべてこのテストから取っています。ラウンド 5 ではスキルなしの設定でも Web で公式ドキュメントを検索でき、実際に調べていたため、差は 100% vs 87% に縮まりました。ラウンド 6 はどちらの設定も Web を使えず、スキルありは 31 項目すべてに合格しました。ラウンド 7 も Web を使えない条件で全 10 問を再実行し、スキルありは 77 項目すべてに合格、スキルなしは平均 77% でした。リファレンスクライアントを SKILL.md から移したあとも、点数が下がった問題はありません。
 
-各ラウンドの評価設定、所要時間とトークン使用量、失点した項目ごとの原因は [benchmark の概要](evals/BENCHMARK.ja.md)を、項目ごとの判定と採点者が添えた根拠は [evals/benchmark.json](evals/benchmark.json) を参照してください。
+各ラウンドの評価設定、所要時間とトークン使用量、失点した項目ごとの原因は [benchmark の概要](evals/BENCHMARK_ja.md)を、項目ごとの判定と採点者が添えた根拠は [evals/benchmark.json](evals/benchmark.json) を参照してください。
 
 ## 既知の制限
 
@@ -341,10 +341,10 @@ python3 threads-api/scripts/threads_client.py delete <media-id>           # 投�
 
 ルールの誤りの報告、間違えやすいポイントの追加、サイトの改善を歓迎します。
 
-- 手順、リポジトリの構成、あわせて更新が必要な箇所：[コントリビューションガイド](.github/CONTRIBUTING.ja.md)
-- [行動規範](.github/i18n/CODE_OF_CONDUCT.ja.md)
-- セキュリティの問題は公開の issue ではなく、[セキュリティポリシー](.github/SECURITY.ja.md)に沿って非公開で報告してください。
-- 紹介サイトのアクセシビリティ：[アクセシビリティ方針](.github/ACCESSIBILITY.ja.md)
+- 手順、リポジトリの構成、あわせて更新が必要な箇所：[コントリビューションガイド](.github/CONTRIBUTING_ja.md)
+- [行動規範](.github/i18n/CODE_OF_CONDUCT_ja.md)
+- セキュリティの問題は公開の issue ではなく、[セキュリティポリシー](.github/SECURITY_ja.md)に沿って非公開で報告してください。
+- 紹介サイトのアクセシビリティ：[アクセシビリティ方針](.github/ACCESSIBILITY_ja.md)
 
 ## ライセンス
 

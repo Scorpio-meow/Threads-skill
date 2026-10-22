@@ -1,6 +1,6 @@
 # 접근성 선언문
 
-[繁體中文](ACCESSIBILITY.md) | [English](ACCESSIBILITY.en.md) | [日本語](ACCESSIBILITY.ja.md) | **한국어**
+[繁體中文](ACCESSIBILITY.md) | [English](ACCESSIBILITY_en.md) | [日本語](ACCESSIBILITY_ja.md) | **한국어**
 
 어떤 기기, 입력 방식, 보조 기술을 쓰든 누구나 [소개 사이트](https://scorpio-meow.github.io/Threads-skill/)의 내용을 읽고 사이트의 도구를 쓸 수 있기를 바랍니다. 사이트는 WCAG 2.2 AA를 참고 기준으로 삼고 있으며, 아직 남은 문제는 아래에 정리해 두었습니다.
 
@@ -44,4 +44,4 @@
 - [issue를 열고](https://github.com/Scorpio-meow/Threads-skill/issues/new/choose) "사이트 문제"를 선택한 뒤 문제 유형으로 "접근성 문제"를 고르고, 브라우저, 기기, 사용하는 보조 기술을 적어 주세요.
 - issue 양식을 쓰기 어렵다면 [Discussions](https://github.com/Scorpio-meow/Threads-skill/discussions)에 글을 남겨도 됩니다.
 
-이 프로젝트는 개인이 관리하며 최대한 빨리 답하겠습니다. 수정하면 이 선언문을 업데이트하고 [CHANGELOG.ko.md](../CHANGELOG.ko.md)에 기록합니다.
+이 프로젝트는 개인이 관리하며 최대한 빨리 답하겠습니다. 수정하면 이 선언문을 업데이트하고 [CHANGELOG_ko.md](../CHANGELOG_ko.md)에 기록합니다.

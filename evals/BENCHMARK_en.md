@@ -1,6 +1,6 @@
 # Benchmark Summary
 
-[繁體中文](BENCHMARK.md) | **English** | [日本語](BENCHMARK.ja.md) | [한국어](BENCHMARK.ko.md)
+[繁體中文](BENCHMARK.md) | **English** | [日本語](BENCHMARK_ja.md) | [한국어](BENCHMARK_ko.md)
 
 A summary of seven rounds of "with skill vs without skill" evals for the threads-api skill. The tasks and checklists are in [`evals.json`](evals.json); item-by-item verdicts for every run, along with the grader's evidence, are in [`benchmark.json`](benchmark.json).
 

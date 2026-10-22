@@ -1,8 +1,15 @@
 # Changelog
 
-[繁體中文](CHANGELOG.md) | **English** | [日本語](CHANGELOG.ja.md) | [한국어](CHANGELOG.ko.md)
+[繁體中文](CHANGELOG.md) | **English** | [日本語](CHANGELOG_ja.md) | [한국어](CHANGELOG_ko.md)
 
 Notable changes to this project are recorded here, following the format of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version numbers follow `metadata.version` in `threads-api/SKILL.md`, and the Agensi listing uses the same numbers; changes before 1.0 are grouped by date.
+
+## Unreleased
+
+### Changed
+
+- The Security Policy `SECURITY*.md` now follows a common format: it adds an email reporting channel, commits to a first reply within 14 days and public disclosure no later than 90 days after the report, and requests a CVE when applicable. The translations are renamed to `SECURITY_en.md`, `SECURITY_ja.md` and `SECURITY_ko.md`, and links inside the files use full URLs.
+- Translations of the README, changelog, benchmark summary and the community files in `.github/` also use `_xx` names, for example `README_en.md`, `CHANGELOG_ja.md`, `evals/BENCHMARK_ko.md` and `.github/i18n/CODE_OF_CONDUCT_en.md`; the project site and all links are updated.
 
 ## 1.4 - 2026-10-19
 

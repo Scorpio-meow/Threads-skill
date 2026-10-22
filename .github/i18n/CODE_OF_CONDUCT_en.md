@@ -1,6 +1,6 @@
 # Code of Conduct
 
-[繁體中文](/.github/CODE_OF_CONDUCT.md) | **English** | [日本語](/.github/i18n/CODE_OF_CONDUCT.ja.md) | [한국어](/.github/i18n/CODE_OF_CONDUCT.ko.md)
+[繁體中文](/.github/CODE_OF_CONDUCT.md) | **English** | [日本語](/.github/i18n/CODE_OF_CONDUCT_ja.md) | [한국어](/.github/i18n/CODE_OF_CONDUCT_ko.md)
 
 This project adopts the [Contributor Covenant 3.0](https://www.contributor-covenant.org/version/3/0/code_of_conduct/) as its code of conduct. The sections below add this project's scope, the things it cares about most, and how to report a problem.
 
@@ -20,7 +20,7 @@ Issues, pull requests, Discussions, commit and code review comments in this repo
 - **If it needs confidentiality or involves harassment**: email [yao921024@gmail.com](mailto:yao921024@gmail.com). Only the maintainer reads it. Please include links or screenshots of what happened.
 - **If it can be public**: mention @Scorpio-meow in the related issue, PR or Discussion, or open an issue describing the problem.
 - **You can also hand it to GitHub**: choose **Report content** from the “⋯” menu at the top right of a comment, or click **Block or Report** on the person's profile, and the report goes to GitHub Support. See [GitHub's docs](https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam) for the full steps.
-- **Security issues**: report them privately as described in the [Security Policy](/.github/SECURITY.en.md).
+- **Security issues**: report them privately as described in the [Security Policy](/.github/SECURITY_en.md).
 
 ## Enforcement
 

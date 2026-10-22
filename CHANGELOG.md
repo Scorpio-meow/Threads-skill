@@ -1,8 +1,15 @@
 # 變更記錄
 
-**繁體中文** | [English](CHANGELOG.en.md) | [日本語](CHANGELOG.ja.md) | [한국어](CHANGELOG.ko.md)
+**繁體中文** | [English](CHANGELOG_en.md) | [日本語](CHANGELOG_ja.md) | [한국어](CHANGELOG_ko.md)
 
 本專案的重要變動都記在這裡，格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。版本號跟著 `threads-api/SKILL.md` 的 `metadata.version` 走，Agensi 上的版本也用同一個號碼；1.0 之前的變動依日期記錄。
+
+## 未發布
+
+### 變更
+
+- 安全政策 `SECURITY*.md` 改用統一格式：新增 Email 回報管道，寫明 14 天內首次回覆、最晚在回報後 90 天公開，適用時申請 CVE；翻譯檔改名為 `SECURITY_en.md`、`SECURITY_ja.md`、`SECURITY_ko.md`，檔內連結改用完整網址。
+- README、變更記錄、benchmark 摘要與 `.github/` 社群檔案的翻譯檔也改用 `_xx` 命名，例如 `README_en.md`、`CHANGELOG_ja.md`、`evals/BENCHMARK_ko.md`、`.github/i18n/CODE_OF_CONDUCT_en.md`；介紹網站與站內連結一併更新。
 
 ## 1.4 - 2026-10-19
 

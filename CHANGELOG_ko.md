@@ -1,8 +1,15 @@
 # 변경 이력
 
-[繁體中文](CHANGELOG.md) | [English](CHANGELOG.en.md) | [日本語](CHANGELOG.ja.md) | **한국어**
+[繁體中文](CHANGELOG.md) | [English](CHANGELOG_en.md) | [日本語](CHANGELOG_ja.md) | **한국어**
 
 이 프로젝트의 주요 변경 사항을 여기에 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 참고했습니다. 버전 번호는 `threads-api/SKILL.md`의 `metadata.version`을 따르며, Agensi에서도 같은 번호를 씁니다. 1.0 이전 변경 사항은 날짜별로 정리합니다.
+
+## 미출시
+
+### 변경
+
+- 보안 정책 `SECURITY*.md`를 공통 형식으로 변경: 이메일 제보 창구를 추가하고, 14일 이내 첫 답변과 늦어도 제보 후 90일 공개를 명시했습니다. 해당하는 경우 CVE를 신청합니다. 번역 파일은 `SECURITY_en.md`, `SECURITY_ja.md`, `SECURITY_ko.md`로 이름을 바꾸고, 파일 안의 링크는 전체 URL로 바꿨습니다.
+- README, 변경 이력, 벤치마크 요약, `.github/` 커뮤니티 파일의 번역본도 `_xx` 형식 파일 이름으로 바꿨습니다(예: `README_en.md`, `CHANGELOG_ja.md`, `evals/BENCHMARK_ko.md`, `.github/i18n/CODE_OF_CONDUCT_en.md`). 소개 사이트와 저장소 안의 링크도 함께 업데이트했습니다.
 
 ## 1.4 - 2026-10-19
 

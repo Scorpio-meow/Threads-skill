@@ -1,8 +1,15 @@
 # 変更履歴
 
-[繁體中文](CHANGELOG.md) | [English](CHANGELOG.en.md) | **日本語** | [한국어](CHANGELOG.ko.md)
+[繁體中文](CHANGELOG.md) | [English](CHANGELOG_en.md) | **日本語** | [한국어](CHANGELOG_ko.md)
 
 このプロジェクトの主な変更をここに記録します。形式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) を参考にしています。バージョン番号は `threads-api/SKILL.md` の `metadata.version` に合わせ、Agensi でも同じ番号を使います。1.0 より前の変更は日付ごとにまとめています。
+
+## 未リリース
+
+### 変更
+
+- セキュリティポリシー `SECURITY*.md` を共通の形式に変更：メールでの報告窓口を追加し、14 日以内の最初の返信と、遅くとも報告から 90 日後の公開を明記しました。該当する場合は CVE を申請します。翻訳ファイルは `SECURITY_en.md`、`SECURITY_ja.md`、`SECURITY_ko.md` に名前を変更し、ファイル内のリンクは完全な URL にしました。
+- README、変更履歴、ベンチマークの要約、`.github/` のコミュニティファイルの翻訳も `_xx` 形式のファイル名に変更しました（例：`README_en.md`、`CHANGELOG_ja.md`、`evals/BENCHMARK_ko.md`、`.github/i18n/CODE_OF_CONDUCT_en.md`）。紹介サイトとリポジトリ内のリンクも更新しました。
 
 ## 1.4 - 2026-10-19
 

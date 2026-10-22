@@ -1,6 +1,6 @@
 # Threads API Skill
 
-[繁體中文](README.md) | **English** | [日本語](README.ja.md) | [한국어](README.ko.md)
+[繁體中文](README.md) | **English** | [日本語](README_ja.md) | [한국어](README_ko.md)
 
 A skill that teaches AI assistants the Meta Threads API: it helps you write, review, and debug integration code, can also use your token to post, reply, and pull insights directly, and helps you embed Threads posts on your website.
 
@@ -282,7 +282,7 @@ The skill itself is [`threads-api/SKILL.md`](threads-api/SKILL.md), organized in
 
 Apart from the engineering advice marked *(practice)* and the live test results marked *(observed)*, everything comes from the official documentation.
 
-The change history is in [CHANGELOG.en.md](CHANGELOG.en.md).
+The change history is in [CHANGELOG_en.md](CHANGELOG_en.md).
 
 ### Reference client
 
@@ -325,7 +325,7 @@ Each cell shows the number of checklist items passed, formatted as "with skill v
 - Each task ran only once per setup, so the sample is tiny and the numbers only indicate direction. For example, the without-skill version of task 2 lost points on pagination and token refresh in the first two rounds, then scored full marks in round 3.
 - Nearly every point lost without the skill came from not knowing the rules in the docs, not from being unable to write the code; the examples in "What difference does the skill make" all come from these tests. In round 5 the without-skill setup could search the web for the official docs, and did, so the gap narrowed to 100% vs 87%. In round 6 neither setup could use the web; with the skill, all 31 checklist items passed. Round 7, again without web access, reran all 10 tasks: with the skill all 77 checklist items passed, without it the average was 77%, and no task regressed after the reference client moved out of SKILL.md.
 
-For each round's eval setup, time and token usage, and the reason behind every lost point, see the [benchmark summary](evals/BENCHMARK.en.md); item-by-item verdicts and the grader's evidence are in [evals/benchmark.json](evals/benchmark.json).
+For each round's eval setup, time and token usage, and the reason behind every lost point, see the [benchmark summary](evals/BENCHMARK_en.md); item-by-item verdicts and the grader's evidence are in [evals/benchmark.json](evals/benchmark.json).
 
 ## Known limitations
 
@@ -341,10 +341,10 @@ For each round's eval setup, time and token usage, and the reason behind every l
 
 Reports of wrong rules, new pitfalls and improvements to the site are all welcome.
 
-- Workflow, repository layout and what to update together: [Contributing guide](.github/CONTRIBUTING.en.md)
-- [Code of Conduct](.github/i18n/CODE_OF_CONDUCT.en.md)
-- Report security issues privately as described in the [Security Policy](.github/SECURITY.en.md), not in a public issue.
-- Accessibility of the project site: [Accessibility Statement](.github/ACCESSIBILITY.en.md)
+- Workflow, repository layout and what to update together: [Contributing guide](.github/CONTRIBUTING_en.md)
+- [Code of Conduct](.github/i18n/CODE_OF_CONDUCT_en.md)
+- Report security issues privately as described in the [Security Policy](.github/SECURITY_en.md), not in a public issue.
+- Accessibility of the project site: [Accessibility Statement](.github/ACCESSIBILITY_en.md)
 
 ## License
 

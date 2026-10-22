@@ -1,6 +1,6 @@
 # アクセシビリティ方針
 
-[繁體中文](ACCESSIBILITY.md) | [English](ACCESSIBILITY.en.md) | **日本語** | [한국어](ACCESSIBILITY.ko.md)
+[繁體中文](ACCESSIBILITY.md) | [English](ACCESSIBILITY_en.md) | **日本語** | [한국어](ACCESSIBILITY_ko.md)
 
 どんなデバイス、入力方法、支援技術を使っていても、[紹介サイト](https://scorpio-meow.github.io/Threads-skill/)の内容を読み、サイト上のツールを使えるようにしたいと考えています。サイトは WCAG 2.2 AA を参考基準にしています。まだ残っている問題は下にまとめています。
 
@@ -44,4 +44,4 @@
 - [issue を作成](https://github.com/Scorpio-meow/Threads-skill/issues/new/choose)し、「サイトの問題」を選んで、問題の種類に「アクセシビリティの問題」を指定してください。ブラウザ、デバイス、使っている支援技術も書いてください。
 - issue のフォームが使いにくい場合は、[Discussions](https://github.com/Scorpio-meow/Threads-skill/discussions) に投稿してもかまいません。
 
-このプロジェクトは個人が管理しており、できるだけ早く返信します。修正したら、この方針を更新し、[CHANGELOG.ja.md](../CHANGELOG.ja.md) に記録します。
+このプロジェクトは個人が管理しており、できるだけ早く返信します。修正したら、この方針を更新し、[CHANGELOG_ja.md](../CHANGELOG_ja.md) に記録します。

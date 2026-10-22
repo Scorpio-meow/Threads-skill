@@ -1,6 +1,6 @@
 # Benchmark 摘要
 
-**繁體中文** | [English](BENCHMARK.en.md) | [日本語](BENCHMARK.ja.md) | [한국어](BENCHMARK.ko.md)
+**繁體中文** | [English](BENCHMARK_en.md) | [日本語](BENCHMARK_ja.md) | [한국어](BENCHMARK_ko.md)
 
 threads-api 技能「有技能 vs 沒技能」七輪評測的摘要。題目和檢查項目在 [`evals.json`](evals.json)，每次執行的逐條判定與評分者附上的證據在 [`benchmark.json`](benchmark.json)。
 

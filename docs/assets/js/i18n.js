@@ -2,7 +2,7 @@
   "use strict";
   const { $, $$, store } = TAS;
   const DOC_LANG = { zh: "zh-Hant-TW", en: "en", ja: "ja", ko: "ko" };
-  const BENCH_FILE = { zh: "BENCHMARK.md", en: "BENCHMARK.en.md", ja: "BENCHMARK.ja.md", ko: "BENCHMARK.ko.md" };
+  const BENCH_FILE = { zh: "BENCHMARK.md", en: "BENCHMARK_en.md", ja: "BENCHMARK_ja.md", ko: "BENCHMARK_ko.md" };
   const i18nEls = $$("[data-i18n]");
   const zhHtml = i18nEls.map((el) => el.innerHTML);
   const ariaEls = $$("[data-i18n-aria]");

@@ -1,6 +1,6 @@
 # Threads API Skill
 
-[繁體中文](README.md) | [English](README.en.md) | [日本語](README.ja.md) | **한국어**
+[繁體中文](README.md) | [English](README_en.md) | [日本語](README_ja.md) | **한국어**
 
 AI 어시스턴트가 Meta Threads API를 제대로 다룰 수 있게 해 주는 스킬입니다. 연동 코드를 작성하고 검토하고 디버깅하는 것은 물론, 여러분의 토큰으로 직접 게시물 작성, 답글, 인사이트 조회까지 할 수 있습니다. Threads 게시물을 웹사이트에 임베드하는 작업도 도와줍니다.
 
@@ -282,7 +282,7 @@ App Review를 통과하기 전에는 권한을 본인과 테스터 계정에만 
 
 *(practice)*로 표시된 엔지니어링 권장 사항과 *(observed)*로 표시된 실측 결과를 제외한 나머지 내용은 모두 공식 문서에 근거합니다.
 
-변경 이력은 [CHANGELOG.ko.md](CHANGELOG.ko.md)에 있습니다.
+변경 이력은 [CHANGELOG_ko.md](CHANGELOG_ko.md)에 있습니다.
 
 ### 참조 클라이언트
 
@@ -325,7 +325,7 @@ python3 threads-api/scripts/threads_client.py delete <media-id>           # 게�
 - 문제마다 설정별로 한 번씩만 실행해 표본이 매우 작으므로, 수치는 경향 정도로만 봐 주세요. 예를 들어 2번 문제의 스킬 없는 버전은 처음 두 라운드에서 페이지네이션과 토큰 갱신에서 감점됐지만, 3라운드에서는 만점을 받았습니다.
 - 스킬이 없을 때의 감점은 거의 모두 코드를 못 짜서가 아니라 문서에 있는 규칙을 몰라서 생겼습니다. "설치하면 달라지는 점"에 나온 예시는 모두 이 테스트에서 나온 것입니다. 5라운드에서는 스킬 없음 설정도 웹에서 공식 문서를 검색할 수 있었고 실제로 찾아봤기 때문에, 차이가 100% vs 87%로 줄었습니다. 6라운드에서는 두 설정 모두 웹을 쓸 수 없었고, 스킬 있음은 31개 항목을 모두 통과했습니다. 7라운드에서도 웹 없이 10개 문제를 모두 다시 실행했고, 스킬 있음은 77개 항목을 모두 통과, 스킬 없음은 평균 77%였습니다. 참조 클라이언트를 SKILL.md에서 옮긴 뒤에도 점수가 떨어진 문제는 없습니다.
 
-라운드별 평가 설정, 소요 시간과 토큰 사용량, 감점 항목별 원인은 [benchmark 요약](evals/BENCHMARK.ko.md)을, 항목별 판정과 채점자가 첨부한 근거는 [evals/benchmark.json](evals/benchmark.json)을 참고하세요.
+라운드별 평가 설정, 소요 시간과 토큰 사용량, 감점 항목별 원인은 [benchmark 요약](evals/BENCHMARK_ko.md)을, 항목별 판정과 채점자가 첨부한 근거는 [evals/benchmark.json](evals/benchmark.json)을 참고하세요.
 
 ## 알려진 제한 사항
 
@@ -341,10 +341,10 @@ python3 threads-api/scripts/threads_client.py delete <media-id>           # 게�
 
 규칙 오류 제보, 실수하기 쉬운 지점 추가, 사이트 개선 모두 환영합니다.
 
-- 절차, 저장소 구성, 함께 업데이트해야 할 부분: [기여 가이드](.github/CONTRIBUTING.ko.md)
-- [행동 강령](.github/i18n/CODE_OF_CONDUCT.ko.md)
-- 보안 문제는 공개 issue가 아니라 [보안 정책](.github/SECURITY.ko.md)에 따라 비공개로 제보해 주세요.
-- 소개 사이트의 접근성: [접근성 선언문](.github/ACCESSIBILITY.ko.md)
+- 절차, 저장소 구성, 함께 업데이트해야 할 부분: [기여 가이드](.github/CONTRIBUTING_ko.md)
+- [행동 강령](.github/i18n/CODE_OF_CONDUCT_ko.md)
+- 보안 문제는 공개 issue가 아니라 [보안 정책](.github/SECURITY_ko.md)에 따라 비공개로 제보해 주세요.
+- 소개 사이트의 접근성: [접근성 선언문](.github/ACCESSIBILITY_ko.md)
 
 ## 라이선스
 

@@ -1,6 +1,6 @@
 # Accessibility Statement
 
-[繁體中文](ACCESSIBILITY.md) | **English** | [日本語](ACCESSIBILITY.ja.md) | [한국어](ACCESSIBILITY.ko.md)
+[繁體中文](ACCESSIBILITY.md) | **English** | [日本語](ACCESSIBILITY_ja.md) | [한국어](ACCESSIBILITY_ko.md)
 
 We want everyone to be able to read the [project site](https://scorpio-meow.github.io/Threads-skill/) and use its tools, whatever device, input method or assistive technology they use. The site uses WCAG 2.2 AA as its reference standard; the issues that remain are listed below.
 
@@ -44,4 +44,4 @@ Tested in October 2026 and rechecked after the fixes:
 - [Open an issue](https://github.com/Scorpio-meow/Threads-skill/issues/new/choose) with “Project site issue”, choose “Accessibility barrier” as the type, and include your browser, device and any assistive technology.
 - If the issue form doesn't work for you, you can post in [Discussions](https://github.com/Scorpio-meow/Threads-skill/discussions) instead.
 
-This project is maintained by one person, who will reply as soon as possible. Fixes will be reflected in this statement and recorded in [CHANGELOG.en.md](../CHANGELOG.en.md).
+This project is maintained by one person, who will reply as soon as possible. Fixes will be reflected in this statement and recorded in [CHANGELOG_en.md](../CHANGELOG_en.md).

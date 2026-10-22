@@ -1,6 +1,6 @@
 # 행동 강령
 
-[繁體中文](/.github/CODE_OF_CONDUCT.md) | [English](/.github/i18n/CODE_OF_CONDUCT.en.md) | [日本語](/.github/i18n/CODE_OF_CONDUCT.ja.md) | **한국어**
+[繁體中文](/.github/CODE_OF_CONDUCT.md) | [English](/.github/i18n/CODE_OF_CONDUCT_en.md) | [日本語](/.github/i18n/CODE_OF_CONDUCT_ja.md) | **한국어**
 
 이 프로젝트는 [Contributor Covenant 3.0](https://www.contributor-covenant.org/ko/version/3/0/code_of_conduct/)을 행동 강령으로 채택합니다. 아래에서는 이 프로젝트의 적용 범위, 특히 중요하게 여기는 점, 신고 방법을 보충합니다.
 
@@ -20,7 +20,7 @@
 - **비밀 유지가 필요하거나 괴롭힘에 해당하는 경우**: [yao921024@gmail.com](mailto:yao921024@gmail.com)으로 메일을 보내 주세요. 메인테이너만 읽습니다. 관련 링크나 스크린샷을 함께 보내 주세요.
 - **공개해도 되는 경우**: 관련 issue, PR, Discussion에서 @Scorpio-meow를 멘션하거나 issue를 열어 설명해 주세요.
 - **GitHub에 맡길 수도 있습니다**: 댓글 오른쪽 위의 "⋯" 메뉴에서 **Report content**를 선택하거나, 상대방 프로필 페이지에서 **Block or Report**를 클릭하면 GitHub Support에 신고가 전달됩니다. 자세한 절차는 [GitHub 문서](https://docs.github.com/ko/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam)를 참고하세요.
-- **보안 문제**: [보안 정책](/.github/SECURITY.ko.md)에 따라 비공개로 제보해 주세요.
+- **보안 문제**: [보안 정책](/.github/SECURITY_ko.md)에 따라 비공개로 제보해 주세요.
 
 ## 처리 방식
 

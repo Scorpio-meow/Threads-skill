@@ -1,6 +1,6 @@
 # Threads API Skill
 
-**繁體中文** | [English](README.en.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
+**繁體中文** | [English](README_en.md) | [日本語](README_ja.md) | [한국어](README_ko.md)
 
 讓 AI 助理熟悉 Meta Threads API 的技能（skill）：幫你寫、檢查、除錯串接程式，也能用你的 token 直接發文、回覆、查數據，或把 Threads 貼文嵌入你的網站。
 
@@ -343,7 +343,7 @@ python3 threads-api/scripts/threads_client.py delete <media-id>           # 刪�
 
 - 流程、repo 結構與修改時要一起更新的地方：[參與貢獻指南](.github/CONTRIBUTING.md)
 - [行為準則](.github/CODE_OF_CONDUCT.md)
-- 資安問題請照[資安政策](.github/SECURITY.md)私下通報，不要開公開 issue。
+- 資安問題請照[安全政策](.github/SECURITY.md)私下通報，不要開公開 issue。
 - 介紹網站的無障礙狀況：[無障礙聲明](.github/ACCESSIBILITY.md)
 
 ## 授權
