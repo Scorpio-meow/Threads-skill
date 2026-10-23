@@ -5,9 +5,10 @@
   --surface: var(--tone-1);
   --surface-2: #e4e9e6;
   --ink: #1d2220;
-  --muted: #5f6763;
+  --muted: #4f5753;
   --accent: #a1ffcb;
   --accent-ink: #1d2220;
+  --accent-soft: #d4ffe6;
   --code-bg: #ffffff;
   --rule: #d3dad6;
   --control-line: #777e7a;
@@ -16,31 +17,50 @@
   --bad: #c0213f;
   --warn: #8a5600;
   --field: #1d2220;
-  --field-ink: #f1f4f2;
-  --field-muted: #a3aca7;
+  --field-ink: #edf1ef;
+  --field-muted: #a9b2ad;
   --field-surface: #2a302d;
+  --field-surface-2: #353c39;
   --field-rule: #3d4541;
+  --field-key: #8cebb8;
+  --field-ok: #8cebb8;
+  --field-bad: #ff8399;
+  --fine-ink: #6b746f;
+  --dlg-bg: #ffffff;
+  --dlg-ink: #1d2220;
+  --dlg-muted: #4f5753;
+  --dlg-surface: #f1f4f2;
+  --dlg-surface-2: #e4e9e6;
+  --dlg-line: #d3dad6;
+  --dlg-control: #777e7a;
+  --dlg-ok: #0a7a45;
+  --dlg-hover: #343b38;
+  --shadow-float: 0 1px 2px rgb(16 32 24 / 0.08), 0 28px 56px -16px rgb(16 32 24 / 0.32);
 
-  --font-sans: system-ui, -apple-system, "Segoe UI", "PingFang TC", "Heiti TC", "Microsoft JhengHei", "Noto Sans CJK TC", "Noto Sans TC", sans-serif;
+  --font-sans: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", "PingFang TC", "Heiti TC", "Microsoft JhengHei", "Noto Sans CJK TC", "Noto Sans TC", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", monospace;
 
   --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
-  --step-body: clamp(1.0625rem, 1rem + 0.2vw, 1.1875rem);
-  --step-lead: clamp(1.1875rem, 1.05rem + 0.5vw, 1.5rem);
-  --step-head: clamp(1.875rem, 1.2rem + 2.3vw, 3.25rem);
-  --step-display: clamp(3.5rem, 1.5rem + 6.5vw, 7rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --step-sub: clamp(1.75rem, 1rem + 2vw, 2.75rem);
+  --step-display: clamp(3.5rem, 1rem + 6.4vw, 7rem);
+  --step-giant: clamp(8.5rem, 3rem + 17vw, 20rem);
   --ui: 0.875rem;
   --ui-s: 0.8125rem;
 
-  --lh-body: 1.75;
-  --lh-head: 1.3;
-  --track-body: 0.02em;
-  --track-head: 0.01em;
+  --lh-body: 1.6;
+  --lh-head: 1.12;
+  --track-body: 0;
+  --track-head: -0.03em;
+  --track-display: -0.04em;
 
-  --margin: clamp(20px, 4.4vw, 72px);
+  --margin: clamp(16px, 4vw, 64px);
   --gap: clamp(12px, 1.7vw, 24px);
-  --section: clamp(96px, 12vw, 184px);
+  --section: clamp(120px, 13vw, 220px);
   --radius: 4px;
+  --round: 999px;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
@@ -60,9 +80,10 @@
     --surface: #181c1a;
     --surface-2: #232826;
     --ink: #edf1ef;
-    --muted: #9aa39e;
+    --muted: #a9b2ad;
     --accent: #a1ffcb;
     --accent-ink: #0f1211;
+    --accent-soft: #1f3a2c;
     --code-bg: #0f1211;
     --rule: #303734;
     --control-line: #777f7b;
@@ -70,11 +91,13 @@
     --ok: #8cebb8;
     --bad: #ff8399;
     --warn: #f0bf62;
-    --field: #e6ece8;
-    --field-ink: #101412;
-    --field-muted: #4f5853;
-    --field-surface: #d6dfda;
-    --field-rule: #c2ccc6;
+    --field: #1a1f1d;
+    --field-ink: #edf1ef;
+    --field-muted: #a9b2ad;
+    --field-surface: #252b28;
+    --field-surface-2: #303734;
+    --field-rule: #3d4541;
+    --fine-ink: #7f8984;
     color-scheme: dark;
   }
 }
@@ -90,9 +113,10 @@
   --surface: #181c1a;
   --surface-2: #232826;
   --ink: #edf1ef;
-  --muted: #9aa39e;
+  --muted: #a9b2ad;
   --accent: #a1ffcb;
   --accent-ink: #0f1211;
+  --accent-soft: #1f3a2c;
   --code-bg: #0f1211;
   --rule: #303734;
   --control-line: #777f7b;
@@ -100,30 +124,39 @@
   --ok: #8cebb8;
   --bad: #ff8399;
   --warn: #f0bf62;
-  --field: #e6ece8;
-  --field-ink: #101412;
-  --field-muted: #4f5853;
-  --field-surface: #d6dfda;
-  --field-rule: #c2ccc6;
+  --field: #1a1f1d;
+  --field-ink: #edf1ef;
+  --field-muted: #a9b2ad;
+  --field-surface: #252b28;
+  --field-surface-2: #303734;
+  --field-rule: #3d4541;
+  --fine-ink: #7f8984;
   color-scheme: dark;
 }
 
-:root:lang(en) {
-  --lh-body: 1.55;
-  --lh-head: 1.12;
-  --track-body: -0.005em;
-  --track-head: -0.025em;
+:root:lang(zh-Hant-TW) {
+  --lh-body: 1.75;
+  --lh-head: 1.22;
+  --track-body: 0.02em;
+  --track-head: 0;
+  --track-display: -0.01em;
 }
 
 :root:lang(ja) {
-  --font-sans: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", sans-serif;
+  --font-sans: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, "Noto Sans CJK JP", "Noto Sans JP", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Hiragino Sans", "Yu Gothic UI", Meiryo, "Noto Sans CJK JP", monospace;
+  --lh-body: 1.75;
+  --lh-head: 1.24;
+  --track-body: 0.01em;
+  --track-head: 0;
+  --track-display: -0.01em;
 }
 
 :root:lang(ko) {
-  --font-sans: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Noto Sans KR", sans-serif;
+  --font-sans: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Noto Sans KR", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", monospace;
   --lh-body: 1.7;
-  --track-body: 0;
+  --lh-head: 1.22;
   --track-head: -0.01em;
+  --track-display: -0.02em;
 }

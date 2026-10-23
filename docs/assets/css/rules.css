@@ -1,20 +1,20 @@
+.rules {
+  padding-top: var(--section);
+}
+
 .rules-head {
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: end;
-  gap: 20px;
+  gap: 20px 40px;
 }
 
 .rules-title {
   font-size: var(--step-head);
-  line-height: 1.22;
+  letter-spacing: var(--track-display);
   min-width: 0;
-}
-
-:root:lang(en) .rules-title {
-  line-height: 1.04;
 }
 
 .rules-title span {
@@ -23,66 +23,75 @@
 
 .rules-note {
   grid-column: 1 / span 7;
-  margin-top: 18px;
-  color: var(--muted);
-  font-size: var(--step-small);
-  max-width: 40em;
+  margin-top: 24px;
+  max-width: 42em;
 }
 
 .rules-body {
   grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: subgrid;
-  margin-top: 56px;
-  align-items: start;
+  margin-top: clamp(40px, 5vw, 72px);
 }
 
 .rules-tabs {
-  grid-column: 1 / span 3;
-  display: grid;
-  gap: 6px;
   position: sticky;
-  top: calc(env(safe-area-inset-top, 0px) + 24px);
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px clamp(18px, 2.4vw, 40px);
+  padding-block: 14px;
+  background: var(--bg);
 }
 
 .rules-tabs button {
-  display: grid;
-  justify-items: start;
-  gap: 2px;
-  text-align: left;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
   border: 0;
-  border-radius: var(--radius);
-  background: var(--surface);
-  padding: 12px 16px;
-  min-height: 64px;
-  font-size: var(--step-body);
+  padding: 6px 0;
+  min-height: 48px;
+  background: none;
+  font-size: var(--step-lead);
   font-weight: 600;
-  transition: background-color var(--t-hover) ease, color var(--t-hover) ease, transform var(--t-press) var(--ease-out);
-}
-
-.rules-tabs button span {
-  font-size: var(--ui-s);
-  font-weight: 400;
+  letter-spacing: var(--track-head);
   color: var(--muted);
   transition: color var(--t-hover) ease;
 }
 
+.rules-tabs button b {
+  font-weight: 600;
+  position: relative;
+}
+
+.rules-tabs button span {
+  font-size: var(--step-small);
+  font-weight: 400;
+}
+
 .rules-tabs button[aria-selected="true"] {
-  background: var(--ink);
-  color: var(--bg);
+  color: var(--ink);
 }
 
-.rules-tabs button[aria-selected="true"] span {
-  color: color-mix(in srgb, var(--bg) 72%, var(--ink));
+.rules-tabs button[aria-selected="true"] b::before {
+  content: "";
+  position: absolute;
+  left: -0.55em;
+  top: 50%;
+  width: 0.32em;
+  height: 0.32em;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--ink);
 }
 
-.rules-tabs button:active {
-  transform: scale(0.985);
+.rules-tabs button[aria-selected="true"] {
+  padding-left: 0.6em;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .rules-tabs button[aria-selected="false"]:hover {
-    background: var(--surface-2);
+    color: var(--ink);
   }
 }
 
@@ -91,7 +100,7 @@ html:not(.js) .rules-tabs {
 }
 
 .rules-panels {
-  grid-column: 4 / -1;
+  margin-top: 16px;
 }
 
 .js .rules-panels .panel-title {
@@ -104,59 +113,55 @@ html:not(.js) .rules-tabs {
 }
 
 html:not(.js) .rules-panels {
-  grid-column: 1 / -1;
   display: grid;
-  gap: 48px;
+  gap: 56px;
 }
 
 .panel-title {
   font-size: var(--step-lead);
-  font-weight: 600;
   margin-bottom: 14px;
 }
 
 .bands {
   display: grid;
-  gap: 4px;
 }
 
 .bands li {
   display: grid;
-  grid-template-columns: minmax(96px, 0.9fr) minmax(0, 3.2fr) minmax(0, 1.5fr);
-  align-items: center;
-  gap: 6px 20px;
-  min-height: 76px;
-  padding: 14px 20px;
-  border-radius: var(--radius);
-  background: var(--surface);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 7fr) minmax(0, 3fr);
+  align-items: baseline;
+  gap: 6px var(--gap);
+  padding-block: 20px;
 }
 
-.bands li:nth-child(even) {
-  background: var(--surface-2);
+.bands li+li {
+  padding-top: 10px;
 }
 
 .bands .key {
-  font-size: var(--step-lead);
-  font-variant-numeric: tabular-nums;
+  font-size: var(--step-sub);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums lining-nums;
   white-space: nowrap;
-  line-height: 1.2;
 }
 
 .bands .what {
   display: grid;
-  gap: 2px;
+  gap: 4px;
 }
 
 .bands .what b {
-  font-weight: 600;
-  font-size: var(--step-body);
-  line-height: 1.45;
+  font-weight: 500;
+  font-size: var(--step-lead);
+  line-height: 1.3;
+  letter-spacing: var(--track-head);
 }
 
 .bands .what span {
-  font-size: var(--step-small);
   color: var(--muted);
-  line-height: 1.55;
+  max-width: 40em;
 }
 
 .bands code {
@@ -171,7 +176,7 @@ html:not(.js) .rules-panels {
 
 [role="tabpanel"]:focus-visible {
   outline: 2px solid var(--ink);
-  outline-offset: 6px;
+  outline-offset: 8px;
 }
 
 @media (max-width: 1023px) {
@@ -179,35 +184,14 @@ html:not(.js) .rules-panels {
     grid-column: 1 / -1;
   }
 
-  .rules-body {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
+  .bands li {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 6fr);
   }
 
-  .rules-tabs {
-    grid-column: 1 / -1;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    position: sticky;
-    top: env(safe-area-inset-top, 0px);
-    z-index: 5;
-    background: var(--bg);
-    padding-block: 10px;
-  }
-
-  .rules-tabs button {
-    min-height: 52px;
-    padding: 8px 6px;
-    justify-items: center;
-    text-align: center;
-    font-size: var(--step-small);
-  }
-
-  .rules-tabs button span {
-    display: none;
-  }
-
-  .rules-panels {
-    grid-column: 1 / -1;
+  .bands code {
+    grid-column: 2;
+    justify-self: start;
+    text-align: left;
   }
 }
 
@@ -217,13 +201,39 @@ html:not(.js) .rules-panels {
   }
 }
 
+@media (max-width: 640px) {
+  .rules-tabs {
+    gap: 0 18px;
+  }
+
+  .rules-tabs button span {
+    display: none;
+  }
+
+  .bands li {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 16px;
+  }
+
+  .bands .what {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .bands code {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    text-align: right;
+  }
+}
+
 @media print {
   .rules-tabs {
     display: none;
   }
 
   .rules-panels {
-    grid-column: 1 / -1;
     display: grid;
     gap: 48px;
   }
@@ -243,31 +253,8 @@ html:not(.js) .rules-panels {
 }
 
 @media (forced-colors: active) {
-  .rules-tabs button {
-    border: 1px solid ButtonText;
-  }
-
   .rules-tabs button[aria-selected="true"] {
     forced-color-adjust: none;
-    background: Highlight;
-    color: HighlightText;
-    border-color: Highlight;
-  }
-
-  .rules-tabs button[aria-selected="true"] span {
-    color: HighlightText;
-  }
-}
-
-@media (max-width: 640px) {
-  .bands li {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
-    padding: 16px;
-  }
-
-  .bands code {
-    justify-self: start;
-    text-align: left;
+    color: Highlight;
   }
 }

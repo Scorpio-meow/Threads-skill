@@ -4,14 +4,68 @@
 
 Notable changes to this project are recorded here, following the format of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version numbers follow `metadata.version` in `threads-api/SKILL.md`, and the Agensi listing uses the same numbers; changes before 1.0 are grouped by date.
 
-## Unreleased
+## [1.5] - 2026-10-24
+
+### Added
+
+- Questions 11 and 12 in `evals/evals.json`, with 8 checks each. Question 11 is a Chrome extension (Manifest V3) preview that iframes `/embed/` directly on its own page, covering height reports, dark mode, URL deduplication and deleted posts; question 12 is embed cards in a React 18 component, covering a leftover fallback link, blank space caused by `min-height`, retries and removeChild errors, theme switching, and how to tell whether an embed loaded.
+- Round 8 evals: questions 6, 11 and 12 run with the skill after section 11 was rewritten; neither setup could use the web. With the skill all 24 checks passed; without it, 10 passed (42% averaged per question). Question 6 scored 8/8 vs 3/8, the same as in round 7, so it didn't regress.
+  - Check 3 of question 11 was rewritten after the first grading. It originally required the iframe itself to start with a height, and the with-skill run lost that point (7/8) because its iframe starts at 0 px with the placeholder height on the outer container. A retest the same day found that an iframe starting at 0 px reports its height normally too, and that this run switches to a failure card with a link and a retry button when the report is 0 or times out. So check 3 now checks the outcome: when the report is 0 or never comes, the code must not leave just an invisible blank space. A new grader regraded both runs from scratch: 8/8 with the skill, still 4/8 without it.
+  - The without-skill runs made several confident but wrong claims: the height comes as a `MEASURE` message in a JSON string, Threads has no theme parameter, `instgrm.Embeds.process()` exists only for Instagram, re-inserting embed.js makes it scan again, oEmbed needs an app token, and any unrecognized 4xx means the post has been deleted.
+  - This round's skill still said the embed page reports its height “only once”, and all three with-skill replies repeated it; in questions 6 and 11 they even told the user to hard-code the card width because of it (the code itself still applies later reports). A retest after the runs found that posts with images report 2–4 times; 1.5 corrects this (see Changed).
+  - While testing, the without-skill run of question 6 mistakenly used the browser pane to load the real embed.js and two embed pages, breaking the no-web rule; its score is still 3/8.
+- A ninth check for each of questions 6, 11 and 12 in `evals/evals.json`, following the round 8 graders' suggestions; the total goes from 98 to 101:
+  - Question 6: handles old threads.net links, by rewriting them to threads.com or by allowing both domains in the CSP's `frame-src`.
+  - Question 11: keeps applying later height reports above 0, and doesn't tell the user that the embed page reports only once.
+  - Question 12: points out that a deleted or non-embeddable post also shows a “Cannot display thread” card and reports a height, so the front end counts it as loaded, and that these posts have to be cleared out with oEmbed (`code 24`).
+- Round 9 evals: questions 6, 11 and 12 rerun with the 1.5 SKILL.md; neither setup could use the web, and this round browser tools weren't allowed to open pages either. With the skill all 27 checks passed; without it, 11 passed (41% averaged per question).
+  - The “only once” fix took effect: the with-skill run of question 11 applies every report above 0; the grader fed 534, 574 and "600" to its handler in turn, all three were applied, and the new ninth check passed. None of the three with-skill replies says the height is reported only once anymore. The without-skill run again treated the height as a `MEASURE` message in a JSON string, and applied none of 498, 534 and 574.
+  - The new checks: both setups passed question 6's (threads.net links), so it didn't separate them this round; check 9 of questions 11 and 12 passed only with the skill.
+  - The without-skill runs repeated round 8's wrong claims: no theme parameter (questions 11 and 12), no API to scan again (questions 6 and 12), and the height as a `MEASURE` message in a JSON string (question 11). To find deleted posts, they instead compared against the user's own posts listed through the API (question 6, which needs an app, a token and a GitHub token that can write secrets) or fetched threads.com pages (question 11); neither used token-free oEmbed.
+  - This round's skill snapshot predates three changes: the causes listed on the fallback card in section 11.3, the oEmbed CORS note in section 11.1, and the version number. The fallback card's causes were verified with question 12 in round 10 (see below); the CORS note hasn't been evaluated yet.
+  - Both rounds are recorded in all four benchmark summaries and `evals/benchmark.json`.
+- Question 13 in `evals/evals.json`, with 8 checks; the total goes from 101 to 109. A blog sidebar embeds 12 posts, 3 of which are shown only to logged-in users, so readers who aren't logged in see only Meta's error page; neither the author's weekly oEmbed check nor the success test “the iframe appears, its URL is on threads.com, and it's taller than 120px” caught them. The checks cover: recognizing posts shown only to logged-in users, oEmbed still returning 200, why the old test passed, switching to numeric height reports, a placeholder height, a fallback card that explains the login and third-party cookies while the page keeps trying to load the post, a way to find these posts ahead of time, and neither promising that logged-out readers can see them nor removing the posts.
+- Round 10 evals: verifying what was added on 2026-10-24 (posts shown only to logged-in users, counting only numeric reports, and the fallback card's causes), running the new question 13 and rerunning question 12 to confirm it didn't regress, under the same conditions as round 9. With the skill all 17 checks passed; without it, 9 passed (54% averaged per question).
+  - Question 13 scored 8/8 with the skill: the fallback card for posts shown only to logged-in users states both that a Threads login is needed and that third-party cookies must be allowed, only numeric reports count as success, and a same-origin request without cookies from a threads.com page finds these posts ahead of time.
+  - Question 13 scored 6/8 without the skill: it worked out on its own that a login and third-party cookies were the cause, so the gap on this question is smaller than on the other embed questions. It lost points because its listener accepts only objects in the `MEASURE` format, so the 498 the grader fed it wasn't applied and all 12 posts would end up on the fallback card; and instead of embedding the posts shown only to logged-in users, it showed the card right away, and the card mentioned only the login. It also said oEmbed needs a token.
+  - Question 12 scored 9/9 with the skill: the fallback card no longer lists “deleted post” as a cause, and lists rate limiting, blockers, network problems and posts shown only to logged-in users instead; 3/9 without it, with the same wrong claims as in rounds 8 and 9.
+  - The results are recorded in all four benchmark summaries and `evals/benchmark.json`.
 
 ### Changed
 
+- Section 11 of SKILL.md rewritten from the experience of two real projects and tests run on 2026-10-23. The projects are [Threadfolio](https://github.com/Scorpio-meow/Threadfolio) (formerly Threads-Featured-Posts), a wall of featured posts, and [Threadkeep](https://github.com/Scorpio-meow/Threadkeep) (formerly Threads-embedded-code), a Chrome extension that stores embed codes; the tests loaded real embeds on a local test page, read that day's live embed.js source and called oEmbed.
+  - Section 11.1: posts are matched and deduplicated by shortcode; notes that the permalink oEmbed returns is `/t/<shortcode>?utm_source=th_embed…`; embed code copied from the share menu's “Get embed code” is the same markup as oEmbed's output and falls under the same usage limits *(practice)*; oEmbed responses, errors included, carry `Access-Control-Allow-Origin: *`, so a web page or extension page can call it directly and read the error body.
+  - Section 11.2:
+    - The blockquote needs a unique `id` (`ig-tp-<shortcode>`). embed.js uses it to remove the fallback link, and without an id the link stays under the post; it previously said the class and permalink were enough.
+    - embed.js changes the blockquote's class to `text-post-media-registered` and processes each blockquote only once; it also scans again 5 seconds after the DOM is ready.
+    - The height is reported as a bare number, and again whenever the content gets taller (2–4 times for posts with images); resizing the iframe from outside doesn't bring another report.
+    - On a report of 0, embed.js leaves a 0 px iframe and, when there's an id, removes the fallback link too, so the post silently disappears. The cause is still unclear; neither a starting height of 0 nor the same post placed twice reproduces it.
+    - A deleted post, or one that doesn't exist, shows a “Cannot display thread” card and reports about 190 px, so a replaced blockquote doesn't mean the post exists. Rechecked on 2026-10-24 with 8 posts removed from Threadfolio: oEmbed returned `code 24` for all of them, and `/embed` returned 200 with this card.
+    - Posts shown only to logged-in users (for example, ones marked sensitive): visitors who aren't logged in to Threads, or whose browser blocks third-party cookies, get an HTTP 500 error page (Meta's “Sorry, something went wrong”, still on threads.com) and no height report; logged-in visitors who allow third-party cookies can see them. oEmbed still returns embed HTML for these posts, so §11.1 now notes this, §11.3 adds a way to tell them apart with `/embed`, the fallback card's causes include them, and §12 gets one more row. Threadkeep found this on 2026-10-23, and it was confirmed on 2026-10-24 with 3 posts Threadfolio had flagged; round 10 evaluated it with the new question 13 (see Added). §11.3 also says the fallback card must state both that a Threads login is needed and that third-party cookies must be allowed (a logged-in Safari visitor still can't see the post).
+    - embed.js resizes any iframe on the page that sends a report, including ones you create yourself; the theme is fixed when the iframe is created.
+    - When iframing `/embed/` directly, add `?theme=` yourself; a listener that only accepts object-shaped messages will think no report arrives.
+    - A CSS `min-height` on the iframe overrides the height embed.js sets; the fallback card in the official embed code has a hard-coded white background.
+  - Section 11.3:
+    - Success now means a first report above 0 within about 12 seconds, no longer whether the blockquote was removed; the iframe's `load` event can't be used as a signal. Only numeric reports count, because extensions that inject scripts into Threads frames can post their own messages from the same origin; added on 2026-10-24 after Threadfolio's fix, and the with-skill runs of questions 12 and 13 in round 10 both count only numeric reports.
+    - To retry, remove the iframe and put the class back on the blockquote; it previously said to remove the class on failure.
+    - Overriding `console.error`, listening for `window` error events and a service worker can't see the embeds' loads either; background tabs don't run `requestAnimationFrame`.
+    - The backoff numbers it quoted from the post wall didn't match that project's code, so they're now a general suggestion.
+    - The causes listed on the fallback card drop “deleted post” and now list rate limiting, a content or tracking blocker, and a CSP or network problem, because a deleted post shows “Cannot display thread” and counts as loaded. This was found while grading question 12 in round 9, and hasn't been evaluated since the change.
+  - Section 12 (Troubleshooting): the “Embed stays a plain "View on Threads" link” row no longer lists “post not embeddable”, and three rows are added: “Embed shows "Cannot display thread"”, “Post renders but a "View on Threads" link stays under it” and “Embed leaves an empty gap or disappears”.
+- SKILL.md updated from the official docs as re-synced on 2026-10-23. The changelog's newest entry is still 2026-08-18, and no endpoints, parameters, fields or limits were added or removed:
+  - The note on the docs at the top now reads “synced 2026-10-23; the changelog's newest entry is 2026-08-18”.
+  - Section 8.2: before approval, publishing works only on behalf of the app's Threads Testers. The new docs no longer mention “your own account”, so it reminds you to add your own account as a tester too.
+  - Section 8.4: the app token response is now given as `{"access_token": "TH|<APP_ID>|<APP_SECRET>", "token_type": "bearer"}`, with a note that it contains the app secret and must stay out of logs, client code and app binaries.
+  - Sections 8.1, 4.1 and 4.2: reposts and cross-sharing to Instagram Stories also need `threads_content_publish`; a Story cross-shared this way follows the user's Instagram privacy and audience settings.
+  - Section 4.2: the docs describe `text_entities` offsets as “positive whole numbers” while the examples start at 0, so it says to count from 0.
+  - Section 8.3: the docs' examples all use `graph.threads.com` now.
+  - Section 13: the quotes in the Ghost Posts example are fixed, so it's off the list; added three mistakes in the Share to Instagram Stories example (`media_type=text` in lowercase, a `|` between parameters, and a missing line-continuation `\`). The other items are still unfixed in the new docs.
+- `metadata.version` in `threads-api/SKILL.md` raised to 1.5.
+- The “Embedding”, “What difference does the skill make”, “Test results” and “Known limitations” sections of all four READMEs, the site (eval numbers, doc-sync date, the pre-App-Review permission wording and the FAQ; the benchmark table's question column now has a minimum width so it isn't squeezed to one or two characters per line with the extra columns) and `docs/llms.txt` are updated to match.
 - The Security Policy `SECURITY*.md` now follows a common format: it adds an email reporting channel, commits to a first reply within 14 days and public disclosure no later than 90 days after the report, and requests a CVE when applicable. The translations are renamed to `SECURITY_en.md`, `SECURITY_ja.md` and `SECURITY_ko.md`, and links inside the files use full URLs.
 - Translations of the README, changelog, benchmark summary and the community files in `.github/` also use `_xx` names, for example `README_en.md`, `CHANGELOG_ja.md`, `evals/BENCHMARK_ko.md` and `.github/i18n/CODE_OF_CONDUCT_en.md`; the project site and all links are updated.
 
-## 1.4 - 2026-10-19
+## [1.4] - 2026-10-19
 
 ### Added
 
@@ -42,7 +96,7 @@ Notable changes to this project are recorded here, following the format of [Keep
 - Section 14 of SKILL.md now covers skills whose files aren't on disk (some hosts serve them on request and don't allow saving them): get `scripts/threads_client.py` from wherever the skill was loaded and feed it to Python on standard input with `python3 - <args>` instead of saving it; step 5 of section 3 points there. The Agensi section of all four READMEs now says the same. Not re-evaluated since the change.
 - Installation docs (all four READMEs): the Codex `$skill-installer` entry now notes that it installs into `~/.codex/skills/` (`$CODEX_HOME/skills/` if `CODEX_HOME` is set), not the `~/.agents/skills/` in the table; Codex reads both, but its source code marks the former as deprecated and kept for backward compatibility, so the entry says not to keep a copy in both. The Copilot CLI entry says adding a folder registers its location rather than copying it. The “Updating and removing” table gains rows for Codex (the installer stops if the folder already exists, so delete the old one first), Copilot CLI, Kiro (its docs don't say; delete and import again) and Agensi. Sources: the openai/codex source (`host_roots.rs` and the skill-installer's `install-skill-from-github.py` on `main` as of 2026-10-19) and the official docs for Codex, GitHub Copilot CLI and Kiro.
 
-## 1.3 - 2026-10-19
+## [1.3] - 2026-10-19
 
 ### Changed
 
@@ -54,7 +108,7 @@ Notable changes to this project are recorded here, following the format of [Keep
   - The Claude apps steps now name the Pro and Max plans, show how to make the ZIP on each system and also give the Settings > Capabilities upload location.
   - The site's tool list, the “How do I install it by hand?” and “How do I use it in the Claude apps?” answers, `docs/llms.txt` and the usage issue forms are updated to match.
 
-## 1.2 - 2026-10-18
+## [1.2] - 2026-10-18
 
 ### Added
 
@@ -70,7 +124,7 @@ Notable changes to this project are recorded here, following the format of [Keep
 - The Contributing and other tabs on the GitHub repository page resolve relative links in the community files from the repository root, so they returned 404; the links now use paths that start with `/`, counted from the repository root.
 - The Code of conduct tab on the GitHub repository page showed the English version: the English, Japanese and Korean versions moved to `.github/i18n/`, so the tab shows the Traditional Chinese version.
 
-## 1.1 - 2026-10-18
+## [1.1] - 2026-10-18
 
 ### Added
 
@@ -113,7 +167,7 @@ Notable changes to this project are recorded here, following the format of [Keep
   - Timeline labels that don't fit their bar are now hidden instead of being cut off.
   - On narrow screens, header links that don't fit move to a second row instead of overlapping the site name.
 
-## 1.0 - 2026-10-18
+## [1.0] - 2026-10-18
 
 ### Added
 
@@ -149,3 +203,10 @@ Notable changes to this project are recorded here, following the format of [Keep
 - Section 11 of SKILL.md expanded from “oEmbed and Web Intents” to embedding posts: token-free oEmbed and its error codes, how embed.js loads posts, and throttling and failure handling for pages with many embeds.
 - Shortened the SKILL.md description to 196 characters.
 - Rewrote the README: installation for each tool, the one-line `skills add` command, configuration and permission tables, and contribution notes.
+
+[1.5]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.4...v1.5
+[1.4]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.3...v1.4
+[1.3]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.2...v1.3
+[1.2]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.1...v1.2
+[1.1]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.0...v1.1
+[1.0]: https://github.com/Scorpio-meow/Threads-skill/releases/tag/v1.0

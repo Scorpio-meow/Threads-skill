@@ -1,0 +1,482 @@
+.duo {
+  --d-bg: var(--surface-2);
+  --d-s1: var(--bg);
+  --d-s2: var(--surface);
+  --seg-size: var(--step-display);
+  background: var(--d-bg);
+  color: var(--ink);
+  transition: background-color 600ms var(--ease-soft), color 600ms var(--ease-soft);
+}
+
+.duo[data-variant="with"] {
+  --d-bg: var(--field);
+  --d-s1: var(--field-surface);
+  --d-s2: var(--field-surface-2);
+  --ink: var(--field-ink);
+  --muted: var(--field-muted);
+  --surface: var(--field-surface);
+  --surface-2: var(--field-surface-2);
+  --code-bg: var(--field);
+  --rule: var(--field-rule);
+  --key: var(--field-key);
+  --ok: var(--field-ok);
+  --bad: var(--field-bad);
+}
+
+:root:lang(en) .duo {
+  --seg-size: var(--step-head);
+}
+
+:root:lang(ja) .duo,
+:root:lang(ko) .duo {
+  --seg-size: var(--step-head);
+}
+
+.duo :focus-visible {
+  outline-color: var(--ink);
+}
+
+.duo>.wrap {
+  padding-block: clamp(96px, 11vw, 176px);
+  row-gap: clamp(32px, 4vw, 64px);
+  align-items: end;
+}
+
+.duo-head {
+  grid-column: 1 / span 7;
+  grid-row: 1;
+  display: grid;
+  gap: 20px;
+  align-self: start;
+}
+
+.duo-cap {
+  font-size: var(--step-body);
+  max-width: 24em;
+}
+
+.duo-switch {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: end;
+  align-self: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+[data-ui] .seg.seg-xl {
+  font-size: var(--seg-size);
+  padding: 0.07em;
+  border-radius: var(--round);
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+[data-ui] .seg.seg-xl button {
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: var(--track-display);
+  min-height: 1.55em;
+  padding: 0 0.62em;
+  border-radius: var(--round);
+  color: var(--muted);
+  line-height: 1;
+}
+
+[data-ui] .seg.seg-xl button[aria-checked="true"] {
+  color: var(--accent-ink);
+}
+
+[data-ui] .seg.seg-xl .seg-thumb {
+  top: 0.07em;
+  bottom: 0.07em;
+  left: 0.07em;
+  width: calc((100% - 0.14em) / var(--n, 2));
+  border-radius: var(--round);
+  background: var(--accent);
+  box-shadow: none;
+  transition: transform 520ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-ui] .seg.seg-xl button[aria-checked="false"]:hover {
+    color: var(--ink);
+  }
+}
+
+[data-ui] .demo-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+}
+
+[data-ui] .chat {
+  padding: 4px 18px 22px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+[data-ui] .who {
+  font-size: var(--ui-s);
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+[data-ui] .bubble {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+[data-ui] .reply {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+[data-ui] .reply pre {
+  background: var(--code-bg);
+  border-radius: 6px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+}
+
+[data-ui] .reply .opt {
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+[data-ui] .reply .meta {
+  color: var(--muted);
+  font-size: var(--ui-s);
+}
+
+[data-ui] .reply ul {
+  display: grid;
+  gap: 2px;
+  padding-left: 0;
+}
+
+[data-ui] .reply li {
+  padding-left: 1em;
+  text-indent: -1em;
+}
+
+[data-ui] .flag {
+  text-decoration: underline wavy var(--bad);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-skip-ink: none;
+}
+
+[data-ui] .reply .more {
+  color: var(--muted);
+  font-size: var(--ui-s);
+}
+
+[data-ui] .grader {
+  background: var(--surface-2);
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+[data-ui] .score-num {
+  font-size: var(--step-head);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-ui] .score-num span {
+  color: var(--muted);
+}
+
+[data-ui] .score-label {
+  color: var(--muted);
+  font-size: var(--ui-s);
+  margin-top: 6px;
+}
+
+[data-ui] .checks {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+[data-ui] .checks li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  line-height: 1.5;
+}
+
+[data-ui] .checks li svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+[data-ui] .checks .pass svg {
+  color: var(--ok);
+}
+
+[data-ui] .checks .fail svg {
+  color: var(--bad);
+}
+
+[data-ui] .checks .fail>span {
+  font-weight: 600;
+}
+
+[data-ui] .checks small {
+  display: block;
+  color: var(--muted);
+  font-size: var(--ui-s);
+  margin-top: 2px;
+}
+
+[data-ui] .grader-link {
+  font-size: var(--ui-s);
+  font-weight: 600;
+}
+
+[data-ui] .checks-sum {
+  display: none;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: var(--ui-s);
+}
+
+.duo .demo {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  font-size: var(--step-small);
+  line-height: 1.7;
+  background: none;
+}
+
+:root:lang(en) .duo .demo {
+  line-height: 1.55;
+}
+
+.duo [data-ui] .demo-main {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  column-gap: var(--gap);
+  align-items: start;
+}
+
+.duo [data-ui] .chat {
+  padding: 0;
+  gap: 18px;
+}
+
+.duo [data-ui] .bubble {
+  background: var(--d-s1);
+  border-radius: 20px 20px 20px 4px;
+  padding: 18px 22px;
+  font-size: var(--step-body);
+  line-height: 1.6;
+}
+
+.duo [data-ui] .reply {
+  background: var(--d-s1);
+  border-radius: 20px 20px 4px 20px;
+  padding: 20px 22px;
+}
+
+.duo [data-ui] .reply pre {
+  background: var(--d-s2);
+}
+
+.duo [data-ui] .grader {
+  background: none;
+  padding: 0 0 0 clamp(0px, 2vw, 32px);
+  gap: 18px;
+  position: sticky;
+  top: 32px;
+}
+
+.duo [data-ui] .score-num {
+  font-size: var(--step-display);
+  line-height: 0.82;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+
+.duo [data-ui] .score-num b {
+  font-weight: 600;
+}
+
+.duo [data-ui] .score-num span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.duo [data-ui] .score-label {
+  font-size: var(--step-small);
+  margin-top: 14px;
+}
+
+.duo [data-ui] .checks {
+  font-size: var(--step-small);
+}
+
+.duo [data-ui] .grader-link {
+  font-size: var(--step-small);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.duo [data-ui] mark {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.duo [data-ui] :not(pre)>code {
+  background: var(--d-s2);
+}
+
+.duo [data-ui] mark code {
+  background: none;
+  color: inherit;
+}
+
+.film {
+  position: relative;
+  overflow: clip;
+  padding-top: var(--section);
+}
+
+.film>.wrap {
+  align-items: center;
+  row-gap: 40px;
+}
+
+.film-head {
+  grid-column: 1 / span 4;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 20px;
+  align-self: center;
+}
+
+.film-head .lede {
+  font-size: var(--step-body);
+  max-width: 22em;
+}
+
+.film-stage {
+  grid-column: 5 / -1;
+  position: relative;
+  isolation: isolate;
+  padding-block: clamp(40px, 6vw, 96px);
+}
+
+.film-stage::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: min(62vw, 980px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--accent);
+  right: calc(-1 * var(--margin) - 8vw);
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.film-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: var(--field);
+  border-radius: var(--radius);
+}
+
+@media (max-width: 1023px) {
+  .duo-head {
+    grid-column: 1 / -1;
+  }
+
+  .duo-switch {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .duo [data-ui] .demo-main {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 40px;
+  }
+
+  .duo [data-ui] .grader {
+    padding: 0;
+    position: static;
+  }
+
+  .film-head,
+  .film-stage {
+    grid-column: 1 / -1;
+  }
+
+  .film-stage::before {
+    width: 110vw;
+    right: -40vw;
+  }
+}
+
+@media (max-width: 640px) {
+  .duo {
+    --seg-size: 10.5vw;
+  }
+
+  :root:lang(en) .duo {
+    --seg-size: 7.4vw;
+  }
+
+  :root:lang(ja) .duo,
+  :root:lang(ko) .duo {
+    --seg-size: 8.4vw;
+  }
+
+  .duo>.wrap {
+    padding-block: 88px;
+  }
+
+  .duo-switch {
+    justify-self: stretch;
+  }
+
+  [data-ui] .seg.seg-xl {
+    width: 100%;
+  }
+
+  .duo [data-ui] .bubble,
+  .duo [data-ui] .reply {
+    padding: 16px 18px;
+  }
+
+  .duo [data-ui] .bubble {
+    font-size: var(--step-small);
+  }
+
+  .duo [data-ui] .opt-b {
+    display: none;
+  }
+
+  .duo [data-ui] .checks li.pass {
+    display: none;
+  }
+
+  .duo [data-ui] .checks-sum {
+    display: block;
+  }
+}

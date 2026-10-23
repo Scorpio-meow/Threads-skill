@@ -84,7 +84,7 @@
     {
       "id": 6,
       "prompt": "我的個人網站（純 HTML + 原生 JS，放在 GitHub Pages，<head> 有設 CSP）想做一面「精選 Threads 貼文」牆，大概 60 則。posts.json 裡存了每則的網址（有些是舊的 threads.net 連結）和從 Threads「取得內嵌程式碼」複製來的嵌入碼。我現在用 fetch 讀 JSON，再把嵌入碼用 innerHTML 塞進頁面，結果大部分都只顯示一個「在 Threads 查看」的連結框，沒變成貼文卡片；偶爾前幾則有出來，後面就整排卡住。幫我看問題在哪，寫一個能穩定載入的版本。另外我想每週自動檢查一次哪些貼文已經被刪掉，從清單拿掉。",
-      "expected_output": "Diagnosis: innerHTML scripts don't run (load embed.js once, call instgrm.Embeds.process()), CSP must allow www.threads.com for script and frame, too many embeds at once get rate-limited (pace them, detect failures by outcome, fallback cards). Weekly check via token-less oEmbed in a scheduled job; delete only on code 24.",
+      "expected_output": "Diagnosis: innerHTML scripts don't run (load embed.js once, call instgrm.Embeds.process()), CSP must allow www.threads.com for script and frame, too many embeds at once get rate-limited (pace them, detect failures by outcome, fallback cards). Weekly check via token-less oEmbed in a scheduled job; delete only on code 24. Old threads.net links are rewritten to threads.com or both hosts are allowed in the CSP.",
       "files": [],
       "expectations": [
         "Identifies that <script> tags inserted via innerHTML never execute, and loads embed.js once, then triggers re-processing of newly inserted embeds with window.instgrm.Embeds.process().",
@@ -94,7 +94,8 @@
         "Implements the weekly deleted-post check with the oEmbed endpoint (graph.threads.net/v1.0/oembed), not by scraping threads.com pages, and runs it outside the visitor's browser (e.g. a scheduled GitHub Actions job or script).",
         "Correctly states that the oEmbed endpoint can be called without an access token (changelog 2026-03-03), so no app, token or app secret is needed for the check — and never puts an app secret in browser code.",
         "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
-        "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL."
+        "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL.",
+        "Handles the old threads.net links so their embeds aren't blocked: either rewrites them to https://www.threads.com before building the embed (e.g. from the shortcode), or allows both https://www.threads.com and https://www.threads.net in the CSP's frame-src (and script-src where needed)."
       ]
     },
     {
@@ -161,6 +162,56 @@
         "Shows the exact content of every part and the parameters to be sent in the reply itself and asks for explicit confirmation before anything is published; nothing is published and the reply does not claim a post was made or scheduled.",
         "Before publishing, it verifies the target account (GET /me?fields=id,username), shows the user which account the thread will be posted to, and stops for the user's explicit OK before it starts waiting for 8 AM or registers a scheduled job (e.g. the assistant asks after the check, or the script prompts and waits for an answer). Printing the account and carrying on, with Ctrl+C as the only way to stop, fails.",
         "Before publishing, the flow checks the publishing quota with GET /me/threads_publishing_limit (quota_usage and config) and posts nothing when quota_usage has reached quota_total, since the API has no native scheduling and the app must enforce the 250-posts/24 h quota itself."
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "我在做一個 Chrome 擴充功能（Manifest V3），使用者收藏的 Threads 貼文網址存在 chrome.storage.local，然後在擴充功能自己的 dashboard.html 裡預覽。因為擴充功能頁面的 CSP 不能載入外部的 embed.js，我直接用 iframe 嵌 `https://www.threads.com/@user/post/<code>/embed/`。現在卡了幾個問題：\n\n1. iframe 高度我寫死 540px，短貼文下面一大塊白、長貼文被切掉。我有寫 `window.addEventListener('message', e => { if (e.data?.type === 'MEASURE') frame.style.height = e.data.details.height + 'px' })`，但從來沒觸發過，所以我懷疑 /embed 根本不會回報高度，正在考慮改成用 content script 注入到 iframe 裡量高度再傳出來。\n2. dashboard 是深色模式，但預覽卡片永遠是白底。\n3. 同一篇貼文常被存成好幾筆：有的是 threads.net、有的是 `/t/` 開頭、有的後面帶 `?xmt=...`。\n4. 有些貼文已經被刪了，可是預覽框看起來照樣載入（iframe 的 onload 有觸發），我想把這些貼文標示出來。\n\n幫我改 dashboard 預覽這段程式碼（原生 JS 就好），並說明每個問題的原因。",
+      "expected_output": "The /embed/ page does post its height, but as a bare number, so the MEASURE-object listener drops it: accept a number (with origin and source checks, ignoring 0) instead of injecting a content script. Add ?theme=dark to the /embed/ URL. Key saved posts by shortcode after normalizing host, /t/ vs /@user/post/, query and trailing slash. iframe onload proves nothing (deleted posts render a 'Cannot display thread' card that reports a height too); detect deleted posts with token-less oEmbed and treat only code 24 as deleted. Later height reports keep being applied, since image posts report again as media loads.",
+      "files": [],
+      "expectations": [
+        "States that the /embed/ page does send its height via postMessage, as a bare number (or numeric string) rather than an object, so the MEASURE listener never matches; fixes the listener to read the number and does not inject a content script into the iframe to measure it.",
+        "The message listener checks event.origin against the Threads hosts (https://www.threads.com, plus https://www.threads.net if threads.net iframes can occur) and matches event.source to the iframe's contentWindow before applying a height.",
+        "A height report of 0, or no report within a timeout, never leaves the preview as an invisible or blank area with nothing else shown: the 0 is not applied as the final height (ignored or treated as a failure), and the card shows something usable instead, such as a placeholder or starting height, or a failure card with a link to the post or a retry.",
+        "Fixes dark mode by adding ?theme=dark (or ?theme=auto) to the /embed/ iframe URL.",
+        "Normalizes saved URLs to the post's shortcode (threads.net and threads.com hosts, /t/<code> and /@user/post/<code>, query string, fragment and trailing slash all map to one key) and dedupes or keys storage by that shortcode.",
+        "Explains that the iframe's load event fires for deleted posts too, and that a missing post renders a short 'Cannot display thread' card inside the iframe (which also reports a height), so neither onload nor height can tell a deleted post from a live one.",
+        "Detects deleted posts with the oEmbed endpoint (https://graph.threads.net/v1.0/oembed, no access token needed) and marks a post deleted only on the definitive not-found error (code 24); other errors are treated as transient. It does not scrape threads.com post pages for this.",
+        "Keeps the iframe pointed at the /embed/ URL (never the post permalink itself, which refuses framing) and does not try to load embed.js in the extension page.",
+        "Keeps applying every later height report above 0 from the same iframe (posts with images report again as their media loads) instead of stopping after the first one, and does not tell the user that the page reports its height only once."
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "我們公司官網用 React 18 + Vite，有一頁「社群精選」會從後台 API 拿 Threads 貼文網址清單（大約 40 則，一頁顯示 10 則）。我的元件是這樣寫的：\n\n```jsx\nfunction ThreadsCard({ url }) {\n  useEffect(() => { window.instgrm?.Embeds?.process(); }, [url]);\n  return (\n    <div className=\"threads-card\">\n      <blockquote className=\"text-post-media\" data-text-post-permalink={url}>\n        <a href={url}>View on Threads</a>\n      </blockquote>\n    </div>\n  );\n}\n```\n\nembed.js 是在每個 ThreadsCard 裡用 useEffect 動態插一個 `<script>`。CSS 有 `.threads-card iframe { min-height: 400px; }`，是為了避免載入時版面跳動。\n\n現在的問題：\n1. 貼文卡片有出來，但每張卡片下面都還留著一個「View on Threads」連結。\n2. 短貼文下面多了一大片空白。\n3. 換頁再切回來，或是某則載入失敗想重試時，再呼叫 `process()` 都沒反應；偶爾還會在 console 看到 React 的 removeChild 錯誤。\n4. 網站有深淺色切換，切換後已經載入的貼文不會跟著變。\n5. 我想在載入失敗時顯示備援卡片，目前是用 iframe 的 onload 判斷成功。\n\n幫我找出每個問題的原因，並給我一個可靠的 ThreadsCard 元件（含載入 embed.js 的方式）。",
+      "expected_output": "Give each blockquote a unique id (ig-tp-<shortcode>) so embed.js can remove the fallback; move the placeholder height off the iframe because a CSS min-height overrides embed.js's inline height; embed.js marks processed blockquotes (text-post-media-registered) so retries need a fresh blockquote; theme is fixed at iframe creation, so re-create on theme change; judge success by a height postMessage > 0 within a timeout, not onload; build the embed imperatively in a ref container so embed.js's DOM changes don't clash with React; load embed.js once. A deleted post's 'Cannot display thread' card looks like success to the client, so dead posts are pruned with oEmbed (code 24).",
+      "files": [],
+      "expectations": [
+        "Gives each blockquote a unique id (e.g. ig-tp-<shortcode>) and explains that embed.js removes the fallback blockquote by that id once the embed reports its height, which is why the 'View on Threads' links stay.",
+        "Explains that the CSS min-height on the iframe overrides the inline height embed.js sets, and moves the placeholder to a wrapper (or sets min-height from the reported height) so short posts don't leave a blank band.",
+        "Explains that embed.js only processes a blockquote once (it swaps the text-post-media class for text-post-media-registered), so retrying or re-showing a post means removing the old iframe and creating a fresh blockquote with the text-post-media class (e.g. a remount with a new key) before calling process() again.",
+        "Handles the theme by setting data-theme on the blockquote and re-creating the embed when the site theme changes, since the theme is fixed when embed.js creates the iframe.",
+        "Judges success by the iframe's height postMessage (a number greater than 0, with origin checked against the Threads hosts and event.source matched to that iframe's contentWindow) within a timeout, not by the iframe load event; a 0 report or no report leads to the fallback card.",
+        "Builds the blockquote and lets embed.js modify it inside a container element whose children React doesn't render (e.g. created imperatively via a ref), so embed.js inserting the iframe and removing the blockquote doesn't conflict with React's reconciliation (the removeChild errors).",
+        "Loads embed.js once for the whole app (e.g. a shared module-level promise or a single script tag), not once per card.",
+        "The fallback card links only to validated https://www.threads.com or https://www.threads.net post URLs and is built without inserting untrusted strings via innerHTML or dangerouslySetInnerHTML.",
+        "Points out that a deleted or unavailable post still renders a 'Cannot display thread' card that reports a height, so client-side success detection counts it as loaded, and recommends pruning such posts with the oEmbed endpoint (code 24 means gone), e.g. on the backend or in a scheduled job."
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "我的個人部落格（純 HTML + 原生 JS，放在 Netlify）側欄有一區「最近在 Threads 上說的話」，用官方嵌入碼放了 12 則貼文：整頁只載入一次 embed.js，插入後呼叫 `window.instgrm.Embeds.process()`。我自己用 Chrome 看全部都正常，可是有讀者說其中 3 則只顯示 Facebook 的「Sorry, something went wrong」，我用 Safari 跟 Chrome 無痕視窗打開也一樣。\n\n奇怪的地方：\n1. 我每週有個 GitHub Actions 用 oEmbed（graph.threads.net/v1.0/oembed）檢查貼文還在不在，這 3 則都回 200、有 html，所以沒被標成失效。\n2. 我判斷載入成功的方式是：blockquote 被換成 iframe、iframe 的 src 是 www.threads.com，而且 8 秒後 iframe 高度大於 120px 就算成功（CSS 有設 `.sidebar-threads iframe { min-height: 300px; }` 避免版面跳動）。這 3 則在無痕視窗下也被判成功，所以備援卡片從來沒出現過。\n\n幫我查出原因、改寫載入判斷，並告訴我怎麼事先找出這種貼文，以及頁面上該怎麼處理它們。",
+      "expected_output": "The three posts are shown only to logged-in Threads users (e.g. marked sensitive): logged-out visitors and browsers blocking third-party cookies (Safari, private windows) get Meta's error page, while the logged-in author sees them. oEmbed still returns HTML for them, so the weekly check can't flag them. The current check passes because the error page is still on threads.com and the iframe's CSS min-height makes the height test pass; success should be a numeric height postMessage > 0 (origin and source checked) within a timeout. Find such posts by requesting <permalink>/embed without credentials from a threads.com page (500 = login-only); keep loading them, explain the login requirement on the fallback card, and don't treat them as deleted.",
+      "files": [],
+      "expectations": [
+        "Identifies the three posts as ones Threads shows only to logged-in users (e.g. marked sensitive): visitors who aren't logged in to Threads, or whose browser blocks third-party cookies (Safari and private windows do by default), get Meta's error page, while a logged-in viewer who allows third-party cookies (like the author in Chrome) sees them.",
+        "States that oEmbed still returns embed HTML (HTTP 200) for such posts, so the weekly oEmbed check can't flag them; oEmbed's code 24 only catches posts that are gone.",
+        "Explains why the current success check passes on the error page: the error page still loads from www.threads.com, and the CSS min-height on the iframe makes the height test pass regardless of what the frame shows.",
+        "Rewrites success detection around the embed page's height postMessage: a numeric report greater than 0, with event.origin checked against the Threads hosts and event.source matched to that iframe, within a timeout; the error page sends no report, so it ends in the fallback. Iframe presence, its src or its rendered height are not treated as success.",
+        "Moves the placeholder height off the iframe (e.g. to a wrapper) or drops it, since a CSS min-height on the iframe overrides the height embed.js sets.",
+        "Shows a fallback card for these posts that links to the post on Threads and says the post needs both a Threads login and third-party cookies allowed in the browser (a card that mentions only logging in fails, since a logged-in Safari or private-window visitor still can't see it), doesn't call the post deleted, and keeps trying to load these posts in the page because logged-in visitors can see them.",
+        "Gives a working way to find such posts ahead of time that doesn't rely on oEmbed: requesting <permalink>/embed without credentials as a same-origin request from a threads.com page (e.g. a DevTools console snippet, a bookmarklet or an extension content script), where HTTP 500 means login-only and HTTP 200 with class=\"Embed\" in the body means it embeds publicly; a real (headless) browser loading the embed page while logged out also counts. A check that only looks at the HTTP status of a plain server-side request (curl, Node or Python fetch, a CI job) doesn't pass.",
+        "Doesn't promise a way to make these posts visible to logged-out visitors (no token, proxy or embed parameter changes that) and doesn't treat them as deleted or remove them from the list."
       ]
     }
   ]

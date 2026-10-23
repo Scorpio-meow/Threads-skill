@@ -1,12 +1,95 @@
+.tools {
+  padding-top: var(--section);
+}
+
+.tools>.wrap {
+  align-items: start;
+  row-gap: 40px;
+}
+
+.tools-copy {
+  grid-column: 1 / span 5;
+  display: grid;
+  gap: 20px;
+  position: sticky;
+  top: 96px;
+}
+
+.tools-copy .lede {
+  font-size: var(--step-body);
+  max-width: 26em;
+}
+
+.tool-list {
+  grid-column: 7 / -1;
+  display: grid;
+  max-width: 640px;
+}
+
+.tool-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  min-height: 48px;
+  padding-block: 8px;
+}
+
+.tool-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  font-size: var(--step-lead);
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: var(--track-head);
+}
+
+.tool-list a::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--ink);
+  transition: transform var(--t-hover) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tool-list a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.2em;
+  }
+
+  .tool-list a:hover::before {
+    transform: scale(1.25);
+  }
+}
+
+.tool-list :is(code, span) {
+  font-size: var(--step-small);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.tool-list code {
+  background: none;
+  padding: 0;
+}
+
 .install {
-  margin-top: var(--section);
+  margin-top: clamp(72px, 7vw, 120px);
   background: var(--accent);
   color: var(--accent-ink);
 }
 
 .install .wrap {
-  min-height: 90svh;
-  padding-block: clamp(64px, 9vw, 120px);
+  min-height: max(600px, 80svh);
+  padding-block: clamp(56px, 7vw, 96px);
   align-items: center;
 }
 
@@ -14,24 +97,18 @@
   grid-column: 1 / span 6;
   align-self: end;
   display: grid;
-  gap: 22px;
+  gap: 24px;
 }
 
 .install-title {
   font-size: var(--step-display);
-  line-height: 0.98;
-  letter-spacing: -0.03em;
-  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: var(--track-display);
 }
 
 :root:lang(zh-Hant-TW) .install-title,
-:root:lang(ja) .install-title {
-  letter-spacing: 0;
-  line-height: 1.08;
-}
-
+:root:lang(ja) .install-title,
 :root:lang(ko) .install-title {
-  letter-spacing: -0.02em;
   line-height: 1.08;
 }
 
@@ -41,7 +118,6 @@
 
 .install-copy p {
   max-width: 30em;
-  font-size: var(--step-body);
 }
 
 .install-copy a {
@@ -52,13 +128,13 @@
   grid-column: 8 / span 4;
   justify-self: end;
   width: min(100%, 460px);
-  background: #ffffff;
-  color: #1d2220;
-  border-radius: 10px;
-  padding: 24px;
+  background: var(--dlg-bg);
+  color: var(--dlg-ink);
+  border-radius: 16px;
+  padding: 28px;
   display: grid;
   gap: 16px;
-  box-shadow: 0 1px 2px rgb(16 32 24 / 0.08), 0 22px 48px -12px rgb(16 32 24 / 0.28);
+  box-shadow: var(--shadow-float);
   font-size: var(--ui);
   line-height: 1.55;
 }
@@ -76,16 +152,16 @@
 
 [data-ui] .dlg-field>span {
   font-size: var(--ui-s);
-  color: #5f6763;
+  color: var(--dlg-muted);
 }
 
 [data-ui] .dlg-cmd {
   display: block;
-  background: #f1f4f2;
-  border: 1px solid #d3dad6;
-  border-radius: 6px;
+  background: var(--dlg-surface);
+  border: 1px solid var(--dlg-line);
+  border-radius: 10px;
   padding: 12px 14px;
-  color: #1d2220;
+  color: var(--dlg-ink);
   font-size: var(--ui-s);
   line-height: 1.6;
   white-space: pre-wrap;
@@ -94,25 +170,28 @@
 }
 
 [data-ui].dialog .seg {
-  background: #e4e9e6;
+  background: var(--dlg-surface-2);
   display: grid;
+  border-radius: var(--round);
 }
 
 [data-ui].dialog .seg button {
-  color: #5f6763;
+  color: var(--dlg-muted);
+  border-radius: var(--round);
 }
 
 [data-ui].dialog .seg button[aria-checked="true"] {
-  color: #1d2220;
+  color: var(--dlg-ink);
 }
 
 [data-ui].dialog .seg .seg-thumb {
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1px #777e7a;
+  background: var(--dlg-bg);
+  border-radius: var(--round);
+  box-shadow: inset 0 0 0 1px var(--dlg-control);
 }
 
 [data-ui] .dlg-hint {
-  color: #5f6763;
+  color: var(--dlg-muted);
   font-size: var(--ui-s);
   min-height: 2.6em;
 }
@@ -120,21 +199,21 @@
 [data-ui] .dlg-primary {
   min-height: 52px;
   border: 0;
-  border-radius: 6px;
-  background: #1d2220;
-  color: #ffffff;
-  font-size: var(--ui);
+  border-radius: var(--round);
+  background: var(--dlg-ink);
+  color: var(--dlg-bg);
+  font-size: var(--step-body);
   font-weight: 600;
   transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease;
 }
 
 [data-ui] .dlg-primary:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 @media (hover: hover) and (pointer: fine) {
   [data-ui] .dlg-primary:hover {
-    background: #343b38;
+    background: var(--dlg-hover);
   }
 }
 
@@ -151,16 +230,17 @@
   background: none;
   padding: 0;
   font-size: var(--ui-s);
-  color: #1d2220;
+  color: var(--dlg-ink);
   text-decoration: underline;
   text-underline-offset: 0.24em;
   text-decoration-thickness: 0.07em;
-  min-height: 32px;
+  min-height: 44px;
 }
 
 [data-ui] .dlg-done {
   font-size: var(--ui-s);
-  color: #0a7a45;
+  color: var(--dlg-ok);
+  font-weight: 600;
   opacity: 0;
   transition: opacity var(--t-ui) ease;
 }
@@ -170,7 +250,7 @@
 }
 
 [data-ui].dialog :focus-visible {
-  outline-color: #1d2220;
+  outline-color: var(--dlg-ink);
 }
 
 .install :focus-visible {
@@ -189,6 +269,16 @@
 }
 
 @media (max-width: 1023px) {
+  .tools-copy {
+    grid-column: 1 / -1;
+    position: static;
+  }
+
+  .tool-list {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+
   .install-copy {
     grid-column: 1 / -1;
     align-self: start;
@@ -199,5 +289,30 @@
     justify-self: stretch;
     width: 100%;
     margin-top: 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  .tool-list li {
+    flex-direction: column;
+    gap: 0;
+    padding-block: 10px;
+  }
+
+  .tool-list a {
+    font-size: var(--step-body);
+  }
+
+  .tool-list :is(code, span) {
+    padding-left: 28px;
+    text-align: left;
+  }
+
+  .install-title {
+    font-size: var(--step-display);
+  }
+
+  [data-ui].dialog {
+    padding: 22px;
   }
 }

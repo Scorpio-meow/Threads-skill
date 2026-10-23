@@ -1,6 +1,6 @@
 # Threads API Skill
 
-> An Agent Skill that teaches AI assistants Meta's Threads API: writing and debugging integration code, acting on the user's own account (post, reply, moderate, pull insights), and embedding Threads posts on websites. Distilled from Meta's official docs, covering the changelog through 2026-08-18. Not an official Meta project.
+> An Agent Skill that teaches AI assistants Meta's Threads API: writing and debugging integration code, acting on the user's own account (post, reply, moderate, pull insights), and embedding Threads posts on websites. Distilled from Meta's official docs (synced 2026-10-23, covering the changelog through 2026-08-18). Not an official Meta project.
 
 The skill is in the Agent Skills format: a `threads-api/` folder holding `SKILL.md` (English Markdown) and `scripts/threads_client.py` (the Python reference client). Statements come from Meta's docs unless tagged *(practice)* (engineering advice) or *(observed)* (live test results). Threads ads belong to the Marketing API and are out of scope.
 
@@ -8,7 +8,7 @@ Key concepts:
 
 - Build mode: write, review or debug code that calls the API, following the project's existing stack.
 - Operate mode: call the API on the user's account with the bundled Python client; anything public or destructive needs the user's explicit confirmation first.
-- Embedding: oEmbed (no token since March 2026) plus embed.js loading, throttling and failure handling for pages with many posts.
+- Embedding: oEmbed (no token since March 2026), embed.js loading and its height reports, framing `/embed/` directly where scripts can't load, plus throttling and failure handling for pages with many posts.
 
 ## Skill
 
@@ -22,7 +22,7 @@ Key concepts:
 
 ## Evaluation
 
-- [Benchmark summary](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/BENCHMARK_en.md): With-skill vs without-skill results over seven rounds, with time, token usage and the reason behind every failed check
+- [Benchmark summary](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/BENCHMARK_en.md): With-skill vs without-skill results over ten rounds, with time, token usage and the reason behind every failed check
 - [Eval set](https://raw.githubusercontent.com/Scorpio-meow/Threads-skill/main/evals/evals.json): Task prompts and the checklist items each answer is graded against
 
 ## Optional

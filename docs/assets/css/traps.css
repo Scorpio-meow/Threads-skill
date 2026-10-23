@@ -1,44 +1,118 @@
 .traps {
-  --bg: var(--tone-1);
-  --surface: var(--tone-0);
-  --code-bg: var(--tone-1);
-  margin-top: var(--section);
-  background: var(--bg);
-}
-
-.traps .wrap {
-  padding-block: clamp(88px, 10vw, 168px);
+  padding-top: var(--section);
 }
 
 .traps-head {
-  grid-column: 4 / span 7;
-  display: grid;
-  gap: 18px;
-  margin-bottom: clamp(56px, 7vw, 96px);
+  align-items: end;
+  row-gap: 20px;
+  margin-bottom: clamp(48px, 6vw, 88px);
+}
+
+.traps-head .sec-title {
+  grid-column: 1 / span 6;
+}
+
+.traps-head .lede {
+  grid-column: 7 / -1;
+  font-size: var(--step-body);
+  max-width: 30em;
 }
 
 .trap {
-  grid-column: 4 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 4fr);
-  column-gap: clamp(20px, 2.6vw, 44px);
-  align-items: start;
+  --band: var(--bg);
+  --band-ink: var(--ink);
+  --band-muted: var(--muted);
+  background: var(--band);
+  color: var(--band-ink);
+  transition: background-color 520ms var(--ease-soft), color 520ms var(--ease-soft);
 }
 
-.trap+.trap {
-  margin-top: clamp(56px, 7vw, 96px);
+.trap>.wrap {
+  align-items: center;
+  row-gap: 16px;
+  min-height: max(176px, 20vh);
+  padding-block: 32px;
+}
+
+.trap h3 {
+  grid-column: 1 / span 10;
+  grid-row: 1;
+  font-size: var(--step-sub);
+  letter-spacing: var(--track-display);
+  line-height: 1.15;
+  color: var(--band-muted);
+  transition: color 520ms var(--ease-soft);
+}
+
+:root:lang(zh-Hant-TW) .trap h3,
+:root:lang(ja) .trap h3,
+:root:lang(ko) .trap h3 {
+  line-height: 1.3;
+}
+
+.trap h3 code {
+  font-size: 0.82em;
+  background: none;
+  padding: 0;
+}
+
+.sw {
+  grid-column: 11 / -1;
+  grid-row: 1;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 48px;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: var(--step-body);
+  font-weight: 600;
+}
+
+.sw i {
+  position: relative;
+  width: 68px;
+  height: 38px;
+  border-radius: var(--round);
+  background: var(--surface-2);
+  transition: background-color var(--t-ui) ease;
+}
+
+.sw i::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform 320ms var(--ease-out), background-color var(--t-ui) ease;
+}
+
+.sw[aria-checked="true"] i {
+  background: currentColor;
+}
+
+.sw[aria-checked="true"] i::after {
+  transform: translateX(30px);
+  background: var(--band);
+}
+
+.sw:active i::after {
+  scale: 0.9;
 }
 
 .trap-text {
+  grid-column: 1 / span 6;
+  grid-row: 2;
+  align-self: start;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
-  max-width: 26em;
-}
-
-.trap-text h3 {
-  font-size: var(--step-lead);
-  font-weight: 600;
+  gap: 14px;
+  max-width: 34em;
 }
 
 .trap-text p b {
@@ -46,13 +120,95 @@
 }
 
 .trap-text .was {
-  color: var(--muted);
+  color: var(--band-muted);
+}
+
+.trap-text :not(pre)>code {
+  background: color-mix(in srgb, var(--band-ink) 10%, transparent);
+  color: inherit;
+}
+
+.trap .tf {
+  grid-column: 8 / -1;
+  grid-row: 2;
+  align-self: start;
+}
+
+.js .trap:not(.is-on) .trap-text p:not(.was),
+.js .trap:not(.is-on) .tf {
+  display: none;
+}
+
+.trap.is-on {
+  --band-muted: color-mix(in srgb, var(--band-ink) 72%, var(--band));
+}
+
+.trap.is-on h3 {
+  color: var(--band-ink);
+}
+
+.trap.is-on>.wrap {
+  padding-block: clamp(40px, 5vw, 72px);
+}
+
+.trap.is-on .trap-text {
+  animation: trap-in 520ms var(--ease-out);
+}
+
+.trap.is-on .tf {
+  animation: trap-in 640ms var(--ease-out);
+}
+
+@keyframes trap-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.trap.is-on[data-tone="a"] {
+  --band: var(--accent);
+  --band-ink: var(--accent-ink);
+  --surface: var(--tone-0);
+  --bg: var(--tone-1);
+  --code-bg: var(--tone-1);
+}
+
+.trap.is-on[data-tone="b"] {
+  --band: var(--surface-2);
+  --surface: var(--tone-0);
+  --bg: var(--tone-1);
+  --code-bg: var(--tone-1);
+}
+
+.trap.is-on[data-tone="c"] {
+  --band: var(--field);
+  --band-ink: var(--field-ink);
+  --ink: var(--field-ink);
+  --muted: var(--field-muted);
+  --surface: var(--field-surface);
+  --surface-2: var(--field-surface-2);
+  --bg: var(--field);
+  --code-bg: var(--field);
+  --rule: var(--field-rule);
+  --key: var(--field-key);
+  --ok: var(--field-ok);
+  --bad: var(--field-bad);
+}
+
+.trap :focus-visible {
+  outline-color: var(--band-ink);
+}
+
+.trap.is-on .sw i {
+  background: var(--band-ink);
 }
 
 [data-ui].tf {
   background: var(--surface);
-  border-radius: 8px;
-  padding: 18px;
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 20px;
   font-size: var(--ui);
   line-height: 1.6;
   display: grid;
@@ -71,6 +227,7 @@
 
 [data-ui] .tf .code {
   margin: 0;
+  background: var(--bg);
 }
 
 [data-ui] .thr {
@@ -101,16 +258,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-[data-ui] .thr-row .note {
-  color: var(--muted);
-  font-size: var(--ui-s);
-}
-
 [data-ui] .thr-row.now b {
   background: var(--accent);
   color: var(--accent-ink);
-  padding: 0 6px;
-  border-radius: 3px;
+  padding: 0 8px;
+  border-radius: var(--round);
 }
 
 [data-ui] .tree {
@@ -139,7 +291,7 @@
   background: var(--surface-2);
   display: grid;
   place-items: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
 }
@@ -156,8 +308,8 @@
 [data-ui] .r .act {
   font-size: var(--ui-s);
   font-weight: 600;
-  border-radius: 4px;
-  padding: 3px 8px;
+  border-radius: var(--round);
+  padding: 3px 10px;
   background: var(--ink);
   color: var(--bg);
   align-self: center;
@@ -223,7 +375,7 @@
 
 [data-ui] .tl-bar .t3 {
   background: var(--bad);
-  color: var(--bg);
+  color: var(--surface);
   font-weight: 600;
 }
 
@@ -255,7 +407,7 @@
 [data-ui] .tl-key i {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: 50%;
   display: inline-block;
 }
 
@@ -265,7 +417,7 @@
 
 [data-ui] .tl-key .i1 {
   background: var(--bg);
-  box-shadow: inset 0 0 0 1px var(--rule);
+  box-shadow: inset 0 0 0 1.5px var(--control-line);
 }
 
 [data-ui] .tl-key .i2 {
@@ -301,8 +453,8 @@
 [data-ui] .vs-row .lab {
   font-size: var(--ui-s);
   font-weight: 600;
-  border-radius: 4px;
-  padding: 1px 8px;
+  border-radius: var(--round);
+  padding: 1px 10px;
   white-space: nowrap;
 }
 
@@ -319,31 +471,50 @@
 @media (forced-colors: active) {
 
   [data-ui] .tl-bar span,
-  [data-ui] .tl-key i {
+  [data-ui] .tl-key i,
+  .sw i {
     border: 1px solid CanvasText;
   }
 }
 
 @media (max-width: 1023px) {
 
-  .traps-head,
-  .trap {
+  .traps-head .sec-title,
+  .traps-head .lede {
     grid-column: 1 / -1;
   }
-}
 
-@media (max-width: 860px) {
-  .trap {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 18px;
+  .trap h3 {
+    grid-column: 1 / span 9;
   }
 
-  .trap-text {
-    max-width: 36em;
+  .sw {
+    grid-column: 10 / -1;
+  }
+
+  .trap-text,
+  .trap .tf {
+    grid-column: 1 / -1;
+    grid-row: auto;
   }
 }
 
 @media (max-width: 640px) {
+  .trap>.wrap {
+    min-height: 0;
+    padding-block: 28px;
+  }
+
+  .trap h3 {
+    grid-column: 1 / -1;
+  }
+
+  .sw {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
   [data-ui] .tl-bar span {
     font-size: 0;
     padding: 0;

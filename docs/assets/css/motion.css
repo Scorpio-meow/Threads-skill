@@ -1,62 +1,108 @@
 @media screen and (prefers-reduced-motion: no-preference) {
   .js [data-rise] {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(24px);
     animation: rise var(--t-reveal) var(--ease-out) forwards;
-    animation-delay: calc(var(--i, 0) * 90ms + 160ms);
+    animation-delay: calc(var(--i, 0) * 90ms + 260ms);
   }
 
   .js .lines [data-line] {
-    transform: translateY(105%);
-    animation: line-up 900ms var(--ease-out) forwards;
-    animation-delay: calc(var(--i, 0) * 110ms + 120ms);
+    transform: translateY(108%);
+    animation: line-up 1000ms var(--ease-out) forwards;
+    animation-delay: calc(var(--i, 0) * 110ms + 160ms);
   }
 
-  .js .hero-demo[data-rise] {
-    transform: translateY(40px);
-    animation-duration: 1100ms;
+  .js .lens {
+    clip-path: inset(0 0 0 100%);
+    animation: shutter 1100ms var(--ease-in-out) 120ms forwards;
   }
 
-  .reveal [data-reveal] {
+  .js .lens-in {
+    transform: scale(1.12);
+    animation: settle 1500ms var(--ease-out) 120ms forwards;
+  }
+
+  .js .stage>.fine {
     opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 700ms var(--ease-out), transform 900ms var(--ease-out);
-    transition-delay: calc(var(--i, 0) * 75ms);
+    animation: fade-in 900ms var(--ease-soft) 700ms forwards;
   }
 
-  .reveal [data-reveal].is-in {
-    opacity: 1;
-    transform: none;
-  }
-
-  .reveal [data-reveal="fig"] {
-    transform: translateY(32px) scale(0.985);
-  }
-
-  .reveal .bands[data-rows] li {
+  .js .lens-cap {
     opacity: 0;
-    transform: translateY(12px);
-    transition: opacity 500ms var(--ease-out), transform 600ms var(--ease-out);
-    transition-delay: calc(var(--r, 0) * 45ms);
+    animation: fade-in 600ms var(--ease-soft) 1200ms forwards;
   }
 
   .reveal .bands[data-rows].is-in li {
-    opacity: 1;
-    transform: none;
+    animation: enter 560ms var(--ease-out) backwards;
+    animation-delay: calc(var(--r, 0) * 45ms);
   }
 
   @supports (animation-timeline: view()) {
-    .hero-demo .demo {
-      animation: drift linear both;
+    :is([data-reveal], .trap>.wrap, .tool-list li, .mark-big span) {
+      animation: enter linear forwards;
       animation-timeline: view();
-      animation-range: cover 50% cover 100%;
+      animation-range: entry 0px entry calc(260px + var(--i, 0) * 56px);
     }
 
-    @keyframes drift {
-      to {
-        transform: translateY(-3%);
-      }
+    [data-reveal="fig"] {
+      animation-name: enter-fig;
     }
+
+    .tool-list li {
+      animation-name: enter-side;
+      animation-range: entry 0px entry calc(140px + var(--r, 0) * 14px);
+    }
+
+    .mark-big span {
+      animation-name: grow;
+      transform-origin: bottom;
+      animation-timeline: view(block);
+      animation-range: entry 0px entry calc(220px + var(--r, 0) * 14px);
+    }
+
+    .film-stage::before,
+    .checker-stage::before {
+      animation: drift-up linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+
+@keyframes enter-fig {
+  from {
+    opacity: 0;
+    transform: translateY(56px) scale(0.97);
+  }
+}
+
+@keyframes enter-side {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scaleY(0.2);
+  }
+}
+
+@keyframes drift-up {
+  from {
+    transform: translateY(10%);
+  }
+
+  to {
+    transform: translateY(-10%);
   }
 }
 
@@ -73,15 +119,40 @@
   }
 }
 
+@keyframes shutter {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes settle {
+  to {
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   [data-ui] .stack>*,
-  .js .mode :is(h3, p),
+  .js .mode,
   .js .mode-fig,
+  .modes-stage::before,
   [data-ui] .seg .seg-thumb,
   [data-ui] .meter .bar i,
   [data-ui] input[role="switch"],
   [data-ui] input[role="switch"]::after,
+  .slide::after,
+  .sw i,
+  .sw i::after,
+  .trap,
+  .trap h3,
+  .duo,
   .qa,
   .qa::details-content,
   .qa .pm::before,
@@ -92,20 +163,28 @@
   .lang-btn svg,
   .btn,
   .rules-tabs button,
+  .stops button,
+  .tool-list a::before,
   [data-ui] .dlg-primary {
     transition-duration: 1ms !important;
   }
 
-  [data-ui] .ck-list li {
+  [data-ui] .ck-list li,
+  .trap.is-on .trap-text,
+  .trap.is-on .tf {
     animation: none;
   }
 
   .btn:active,
-  .rules-tabs button:active,
   [data-ui] .dlg-primary:active,
   .link-arrow:hover span,
-  .wordmark:hover .mark {
+  .wordmark:hover .mark,
+  .tool-list a:hover::before {
     transform: none;
+  }
+
+  .sw:active i::after {
+    scale: none;
   }
 }
 

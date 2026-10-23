@@ -30,10 +30,14 @@
   <meta property="og:locale:alternate" content="ja_JP">
   <meta property="og:locale:alternate" content="ko_KR">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..600&display=swap">
   <link rel="stylesheet" href="assets/css/tokens.css">
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/fragments.css">
   <link rel="stylesheet" href="assets/css/hero.css">
+  <link rel="stylesheet" href="assets/css/demo.css">
   <link rel="stylesheet" href="assets/css/modes.css">
   <link rel="stylesheet" href="assets/css/traps.css">
   <link rel="stylesheet" href="assets/css/checker.css">
@@ -41,6 +45,7 @@
   <link rel="stylesheet" href="assets/css/rules.css">
   <link rel="stylesheet" href="assets/css/install.css">
   <link rel="stylesheet" href="assets/css/faq.css">
+  <link rel="stylesheet" href="assets/css/foot.css">
   <link rel="stylesheet" href="assets/css/tables.css">
   <link rel="stylesheet" href="assets/css/motion.css">
   <script src="assets/js/core.js" defer></script>
@@ -53,6 +58,7 @@
   <script src="assets/js/theme.js" defer></script>
   <script src="assets/js/controls.js" defer></script>
   <script src="assets/js/checker.js" defer></script>
+  <script src="assets/js/lens.js" defer></script>
   <script src="assets/js/motion.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </head>
@@ -61,12 +67,14 @@
   <a class="skip" href="#main" data-i18n="skip">跳到主要內容</a>
 
   <header class="top">
-    <div class="wrap grid">
+    <div class="wrap top-row">
       <a class="wordmark" href="#top"><img class="mark" src="assets/img/logo.webp" width="34" height="34" alt="">Threads
         API Skill</a>
       <nav class="top-links" aria-label="站外連結、語言與外觀" data-i18n-aria="nav.aria">
+        <a class="nav-more" href="#benchmark" data-i18n="nav.bench">評測</a>
         <a href="#install" data-i18n="nav.install">安裝</a>
-        <a href="https://github.com/Scorpio-meow/Threads-skill">GitHub</a>
+        <a class="nav-more" href="#faq" data-i18n="nav.faq">常見問題</a>
+        <a class="nav-more" href="https://github.com/Scorpio-meow/Threads-skill">GitHub</a>
         <div class="lang">
           <button type="button" class="lang-btn" id="lang-btn" popovertarget="lang-list"><span class="vh"
               data-i18n="nav.lang">語言</span> <span id="lang-cur" lang="zh-Hant-TW">繁體中文</span><svg viewBox="0 0 10 6"
@@ -108,7 +116,8 @@
   <main id="main">
 
     <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="wrap grid">
+
+      <div class="wrap hero-copy">
         <div class="hero-col">
           <h1 class="hero-title lines" id="hero-title" data-i18n="hero.title"><span class="line"><span data-line
                 style="--i:0">把 Threads API 的眉角</span></span> <span class="line"><span data-line style="--i:1">寫進你的 AI
@@ -129,19 +138,73 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="hero-demo" data-rise style="--i:4">
-          <div class="demo" data-ui role="group" aria-labelledby="demo-cap">
-            <div class="demo-bar">
-              <div class="seg" role="radiogroup" aria-label="切換回覆" data-i18n-aria="demo.seg" style="--n:2">
-                <span class="seg-thumb" aria-hidden="true"></span>
-                <button type="button" role="radio" aria-checked="true" data-variant="with"
-                  data-i18n="demo.with">有技能</button>
-                <button type="button" role="radio" aria-checked="false" data-variant="without" tabindex="-1"
-                  data-i18n="demo.without">沒技能</button>
-              </div>
-              <p class="demo-cap" id="demo-cap" data-i18n="demo.cap">第 3 輪評測第 3 題：同一個模型的真實回覆（節錄）</p>
-            </div>
+      <figure class="stage" data-ui aria-labelledby="lens-cap">
+        <div class="fine" aria-hidden="true">
+          <div class="fine-in">
+            <pre class="fine-block">## 4. Publishing
+Publishing is two steps: create a container, then publish it with creation_id.
+<mark>24 h</mark>: containers not published by then expire.
+Container ID ≠ media ID: only the media ID works for permalink, insights and replies.
+No native scheduling. To post later, the app runs the calls itself.
+<mark>☕️ = 6</mark> of 500: emoji count as UTF-8 bytes, most of them 4.
+Links: at most 5 unique URLs per post, text plus link_attachment.
+is_ghost_post: TEXT only, auto-archives after 24 h.
+<mark>No poll_attachment</mark> on a ghost post; text spoilers only.
+Carousel: 2–20 images or videos, mixing allowed; counts as one post.
+GET /{container-id}?fields=status,error_message
+Wait for <mark>FINISHED</mark>, then publish the container.
+## 5. Reading &amp; search
+Own posts: GET /me/threads returns top-level posts only.
+Paginate with <mark>cursors.after</mark>; there is no next.
+Keyword search: 2,200 queries per 24 h, per user across all apps.
+GET /profile_lookup?username=&lt;exact, no @&gt;
+Lookups need <mark>100 followers</mark>, down from 1,000.
+## 6. Replies &amp; moderation
+POST /{reply-id}/manage_reply with hide=true|false.
+Hide <mark>top-level replies only</mark>; the whole branch goes.
+GET /{media-id}/conversation flattens every level of replies.
+## 8. Auth &amp; permissions
+Strip the trailing <mark>#_</mark> from ?code=…; codes last 1 h.
+Long-lived token: th_exchange_token, about 60 days, server-side only.
+Use the Threads app ID and Threads app secret, not the Facebook pair.
+Refresh once <mark>≥ 24 h old</mark>, and only while unexpired.
+## 9. Quotas
+Per profile, rolling 24 h: 250 posts, 1,000 replies, 100 deletes.
+<mark>threads_publishing_limit</mark> first, then batch-post.
+## 11. Embedding
+oEmbed: GET /v1.0/oembed?url=…&amp;maxwidth=320–658, no token since 2026-03-03.
+Deleted post: <mark>code 24</mark>, HTTP 400, no token needed.
+maxwidth outside 320–658 → HTTP 500, code 100: a validation error, don't retry.
+A &lt;script&gt; inserted through innerHTML never runs.
+<mark>Embeds.process()</mark> rescans after inserting.
+</pre>
+          </div>
+        </div>
+        <div class="lens">
+          <div class="lens-in"></div>
+        </div>
+        <figcaption class="lens-cap" id="lens-cap" data-i18n="hero.lens">SKILL.md 裡的細則，放大來看</figcaption>
+      </figure>
+    </section>
+
+    <section class="duo" id="demo" aria-labelledby="demo-title" data-variant="with">
+      <div class="wrap grid">
+        <div class="duo-head">
+          <h2 class="sec-title" id="demo-title" data-reveal data-i18n="demo.title"><span class="tk">同一個要求，</span><span class="tk">兩種回答</span></h2>
+          <p class="duo-cap" data-reveal style="--i:1" data-i18n="demo.cap">第 3 輪評測第 3 題：同一個模型的真實回覆（節錄）</p>
+        </div>
+        <div class="duo-switch" data-ui data-reveal="fig" style="--i:2">
+          <div class="seg seg-xl" role="radiogroup" aria-label="切換回覆" data-i18n-aria="demo.seg" style="--n:2">
+            <span class="seg-thumb" aria-hidden="true"></span>
+            <button type="button" role="radio" aria-checked="true" data-variant="with"
+              data-i18n="demo.with">有技能</button>
+            <button type="button" role="radio" aria-checked="false" data-variant="without" tabindex="-1"
+              data-i18n="demo.without">沒技能</button>
+          </div>
+        </div>
+        <div class="demo" data-ui role="group" aria-labelledby="demo-title" data-reveal="fig" style="--i:3">
             <div class="demo-main">
               <div class="chat">
                 <div class="bubble">
@@ -289,51 +352,58 @@ poll_attachment={"option_a": "淺焙", "option_b": "深焙"}</code></pre>
                     <p class="checks-sum" data-i18n="g.sumWithout">其餘 5 項都通過</p>
                   </div>
                 </div>
-                <a class="grader-link" href="#benchmark" data-i18n="g.more">看七輪評測的結果</a>
+                <a class="grader-link" href="#benchmark" data-i18n="g.more">看十輪評測的結果</a>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </section>
 
-    <section class="tools">
-      <div class="wrap">
-        <p class="tools-row" data-reveal>
-          <span class="tools-lead" id="tools-lead" data-i18n="tools.lead">可以裝在</span>
-          <a href="https://code.claude.com/docs/en/skills">Claude Code</a>
-          <a href="https://help.openai.com/en/articles/20001066-skills-in-chatgpt">ChatGPT</a>
-          <a href="https://learn.chatgpt.com/docs/build-skills">OpenAI Codex</a>
-          <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills">GitHub
-            Copilot</a>
-          <a href="https://cursor.com/docs/skills">Cursor</a>
-          <a href="https://geminicli.com/docs/cli/skills/">Gemini CLI</a>
-          <a href="https://antigravity.google/docs/skills">Google Antigravity</a>
-          <a href="https://docs.devin.ai/desktop/cascade/skills">Devin Desktop</a>
-          <a href="https://opencode.ai/docs/skills">OpenCode</a>
-          <a href="https://docs.cline.bot/customization/skills">Cline</a>
-          <a href="https://kiro.dev/docs/skills/">Kiro</a>
-          <a href="https://junie.jetbrains.com/docs/agent-skills.html">JetBrains Junie</a>
-          <a href="https://roocodeinc.github.io/Roo-Code/features/skills/">Roo Code</a>
-        </p>
+    <section class="film" id="film" aria-labelledby="film-title">
+      <div class="wrap grid">
+        <div class="film-head">
+          <h2 class="sec-title" id="film-title" data-reveal data-i18n="film.title"><span class="tk">47 秒看完</span><span class="tk">整個技能</span></h2>
+          <p class="lede" data-reveal style="--i:1" data-i18n="film.body">同一個要求的兩種回答、三種工作、送出前的檢查，再到評測結果。影片是英文，有配樂。</p>
+        </div>
+        <figure class="film-stage" data-reveal="fig" style="--i:2">
+          <video class="film-video" width="1920" height="1080" controls muted loop playsinline preload="none"
+            poster="assets/media/threads-api-skill-01-cover.png" aria-label="Threads API Skill 示範影片"
+            data-i18n-aria="film.aria">
+            <source src="assets/media/threads-api-skill-demo.mp4" type="video/mp4">
+          </video>
+        </figure>
       </div>
     </section>
 
     <section class="modes" id="modes" aria-labelledby="modes-title">
-      <div class="wrap grid">
-        <div class="modes-head">
-          <h2 class="sec-title" id="modes-title" data-reveal data-i18n="modes.title">一個技能，三種工作</h2>
-          <p class="lede" data-reveal style="--i:1" data-i18n="modes.lede">問一句跟 Threads API
-            有關的事，技能就會自動啟用，再依你要的是程式、操作帳號還是網頁嵌入，換一套做法。</p>
-        </div>
-        <div class="modes-grid" data-modes>
+      <div class="wrap grid modes-head">
+        <h2 class="sec-title" id="modes-title" data-reveal data-i18n="modes.title">一個技能，三種工作</h2>
+        <p class="lede" data-reveal style="--i:1" data-i18n="modes.lede">問一句跟 Threads API
+          有關的事，技能就會自動啟用，再依你要的是程式、操作帳號還是網頁嵌入，換一套做法。</p>
+      </div>
+      <div class="modes-split" data-modes style="--k:0">
+        <div class="modes-text">
           <article class="mode is-active" data-step="0">
             <h3 data-i18n="m1.title">寫程式、查問題</h3>
             <p data-i18n="m1.body">沿用專案現有的語言和寫法（Node.js、Python、C#、Go 都行，沒有專案時用 Python），把文件規則直接寫進程式：token
               從環境變數讀、發文走完整流程、送出前先在本機檢查、4xx 錯誤不盲目重試。</p>
             <p class="ask" data-i18n="m1.ask">「幫我用 TypeScript 寫一個每天抓 Threads 貼文數據的排程，token 要能自動續期。」</p>
           </article>
-          <figure class="mode-fig is-active" data-step="0" data-reveal="fig">
+          <article class="mode" data-step="1">
+            <h3 data-i18n="m2.title">直接操作你的帳號</h3>
+            <p data-i18n="m2.body">用你的 token 發文、回覆、查數據、隱藏留言。先呼叫 <code>GET /me</code>
+              告訴你要操作哪個帳號；發文、刪文、隱藏留言之前，列出完整內文和每個參數，等你明確同意。只是查資料就不必確認。</p>
+            <p class="ask" data-i18n="m2.ask">「把我最新一篇貼文底下提到『加賴』的留言隱藏起來。」</p>
+          </article>
+          <article class="mode" data-step="2">
+            <h3 data-i18n="m3.title">把貼文嵌入網站</h3>
+            <p data-i18n="m3.body">用 oEmbed 取得嵌入碼（2026 年 3 月起不需要 token），整頁只載入一次 embed.js，插入貼文後呼叫
+              <code>instgrm.Embeds.process()</code>。一頁放很多則時依序載入，失敗的換成連回原文的卡片。</p>
+            <p class="ask" data-i18n="m3.ask">「幫我做一面 60 則精選貼文的展示牆，並每週自動檢查哪些貼文已經被刪掉。」</p>
+          </article>
+        </div>
+        <div class="modes-stage">
+          <figure class="mode-fig is-active" data-step="0">
             <div class="panel" data-ui>
               <p class="panel-tab"><b>threads_client.py</b><span data-i18n="m1.tab">技能內建的參考用戶端・publish()</span></p>
               <pre class="code"><code>container = call(<span class="s">"POST"</span>, <span class="s">f"{user}/threads"</span>, spec)
@@ -353,14 +423,7 @@ result.update(media)
               <p class="panel-tab"><span data-i18n="m1.note">建立 container → 等到 FINISHED → 發佈 → 只查 permalink</span></p>
             </div>
           </figure>
-
-          <article class="mode" data-step="1">
-            <h3 data-i18n="m2.title">直接操作你的帳號</h3>
-            <p data-i18n="m2.body">用你的 token 發文、回覆、查數據、隱藏留言。先呼叫 <code>GET /me</code>
-              告訴你要操作哪個帳號；發文、刪文、隱藏留言之前，列出完整內文和每個參數，等你明確同意。只是查資料就不必確認。</p>
-            <p class="ask" data-i18n="m2.ask">「把我最新一篇貼文底下提到『加賴』的留言隱藏起來。」</p>
-          </article>
-          <figure class="mode-fig" data-step="1" data-reveal="fig">
+          <figure class="mode-fig" data-step="1">
             <div class="panel" data-ui>
               <p class="panel-tab"><b data-i18n="m2.tabA">終端機</b><span data-i18n="m2.tab">參考用戶端的指令與輸出格式（示意）</span></p>
               <pre class="code"><code><span class="prompt">$ </span>python3 threads_client.py get me fields=id,username
@@ -386,14 +449,7 @@ result.update(media)
 }</code></pre>
             </div>
           </figure>
-
-          <article class="mode" data-step="2">
-            <h3 data-i18n="m3.title">把貼文嵌入網站</h3>
-            <p data-i18n="m3.body">用 oEmbed 取得嵌入碼（2026 年 3 月起不需要 token），整頁只載入一次 embed.js，插入貼文後呼叫
-              <code>instgrm.Embeds.process()</code>。一頁放很多則時依序載入，失敗的換成連回原文的卡片。</p>
-            <p class="ask" data-i18n="m3.ask">「幫我做一面 60 則精選貼文的展示牆，並每週自動檢查哪些貼文已經被刪掉。」</p>
-          </article>
-          <figure class="mode-fig" data-step="2" data-reveal="fig">
+          <figure class="mode-fig" data-step="2">
             <div class="panel" data-ui>
               <p class="panel-tab"><b>wall.html</b><span data-i18n="m3.tab">嵌入貼文的寫法</span></p>
               <pre class="code"><code><span class="c">&lt;!-- </span><span class="c" data-i18n="m3.c1">整頁只載入一次</span><span class="c"> --&gt;</span>
@@ -414,18 +470,36 @@ frame-src <span class="k">https://www.threads.com</span>;</code></pre>
             </div>
           </figure>
         </div>
+        <div class="modes-range" data-ui>
+          <div class="slide" style="--p:0">
+            <input type="range" id="mode-range" min="0" max="2" step="1" value="0" aria-label="切換工作"
+              data-i18n-aria="m.range" aria-valuetext="寫程式、查問題">
+          </div>
+          <ul class="stops">
+            <li><button type="button" data-go="0" aria-current="true" data-i18n="m1.title">寫程式、查問題</button></li>
+            <li><button type="button" data-go="1" data-i18n="m2.title">直接操作你的帳號</button></li>
+            <li><button type="button" data-go="2" data-i18n="m3.title">把貼文嵌入網站</button></li>
+          </ul>
+        </div>
       </div>
     </section>
 
     <section class="traps" id="traps" aria-labelledby="traps-title">
-      <div class="wrap grid">
-        <div class="traps-head">
-          <h2 class="sec-title" id="traps-title" data-reveal data-i18n="traps.title">沒裝技能時，錯在文件細節</h2>
-          <p class="lede" data-reveal style="--i:1" data-i18n="traps.lede">
-            以下都是評測裡發生過的：同一個模型沒裝技能時答錯，裝了技能就沒再犯。錯的多半不是程式，而是藏在文件細節和最近 changelog 裡的規則。</p>
-        </div>
-
-        <div class="trap">
+      <div class="wrap grid traps-head">
+        <h2 class="sec-title" id="traps-title" data-reveal data-i18n="traps.title">沒裝技能時，錯在文件細節</h2>
+        <p class="lede" data-reveal style="--i:1" data-i18n="traps.lede">
+          以下都是評測裡發生過的：同一個模型沒裝技能時答錯，裝了技能就沒再犯。錯的多半不是程式，而是藏在文件細節和最近 changelog 裡的規則。</p>
+      </div>
+      <ul class="trap-list">
+        <li class="trap is-on" data-tone="a">
+          <div class="wrap grid">
+            <h3 id="t1-h" data-i18n="t1.title">查公開帳號，門檻是 100 位粉絲</h3>
+            <button type="button" class="sw" role="switch" aria-checked="true" aria-describedby="t1-h"><span
+                data-i18n="tr.sw">技能</span><i aria-hidden="true"></i></button>
+            <div class="trap-text">
+            <p class="was" data-i18n="t1.was"><b>沒技能時：</b>說 <code>profile_lookup</code> 只查得到粉絲 1,000 人以上的帳號，或完全沒提門檻。</p>
+            <p data-i18n="t1.doc"><b>文件寫的：</b>門檻在 2025 年 11 月已經降到 100。只查得到公開帳號，用戶名要完全一致、不加 @。</p>
+            </div>
           <div class="tf" data-ui data-reveal="fig">
             <p class="tf-label"><code>GET /profile_lookup?username=…</code></p>
             <div class="thr">
@@ -433,14 +507,17 @@ frame-src <span class="k">https://www.threads.com</span>;</code></pre>
               <div class="thr-row now"><span data-i18n="t1.new">粉絲門檻，2025 年 11 月起</span><b>100</b></div>
             </div>
           </div>
-          <div class="trap-text" data-reveal style="--i:1">
-            <h3 data-i18n="t1.title">查公開帳號，門檻是 100 位粉絲</h3>
-            <p class="was" data-i18n="t1.was"><b>沒技能時：</b>說 <code>profile_lookup</code> 只查得到粉絲 1,000 人以上的帳號，或完全沒提門檻。</p>
-            <p data-i18n="t1.doc"><b>文件寫的：</b>門檻在 2025 年 11 月已經降到 100。只查得到公開帳號，用戶名要完全一致、不加 @。</p>
           </div>
-        </div>
-
-        <div class="trap">
+        </li>
+        <li class="trap is-on" data-tone="b">
+          <div class="wrap grid">
+            <h3 id="t2-h" data-i18n="t2.title">巢狀回覆不能單獨隱藏</h3>
+            <button type="button" class="sw" role="switch" aria-checked="true" aria-describedby="t2-h"><span
+                data-i18n="tr.sw">技能</span><i aria-hidden="true"></i></button>
+            <div class="trap-text">
+            <p class="was" data-i18n="t2.was"><b>沒技能時：</b>先對巢狀回覆本身呼叫隱藏，失敗了才改處理上層留言。</p>
+            <p data-i18n="t2.doc"><b>文件寫的：</b><code>manage_reply</code> 只對第一層留言有效，而且會連同底下整串一起隱藏。技能會先說明這個取捨，再讓你決定。</p>
+            </div>
           <div class="tf" data-ui data-reveal="fig">
             <p class="tf-label"><span data-i18n="t2.label">你的貼文底下的留言</span><code>POST /{reply-id}/manage_reply</code>
             </p>
@@ -465,14 +542,17 @@ frame-src <span class="k">https://www.threads.com</span>;</code></pre>
               </div>
             </div>
           </div>
-          <div class="trap-text" data-reveal style="--i:1">
-            <h3 data-i18n="t2.title">巢狀回覆不能單獨隱藏</h3>
-            <p class="was" data-i18n="t2.was"><b>沒技能時：</b>先對巢狀回覆本身呼叫隱藏，失敗了才改處理上層留言。</p>
-            <p data-i18n="t2.doc"><b>文件寫的：</b><code>manage_reply</code> 只對第一層留言有效，而且會連同底下整串一起隱藏。技能會先說明這個取捨，再讓你決定。</p>
           </div>
-        </div>
-
-        <div class="trap">
+        </li>
+        <li class="trap" data-tone="c">
+          <div class="wrap grid">
+            <h3 id="t3-h" data-i18n="t3.title">翻頁要讀 cursors.after</h3>
+            <button type="button" class="sw" role="switch" aria-checked="false" aria-describedby="t3-h"><span
+                data-i18n="tr.sw">技能</span><i aria-hidden="true"></i></button>
+            <div class="trap-text">
+            <p class="was" data-i18n="t3.was"><b>沒技能時：</b>翻頁只跟著 <code>paging.next</code> 走。</p>
+            <p data-i18n="t3.doc"><b>文件寫的：</b>貼文列表的回應只有 cursors，沒有 next。只等 next 的程式，照文件的說法只會抓到第一頁。</p>
+            </div>
           <div class="tf" data-ui data-reveal="fig">
             <p class="tf-label"><code>GET /me/threads?fields=id,text&amp;limit=25</code></p>
             <pre class="code"><code>{
@@ -485,14 +565,17 @@ frame-src <span class="k">https://www.threads.com</span>;</code></pre>
   }
 }  <span class="c">// </span><span class="c" data-i18n="t3.c">沒有 "next"</span></code></pre>
           </div>
-          <div class="trap-text" data-reveal style="--i:1">
-            <h3 data-i18n="t3.title">翻頁要讀 cursors.after</h3>
-            <p class="was" data-i18n="t3.was"><b>沒技能時：</b>翻頁只跟著 <code>paging.next</code> 走。</p>
-            <p data-i18n="t3.doc"><b>文件寫的：</b>貼文列表的回應只有 cursors，沒有 next。只等 next 的程式，照文件的說法只會抓到第一頁。</p>
           </div>
-        </div>
-
-        <div class="trap">
+        </li>
+        <li class="trap" data-tone="a">
+          <div class="wrap grid">
+            <h3 id="t4-h" data-i18n="t4.title">token 續期有條件</h3>
+            <button type="button" class="sw" role="switch" aria-checked="false" aria-describedby="t4-h"><span
+                data-i18n="tr.sw">技能</span><i aria-hidden="true"></i></button>
+            <div class="trap-text">
+            <p class="was" data-i18n="t4.was"><b>沒技能時：</b>續期前沒檢查 token 是否已發出滿 24 小時、而且還沒過期。</p>
+            <p data-i18n="t4.doc"><b>文件寫的：</b>長效 token 約 60 天到期，發出滿 24 小時、還沒過期時才能續；新 token 和到期時間要一起存好。</p>
+            </div>
           <div class="tf" data-ui data-reveal="fig">
             <p class="tf-label"><span data-i18n="t4.label">長效 token 的一生</span><code>th_refresh_token</code></p>
             <div class="tl">
@@ -509,14 +592,18 @@ frame-src <span class="k">https://www.threads.com</span>;</code></pre>
               </div>
             </div>
           </div>
-          <div class="trap-text" data-reveal style="--i:1">
-            <h3 data-i18n="t4.title">token 續期有條件</h3>
-            <p class="was" data-i18n="t4.was"><b>沒技能時：</b>續期前沒檢查 token 是否已發出滿 24 小時、而且還沒過期。</p>
-            <p data-i18n="t4.doc"><b>文件寫的：</b>長效 token 約 60 天到期，發出滿 24 小時、還沒過期時才能續；新 token 和到期時間要一起存好。</p>
           </div>
-        </div>
-
-        <div class="trap">
+        </li>
+        <li class="trap" data-tone="b">
+          <div class="wrap grid">
+            <h3 id="t5-h" data-i18n="t5.title">embed.js 會重新掃描頁面</h3>
+            <button type="button" class="sw" role="switch" aria-checked="false" aria-describedby="t5-h"><span
+                data-i18n="tr.sw">技能</span><i aria-hidden="true"></i></button>
+            <div class="trap-text">
+            <p class="was" data-i18n="t5.was"><b>沒技能時：</b>以為 embed.js 只在載入時掃描一次，於是把每則貼文各包進一個 iframe 頁面。</p>
+            <p data-i18n="t5.doc"><b>技能寫的：</b>用 innerHTML 塞進去的 <code>&lt;script&gt;</code> 不會執行。整頁載入一次 embed.js，插入貼文後呼叫
+              <code>process()</code> 就會重新掃描。這部分官方沒有文件，是 2026 年 10 月讀 embed.js 程式碼觀察到的。</p>
+            </div>
           <div class="tf" data-ui data-reveal="fig">
             <p class="tf-label"><span data-i18n="t5.label">把貼文加進頁面</span><code>embed.js</code></p>
             <div class="vs">
@@ -529,15 +616,18 @@ window.instgrm?.Embeds?.process();</code></pre>
               </div>
             </div>
           </div>
-          <div class="trap-text" data-reveal style="--i:1">
-            <h3 data-i18n="t5.title">embed.js 會重新掃描頁面</h3>
-            <p class="was" data-i18n="t5.was"><b>沒技能時：</b>以為 embed.js 只在載入時掃描一次，於是把每則貼文各包進一個 iframe 頁面。</p>
-            <p data-i18n="t5.doc"><b>技能寫的：</b>用 innerHTML 塞進去的 <code>&lt;script&gt;</code> 不會執行。整頁載入一次 embed.js，插入貼文後呼叫
-              <code>process()</code> 就會重新掃描。這部分官方沒有文件，是 2026 年 10 月讀 embed.js 程式碼觀察到的。</p>
           </div>
-        </div>
-
-        <div class="trap">
+        </li>
+        <li class="trap" data-tone="c">
+          <div class="wrap grid">
+            <h3 id="t6-h" data-i18n="t6.title">檢查貼文是否被刪，不用 token</h3>
+            <button type="button" class="sw" role="switch" aria-checked="false" aria-describedby="t6-h"><span
+                data-i18n="tr.sw">技能</span><i aria-hidden="true"></i></button>
+            <div class="trap-text">
+            <p class="was" data-i18n="t6.was"><b>沒技能時：</b>以為要先有 Meta App 和 token 才能準確檢查，改去爬 threads.com 的頁面。</p>
+            <p data-i18n="t6.doc"><b>文件寫的：</b>oEmbed 從 2026 年 3 月起不需要 token。貼文不存在時回明確的
+              <code>code 24</code>，只有這時才從清單移除，其他錯誤都當成暫時性問題。</p>
+            </div>
           <div class="tf" data-ui data-reveal="fig">
             <p class="tf-label"><code>GET /v1.0/oembed?url=…</code><span>HTTP 400</span></p>
             <pre class="code"><code>{
@@ -549,17 +639,12 @@ window.instgrm?.Embeds?.process();</code></pre>
   }
 }</code></pre>
           </div>
-          <div class="trap-text" data-reveal style="--i:1">
-            <h3 data-i18n="t6.title">檢查貼文是否被刪，不用 token</h3>
-            <p class="was" data-i18n="t6.was"><b>沒技能時：</b>以為要先有 Meta App 和 token 才能準確檢查，改去爬 threads.com 的頁面。</p>
-            <p data-i18n="t6.doc"><b>文件寫的：</b>oEmbed 從 2026 年 3 月起不需要 token。貼文不存在時回明確的
-              <code>code 24</code>，只有這時才從清單移除，其他錯誤都當成暫時性問題。</p>
           </div>
-        </div>
-      </div>
+        </li>
+      </ul>
     </section>
 
-    <section class="checker" id="checker" aria-labelledby="checker-title" style="padding-top: var(--section)">
+    <section class="checker" id="checker" aria-labelledby="checker-title">
       <div class="wrap grid">
         <div class="checker-head">
           <h2 class="sec-title" id="checker-title" data-reveal data-i18n="ck.title">送出前先檢查</h2>
@@ -655,9 +740,18 @@ is_ghost_post=true</code></pre>
     </section>
 
     <section class="bench" id="benchmark" aria-labelledby="bench-title">
-      <div class="wrap grid">
-        <h2 class="bench-title" id="bench-title" data-reveal data-i18n="b.title"><span class="soft">裝了技能，</span>
-          <span>平均通過率高出</span></h2>
+      <div class="bench-stat">
+        <div class="wrap grid">
+          <h2 class="bench-title" id="bench-title" data-reveal data-i18n="b.title"><span class="soft">裝了技能，</span>
+            <span>平均通過率高出</span></h2>
+          <div class="dial" data-ui data-reveal style="--i:1">
+            <p class="dial-row"><label for="b-round" data-i18n="b.slider">選一輪評測</label><output id="b-round-out"
+                for="b-round">第 10 輪</output></p>
+            <div class="slide" style="--p:1"><input type="range" id="b-round" min="1" max="10" step="1" value="10"></div>
+          </div>
+          <p class="bench-fig" data-reveal style="--i:2"><span class="fig" id="b-fig">46</span><span
+              class="unit" id="b-unit">個百分點，第 10 輪</span></p>
+          <p class="bench-how" data-reveal style="--i:3"><span id="b-note">100% 對 54%。新增只限登入者觀看的貼文一題，並重跑 React 元件題，有技能 17 項全過；沒技能也推論得出要登入，差距比較小</span> <span data-i18n="b.how">算法：同一輪、同一個模型，有技能的平均通過率減去沒技能的。</span></p>
         <ol class="ledger">
           <li data-reveal><span class="fig" data-count="24">24</span><span class="cap"><b data-i18n="b.r1">個百分點，第 1
                 輪</b><span data-i18n="b.r1n">100% 對 76%。3 題：Python 輪播發文、TypeScript 數據排程、代發限時貼文</span></span></li>
@@ -681,9 +775,21 @@ is_ghost_post=true</code></pre>
                 data-i18n="b.r7">個百分點，第 7 輪</b><span data-i18n="b.r7n">100% 對 77%。參考用戶端搬到 scripts/
                 後重跑全部 10 題，有技能 77 項全過；這輪兩邊同樣不能上網</span></span>
           </li>
+          <li data-reveal style="--i:7"><span class="fig" data-count="58">58</span><span class="cap"><b
+                data-i18n="b.r8">個百分點，第 8 輪</b><span data-i18n="b.r8n">100% 對 42%。嵌入貼文一節改寫後，測第 6 題和新增的擴充功能預覽、React
+                元件兩題；這輪兩邊都不能上網</span></span>
+          </li>
+          <li data-reveal style="--i:8"><span class="fig" data-count="59">59</span><span class="cap"><b
+                data-i18n="b.r9">個百分點，第 9 輪</b><span data-i18n="b.r9n">100% 對 41%。用 1.5 版重跑同樣三題，每題多一個檢查項目，有技能
+                27 項全過</span></span>
+          </li>
+          <li data-reveal style="--i:9"><span class="fig" data-count="46">46</span><span class="cap"><b
+                data-i18n="b.r10">個百分點，第 10 輪</b><span data-i18n="b.r10n">100% 對 54%。新增只限登入者觀看的貼文一題，並重跑 React 元件題，有技能 17 項全過；沒技能也推論得出要登入，差距比較小</span></span>
+          </li>
         </ol>
-
-        <div class="bench-detail">
+        </div>
+      </div>
+      <div class="wrap grid bench-detail">
           <div class="tbl-wrap" data-reveal>
             <table class="stack-table" style="--cols:3">
               <caption data-i18n="b.cap">每題通過的檢查項目數：粗體是有技能，後面是沒技能</caption>
@@ -697,6 +803,9 @@ is_ghost_post=true</code></pre>
                   <th scope="col" data-i18n="b.c5">第 5 輪</th>
                   <th scope="col" data-i18n="b.c6">第 6 輪</th>
                   <th scope="col" data-i18n="b.c7">第 7 輪</th>
+                  <th scope="col" data-i18n="b.c8">第 8 輪</th>
+                  <th scope="col" data-i18n="b.c9">第 9 輪</th>
+                  <th scope="col" data-i18n="b.c10">第 10 輪</th>
                 </tr>
               </thead>
               <tbody>
@@ -709,6 +818,9 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>8/8</b><span>8/8</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q2">TypeScript 每日數據排程與 token 續期</th>
@@ -719,6 +831,9 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>9/9</b><span>8/9</span></td>
                   <td><b>9/9</b><span>7/9</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q3">代發附投票的限時貼文</th>
@@ -729,6 +844,9 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>7/7</b><span>6/7</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q4">搜尋、地點、查帳號結果異常的原因</th>
@@ -739,6 +857,9 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>6/6</b><span>5/6</span></td>
                   <td><b>7/7</b><span>5/7</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q5">自動隱藏含關鍵字的留言</th>
@@ -749,6 +870,9 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>7/7</b><span>6/7</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q6">60 則貼文牆與每週檢查被刪貼文</th>
@@ -759,6 +883,9 @@ is_ghost_post=true</code></pre>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>8/8</b><span>3/8</span></td>
+                  <td><b>8/8</b><span>3/8</span></td>
+                  <td><b>9/9</b><span>4/9</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q7">FastAPI 接收留言與提及的 webhook</th>
@@ -769,6 +896,9 @@ is_ghost_post=true</code></pre>
                   <td><b>8/8</b><span>8/8</span></td>
                   <td><b>8/8</b><span>6/8</span></td>
                   <td><b>8/8</b><span>6/8</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q8">Express 的 OAuth 登入與長期 token 續期</th>
@@ -779,6 +909,9 @@ is_ghost_post=true</code></pre>
                   <td><b>8/8</b><span>7/8</span></td>
                   <td><b>8/8</b><span>7/8</span></td>
                   <td><b>8/8</b><span>7/8</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q9">審查一段出錯的 Python 發文程式</th>
@@ -789,6 +922,9 @@ is_ghost_post=true</code></pre>
                   <td><b>8/8</b><span>6/8</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>8/8</b><span>6/8</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                 </tr>
                 <tr>
                   <th scope="row" data-i18n="b.q10">隔天早上 8 點代發含 emoji 的串文</th>
@@ -799,6 +935,48 @@ is_ghost_post=true</code></pre>
                   <td><b>7/7</b><span>6/7</span></td>
                   <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
                   <td><b>7/7</b><span>5/7</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                </tr>
+                <tr>
+                  <th scope="row" data-i18n="b.q11">Chrome 擴充功能直接嵌 /embed/ 的預覽</th>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>8/8</b><span>4/8</span></td>
+                  <td><b>9/9</b><span>4/9</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                </tr>
+                <tr>
+                  <th scope="row" data-i18n="b.q12">React 元件裡的嵌入卡片</th>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>8/8</b><span>3/8</span></td>
+                  <td><b>9/9</b><span>3/9</span></td>
+                  <td><b>9/9</b><span>3/9</span></td>
+                </tr>
+                <tr>
+                  <th scope="row" data-i18n="b.q13">只限登入者觀看的貼文</th>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td class="na"><span aria-hidden="true">–</span><span class="vh" data-i18n="b.na">未測</span></td>
+                  <td><b>8/8</b><span>6/8</span></td>
                 </tr>
               </tbody>
               <tfoot>
@@ -811,6 +989,9 @@ is_ghost_post=true</code></pre>
                   <td><b>100%</b><span>87%</span></td>
                   <td><b>100%</b><span>84%</span></td>
                   <td><b>100%</b><span>77%</span></td>
+                  <td><b>100%</b><span>42%</span></td>
+                  <td><b>100%</b><span>41%</span></td>
+                  <td><b>100%</b><span>54%</span></td>
                 </tr>
               </tfoot>
             </table>
@@ -818,19 +999,18 @@ is_ghost_post=true</code></pre>
           <div class="bench-notes" data-reveal style="--i:1">
             <p data-i18n="b.n1">每題在兩種設定下各跑一次，再由沒參與作答的評分者，照事先寫好的檢查項目逐條判定，並附上證據。作答、評分都用 <code>claude-opus-5-5</code>。</p>
             <p data-i18n="b.n2">樣本很小，數字只能看方向：第 2 題沒技能的版本前兩輪都在翻頁和 token 續期上失分，第 3 輪卻拿到滿分。測試只在 Claude 上跑過；第 1–4 輪的 API
-              呼叫都打在評分者架的模擬伺服器上，第 5 輪則由評分者閱讀程式碼判定，第 6、7 輪則由評分者重跑作答者的測試，再用自己寫的模擬實測。技能本身要讀進約 1.1 萬 token，所以第 1 輪有技能比較慢；第 2、3 輪反而比較快，評分者認為是少了試錯。</p>
+              呼叫都打在評分者架的模擬伺服器上，第 5 輪則由評分者閱讀程式碼判定，第 6、7 輪則由評分者重跑作答者的測試，再用自己寫的模擬實測；第 8–10 輪也一樣，並把純數字的高度回報直接送進作答者的處理函式，確認會不會套用。技能本身要讀進約 1.1 萬 token，所以第 1 輪有技能比較慢；第 2、3 輪反而比較快，評分者認為是少了試錯。</p>
             <p class="links"><a class="link-arrow"
-                href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md" data-bench><b
+                href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md" data-md="BENCHMARK"><b
                   data-i18n="b.l1" style="font-weight:600">Benchmark 摘要與每個失分原因</b><span
                   aria-hidden="true">→</span></a><a class="link-arrow"
                 href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/evals.json"><b data-i18n="b.l2"
                   style="font-weight:600">題目與檢查項目</b><span aria-hidden="true">→</span></a></p>
           </div>
-        </div>
       </div>
     </section>
 
-    <section class="rules" id="rules" aria-labelledby="rules-title" style="padding-top: var(--section)">
+    <section class="rules" id="rules" aria-labelledby="rules-title">
       <div class="wrap grid">
         <div class="rules-head">
           <h2 class="rules-title" id="rules-title" data-reveal data-i18n="r.title"><span class="soft">技能裡寫了什麼</span>
@@ -839,9 +1019,8 @@ is_ghost_post=true</code></pre>
             data-reveal style="--i:1"><b data-i18n="r.read" style="font-weight:600">讀完整的 SKILL.md</b><span
               aria-hidden="true">→</span></a>
         </div>
-        <p class="rules-note" data-reveal style="--i:2" data-i18n="r.note">文件快照涵蓋到 2026-08-18 的 changelog。標成
+        <p class="rules-note" data-reveal style="--i:2" data-i18n="r.note">官方文件在 2026-10-23 同步，涵蓋到 2026-08-18 的 changelog。標成
           <i>practice</i> 的是工程建議，<i>observed</i> 是實測結果，其餘都出自 Meta 官方文件。下面挑出各節最常用到的數字。</p>
-
         <div class="rules-body">
           <div class="rules-tabs" role="tablist" aria-label="技能章節" data-i18n-aria="r.tabs" aria-orientation="vertical">
             <button type="button" role="tab" id="tab-pub" aria-controls="pn-pub" aria-selected="true"><b
@@ -961,8 +1140,8 @@ is_ghost_post=true</code></pre>
                       data-i18n="a4.t">權限授予的期限</b><span data-i18n="a4.d">公開帳號續期會一起延長；私人帳號不能延長，每 90
                       天要重新授權</span></span><code>data_access_expires_at</code></li>
                 <li style="--r:4"><span class="key">11</span><span class="what"><b data-i18n="a5.t">threads_*
-                      權限</b><span data-i18n="a5.d">App Review 通過前，只能用在自己和 Threads
-                      測試人員的帳號</span></span><code>threads_basic</code></li>
+                      權限</b><span data-i18n="a5.d">App Review 通過前，只能用在 App 的 Threads
+                      測試人員帳號（自己的帳號也要加入）</span></span><code>threads_basic</code></li>
                 <li style="--r:5"><span class="key" data-i18n="a6.k">2 組</span><span class="what"><b
                       data-i18n="a6.t">App ID 和密鑰</b><span data-i18n="a6.d">要用 Threads 那一組，不是 Facebook
                       那一組</span></span><code>THREADS_APP_ID</code></li>
@@ -1033,6 +1212,36 @@ is_ghost_post=true</code></pre>
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="tools" id="tools" aria-labelledby="tools-title">
+      <div class="wrap grid">
+        <div class="tools-copy">
+          <h2 class="sec-title" id="tools-title" data-reveal data-i18n="tl.title">裝在你用的工具裡</h2>
+          <p class="lede" data-reveal style="--i:1" data-i18n="tl.body">一份 SKILL.md，13 種工具都讀得懂。右邊是各工具的個人技能資料夾，手動安裝時把
+            threads-api 資料夾放進去就好。</p>
+        </div>
+        <ul class="tool-list" data-reveal style="--i:2">
+          <li><a href="https://code.claude.com/docs/en/skills">Claude Code</a><code>~/.claude/skills/</code></li>
+          <li><a href="https://help.openai.com/en/articles/20001066-skills-in-chatgpt">ChatGPT</a><span
+              data-i18n="tl.zip">上傳 ZIP</span></li>
+          <li><a href="https://learn.chatgpt.com/docs/build-skills">OpenAI Codex</a><code>~/.agents/skills/</code></li>
+          <li><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills">GitHub
+              Copilot</a><code>~/.copilot/skills/</code></li>
+          <li><a href="https://cursor.com/docs/skills">Cursor</a><code>~/.cursor/skills/</code></li>
+          <li><a href="https://geminicli.com/docs/cli/skills/">Gemini CLI</a><code>~/.gemini/skills/</code></li>
+          <li><a href="https://antigravity.google/docs/skills">Google Antigravity</a><code>~/.gemini/config/skills/</code>
+          </li>
+          <li><a href="https://docs.devin.ai/desktop/cascade/skills">Devin Desktop</a><code>~/.config/devin/skills/</code>
+          </li>
+          <li><a href="https://opencode.ai/docs/skills">OpenCode</a><code>~/.config/opencode/skills/</code></li>
+          <li><a href="https://docs.cline.bot/customization/skills">Cline</a><code>~/.cline/skills/</code></li>
+          <li><a href="https://kiro.dev/docs/skills/">Kiro</a><code>~/.kiro/skills/</code></li>
+          <li><a href="https://junie.jetbrains.com/docs/agent-skills.html">JetBrains Junie</a><code>~/.junie/skills/</code>
+          </li>
+          <li><a href="https://roocodeinc.github.io/Roo-Code/features/skills/">Roo Code</a><code>~/.roo/skills/</code></li>
+        </ul>
       </div>
     </section>
 
@@ -1252,14 +1461,14 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
                   </tbody>
                 </table>
               </div>
-              <p data-i18n="f5.b">權限在 App Review 通過前只能用在自己和測試人員的帳號，部分功能的結果也會受限，例如關鍵字搜尋只找得到自己的貼文。</p>
+              <p data-i18n="f5.b">權限在 App Review 通過前只能用在 App 的測試人員帳號（自己的帳號也要加成測試人員），部分功能的結果也會受限，例如關鍵字搜尋只找得到自己的貼文。</p>
             </div>
           </details>
           <details class="qa" name="faq" data-reveal style="--i:5">
             <summary><span data-i18n="f6.q">內容新到什麼時候？</span><i class="pm" aria-hidden="true"></i></summary>
             <div class="qa-body">
-              <p data-i18n="f6.a">整理自 Meta 官方文件，涵蓋到 2026-08-18 的 changelog。嵌入貼文的部分另外參考 2026 年 10 月實際讀取的 embed.js
-                程式碼和實測結果。之後的變動以<a href="https://developers.facebook.com/documentation/threads/changelog">官方
+              <p data-i18n="f6.a">整理自 Meta 官方文件（2026-10-23 同步，涵蓋到 2026-08-18 的 changelog）。嵌入貼文的部分另外參考 2026 年 10 月實際讀取的 embed.js
+                程式碼、實測結果和兩個實際專案的經驗。之後的變動以<a href="https://developers.facebook.com/documentation/threads/changelog">官方
                   changelog</a> 為準。</p>
               <p data-i18n="f6.b">文件互相矛盾或沒寫清楚的地方，例如地點搜尋要用 <code>q</code> 還是 <code>query</code>、限時貼文加上不支援的功能時 API
                 會報錯還是直接忽略，技能會照實說明，不會自行假設。</p>
@@ -1303,19 +1512,56 @@ $env:THREADS_ACCESS_TOKEN="&lt;token&gt;"</code></pre>
   </main>
 
   <footer class="foot">
-    <div class="wrap foot-row">
-      <p data-i18n="ft.what">Threads API Skill，非 Meta 官方專案</p>
-      <nav aria-label="專案連結" data-i18n-aria="ft.nav">
-        <a href="https://github.com/Scorpio-meow/Threads-skill">GitHub</a>
-        <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/SKILL.md">SKILL.md</a>
-        <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md" data-bench
-          data-i18n="ft.bench">評測摘要</a>
-        <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README_en.md" lang="en">English README</a>
-        <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README_ja.md" lang="ja">日本語</a>
-        <a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README_ko.md" lang="ko">한국어</a>
-      </nav>
-      <p class="by"><img class="mark" src="assets/img/logo.webp" width="24" height="24" alt=""><span>2026 ·
-          Scorpio-meow</span></p>
+    <div class="wrap">
+      <p class="mark-big" aria-hidden="true"><span style="--h:1" data-l="T"></span><span style="--h:.8" data-l="h"></span><span
+          style="--h:.64" data-l="r"></span><span style="--h:.86" data-l="e"></span><span style="--h:.7" data-l="a"></span><span
+          style="--h:.95" data-l="d"></span><span style="--h:.6" data-l="s"></span><i></i><span style="--h:.84" data-l="A"></span><span
+          style="--h:1" data-l="P"></span><span style="--h:.68" data-l="I"></span><i></i><span style="--h:.76" data-l="S"></span><span
+          style="--h:.92" data-l="k"></span><span style="--h:.62" data-l="i"></span><span style="--h:1" data-l="l"></span><span
+          style="--h:.8" data-l="l"></span><img class="cat" src="assets/img/favicon-192.png" width="96" height="96" alt=""></p>
+      <div class="foot-grid">
+        <nav class="foot-links" aria-label="專案連結" data-i18n-aria="ft.nav">
+          <ul>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill">GitHub</a></li>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/SKILL.md">SKILL.md</a></li>
+            <li><a
+                href="https://github.com/Scorpio-meow/Threads-skill/blob/main/threads-api/scripts/threads_client.py">threads_client.py</a>
+            </li>
+          </ul>
+          <ul>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/BENCHMARK.md" data-md="BENCHMARK"
+                data-i18n="ft.bench">評測摘要</a></li>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/evals/evals.json"
+                data-i18n="b.l2">題目與檢查項目</a></li>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/CHANGELOG.md" data-md="CHANGELOG" data-i18n="ft.log">更新紀錄</a>
+            </li>
+          </ul>
+          <ul>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README.md" lang="zh-Hant-TW">繁體中文
+                README</a></li>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README_en.md" lang="en">English README</a>
+            </li>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README_ja.md" lang="ja">日本語</a></li>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/README_ko.md" lang="ko">한국어</a></li>
+          </ul>
+          <ul>
+            <li><a href="https://agensi.io/skills/threads-api" data-i18n="ft.agensi">Agensi 上架頁</a></li>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/.github/CONTRIBUTING.md" data-md="CONTRIBUTING"
+                data-i18n="ft.contrib">參與貢獻</a></li>
+            <li><a href="https://github.com/Scorpio-meow/Threads-skill/blob/main/.github/SECURITY.md" data-md="SECURITY"
+                data-i18n="ft.sec">安全政策</a></li>
+          </ul>
+        </nav>
+        <div class="foot-about">
+          <p data-i18n="ft.what">Threads API Skill，非 Meta 官方專案</p>
+          <p data-i18n="ft.lic">MIT 授權，社群維護的開源專案</p>
+        </div>
+      </div>
+      <div class="foot-last">
+        <p class="by"><img class="mark" src="assets/img/logo.webp" width="24" height="24" alt=""><span>2026 ·
+            Scorpio-meow</span></p>
+        <a class="btn btn-ink" href="#top" data-i18n="ft.top">回到頂端</a>
+      </div>
     </div>
   </footer>
 

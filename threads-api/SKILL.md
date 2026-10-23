@@ -5,12 +5,12 @@ license: MIT
 compatibility: "Operate mode runs the bundled client scripts/threads_client.py (Python 3.8+, standard library only) and needs HTTPS access to graph.threads.net plus THREADS_ACCESS_TOKEN from the environment or a .env file in the working folder. Build and Embed don't run it and need no token."
 metadata:
   author: Scorpio-meow
-  version: "1.4"
+  version: "1.5"
 ---
 
 # Threads API
 
-Playbook for Meta's Threads API, distilled from the official docs (snapshot covering the changelog through **2026-08-18**). It serves three jobs:
+Playbook for Meta's Threads API, distilled from the official docs (synced 2026-10-23; the changelog's newest entry is **2026-08-18**). It serves three jobs:
 
 - **Build** — write, review or debug code that calls the API.
 - **Operate** — call the API on the user's own account: post, reply, delete, hide replies, read insights.
@@ -76,7 +76,7 @@ Publishing, replying, reposting, deleting and hiding replies change a real, publ
 - **Carousel** (2–20 images/videos, mixing allowed; counts as one post): create each item with `media_type=IMAGE|VIDEO`, `is_carousel_item=true`, its URL and optional `alt_text` → *(practice)* wait until every item is `FINISHED`, videos especially → create the parent with `media_type=CAROUSEL`, `children=<id1>,<id2>,…` plus the post-level fields (`text`, `reply_control`, `topic_tag`, spoilers, …) → publish the parent.
 - **Reply**: a normal container plus `reply_to_id=<media id>` → publish. Needs `threads_content_publish` + `threads_manage_replies`, and either owning the root post or holding `threads_keyword_search` / `threads_manage_mentions` (which lets you answer public posts found via search or mentions). 1,000 replies/24 h. *(practice: for long text, chain replies under your own post.)*
 - **Quote**: a normal container plus `quote_post_id=<media id>`.
-- **Repost**: `POST /{media-id}/repost` (no container) → `{"id": "<repost id>"}`; reposts read back as `REPOST_FACADE` with `reposted_post`.
+- **Repost**: `POST /{media-id}/repost` (no container; needs `threads_content_publish`) → `{"id": "<repost id>"}`; reposts read back as `REPOST_FACADE` with `reposted_post`.
 - **Delete**: `DELETE /{media-id}` → `{"success": true, "deleted_id": "…"}`. Own posts only, needs `threads_delete`, 100 deletes/24 h, permanent.
 - If the user enabled fediverse sharing, eligible API posts are shared to the fediverse too.
 
@@ -98,13 +98,13 @@ Publishing, replying, reposting, deleting and hiding replies change a real, publ
 | `poll_attachment` | TEXT only | `{"option_a":"…","option_b":"…","option_c":"…","option_d":"…"}`: a and b required, c and d optional, each 1–25 chars. There's no poll-duration parameter; read `expiration_timestamp` |
 | `gif_attachment` | TEXT only | `{"gif_id":"<GIPHY id>","provider":"GIPHY"}`. GIPHY only (Tenor support ended 2026-03-31) |
 | `text_attachment` | TEXT only | `{"plaintext": "≤10,000 chars", "link_attachment_url": "…", "text_with_styling_info": [{"offset":0,"length":7,"styling_info":["bold","italic"]}]}`; styles `bold`, `italic`, `highlight`, `underline`, `strikethrough`, ranges must not overlap. Not with a poll; no `link_attachment_url` if the post has `link_attachment` |
-| `text_entities` | text spoilers | `[{"entity_type":"SPOILER","offset":0,"length":5}]`, ≤10 entities *(practice: the docs don't define the offset unit; test with emoji or CJK text)* |
+| `text_entities` | text spoilers | `[{"entity_type":"SPOILER","offset":0,"length":5}]`, ≤10 entities. The parameter table calls offsets "positive whole numbers" while every example starts at `0`; treat them as 0-based *(practice: the docs don't define the offset unit; test with emoji or CJK text)* |
 | `is_spoiler_media` | IMAGE, VIDEO, CAROUSEL | On a carousel, set it on the parent; it covers every item |
 | `alt_text` | IMAGE, VIDEO (incl. carousel items) | ≤1,000 chars; not for TEXT |
 | `is_ghost_post` | TEXT only | Auto-archives after 24 h. Can't be a reply, and reply approvals can't be enabled. Beyond that the docs only say text spoilers are the one supported feature, so expect polls, GIFs, link/text attachments and quotes not to work, and don't count on location, geo-gating, topic tags or cross-sharing either. The docs don't say whether the API rejects these with an error or silently drops them, nor whether a URL typed into the text gets a preview card; say that rather than promising either outcome |
 | `allowlisted_country_codes` | any | ISO 3166-1 alpha-2, comma-separated (`US,CA`); only when `GET /me?fields=is_eligible_for_geo_gating` is true. The author always sees the post |
 | `location_id` | any | From `GET /location_search` (§5); needs `threads_location_tagging` |
-| `crossreshare_to_ig` / `crossreshare_to_ig_dark_mode` | any | Also shares to the linked Instagram account as a Story; needs `threads_share_to_instagram`. The docs' text puts `crossreshare_to_ig_status` (`SUCCESS`/`FAILED`) on the publish response, their example on the container response, so check both. The Threads post goes out either way |
+| `crossreshare_to_ig` / `crossreshare_to_ig_dark_mode` | any | Also shares to the linked Instagram account as a Story; needs `threads_share_to_instagram` on top of `threads_content_publish`. The Story goes through the normal Instagram Story flow, so the account's Instagram privacy and Story-audience settings apply. The docs' text puts `crossreshare_to_ig_status` (`SUCCESS`/`FAILED`) on the publish response, their example on the container response, so check both. The Threads post goes out either way |
 | `auto_publish_text` | TEXT only | Publish without step 2 |
 
 ### 4.3 Compatibility traps
@@ -173,7 +173,7 @@ Here `since`/`until` must be Unix timestamps ≥ `1712991600` (2024-04-13); the 
 | Permission | Needed for |
 |---|---|
 | `threads_basic` | every endpoint (always required) |
-| `threads_content_publish` | creating/publishing posts and replies; the post and reply fields of `threads_publishing_limit` |
+| `threads_content_publish` | creating/publishing posts, replies and reposts (also required for `crossreshare_to_ig*`); the post and reply fields of `threads_publishing_limit` |
 | `threads_manage_replies` | POST reply endpoints (publishing replies, `manage_reply`, `manage_pending_reply`) |
 | `threads_read_replies` | GET replies, conversation, pending replies; reading the `reply_audience` field; reply webhooks |
 | `threads_manage_insights` | insights |
@@ -188,14 +188,14 @@ Here `since`/`until` must be Unix timestamps ≥ `1712991600` (2024-04-13); the 
 
 - Create the app with the **Access the Threads API** use case; add permissions under Use cases → Customize. Settings holds the Threads app ID/secret, valid OAuth redirect URIs, and the deauthorize and data-deletion callback URLs.
 - Test with **Threads Testers**: App roles → Roles → Add People → Threads Tester; the person accepts under Threads → Settings → Account → Website permissions. Testers can grant every permission; test tokens can come from the Graph API Explorer or the OAuth flow.
-- Until a permission is approved (App Review, app published): publishing works only for your own and tester accounts; `GET /{media-id}` only reads testers' posts; keyword search only finds the user's own posts; location search only answers the query "Menlo Park"; mentions only come from testers; profile discovery only reaches some official Meta accounts (including @meta, @threads, @instagram, @facebook).
+- Until a permission is approved (App Review, app published): publishing works only on behalf of the app's Threads Testers (the current docs no longer mention your own account, so add it as a tester too); `GET /{media-id}` only reads testers' posts; keyword search only finds the user's own posts; location search only answers the query "Menlo Park"; mentions only come from testers; profile discovery only reaches some official Meta accounts (including @meta, @threads, @instagram, @facebook).
 - To see what a user granted, call `debug_token` (§8.4) with the app token (`TH|<APP_ID>|<APP_SECRET>`) as `access_token`; it works for any user of the same app, tester or not. `scopes` shows grants, not App Review approval.
 
 ### 8.3 OAuth flow
 
 1. Send the user to `https://threads.com/oauth/authorize?client_id=<THREADS_APP_ID>&redirect_uri=<registered URI>&scope=threads_basic,threads_content_publish,…&response_type=code&state=<csrf>` (on Android open it in a browser or webview, not the app).
 2. The callback receives `?code=…#_`; strip the trailing `#_`. Codes last 1 h and work once. A denial returns `error=access_denied&error_reason=user_denied`.
-3. Exchange it server-side: `POST https://graph.threads.net/oauth/access_token` (the docs show `graph.threads.com`; both work) with `client_id`, `client_secret`, `code`, `grant_type=authorization_code`, `redirect_uri` (identical to step 1, and the dashboard may have added a trailing slash) → `{access_token, token_type: "bearer", user_id}`, valid 1 h.
+3. Exchange it server-side: `POST https://graph.threads.net/oauth/access_token` (the docs' examples use `graph.threads.com`; both work) with `client_id`, `client_secret`, `code`, `grant_type=authorization_code`, `redirect_uri` (identical to step 1, and the dashboard may have added a trailing slash) → `{access_token, token_type: "bearer", user_id}`, valid 1 h.
 4. Long-lived: `GET https://graph.threads.net/access_token?grant_type=th_exchange_token&client_secret=…&access_token=<short-lived>` → `{access_token, token_type, expires_in}` (about 60 days). The short-lived token must still be valid; server-side only.
 
 ### 8.4 Keeping tokens alive
@@ -204,7 +204,7 @@ Here `since`/`until` must be Unix timestamps ≥ `1712991600` (2024-04-13); the 
 - *(practice)* Refresh on a schedule well before expiry (e.g. when < 10 days remain, or weekly), store the new token and its expiry (from `expires_in`) atomically, and alert a human when a refresh fails.
 - Permission grants last 90 days. Refreshing a long-lived token extends the grant for public profiles; for private profiles the grant can't be extended (their tokens still refresh), so those users must authorize again every 90 days. Read `data_access_expires_at` from `debug_token` and prompt re-authorization before it passes.
 - Inspect a token: `GET /v1.0/debug_token?access_token=<app token, or a Threads tester's user token>&input_token=<token>` → `data{type, application, is_valid, issued_at, expires_at, data_access_expires_at, scopes[], user_id}`. The app token (`TH|<APP_ID>|<APP_SECRET>`, next item) is accepted since 2026-08-18, so a server can inspect its users' tokens without a tester. Either way, `access_token` must come from the same app as `input_token` (the users can differ); a token issued by another app fails with "The App_id in the input_token did not match the Viewing App". `scopes` lists what the user granted, not whether App Review approved those permissions; check approval in the App Dashboard.
-- App token (server-side, for app-level calls): `GET https://graph.threads.net/oauth/access_token?client_id=…&client_secret=…&grant_type=client_credentials` → `"TH|<APP_ID>|…"`, or pass `TH|<APP_ID>|<APP_SECRET>` directly as `access_token`.
+- App token (server-side, for app-level calls): `GET https://graph.threads.net/oauth/access_token?client_id=…&client_secret=…&grant_type=client_credentials` → `{"access_token": "TH|<APP_ID>|<APP_SECRET>", "token_type": "bearer"}`, or pass that same string directly as `access_token`. It contains the app secret, so keep it out of logs, client code and app binaries.
 
 ## 9. Quotas and rate limits
 
@@ -227,47 +227,58 @@ App-level, per app–user pair, rolling 24 h: calls ≤ 4800 × impressions (imp
 
 ### 11.1 Getting the embed HTML
 
-- **oEmbed**: `GET https://graph.threads.net/v1.0/oembed?url=<URL-encoded post URL>&maxwidth=<320–658>` → `{type: "rich", version: "1.0", html, provider_name, provider_url, width}`. Works for text, image, video and carousel posts, but not for posts from private, inactive or age-restricted accounts or geo-gated posts. 1,000 requests/hour. There's no `maxheight`: the embed is responsive, so its height follows the width and the content. Documented URL forms: `https://www.threads.com/@{username}/post/{shortcode}` and `https://www.threads.com/t/{shortcode}` *(observed 2026-10: `threads.net` hosts, trailing slashes and query strings are accepted too)*.
-- **Token**: none since 2026-03-03, per the changelog *(observed 2026-10: token-less calls succeed)*. The App Access Tokens page still says oEmbed needs an app token; if a token-less call is ever refused, call it server-side with one (§8.4), never from browser code.
+- **oEmbed**: `GET https://graph.threads.net/v1.0/oembed?url=<URL-encoded post URL>&maxwidth=<320–658>` → `{type: "rich", version: "1.0", html, provider_name, provider_url, width}`. Works for text, image, video and carousel posts, but not for posts from private, inactive or age-restricted accounts or geo-gated posts *(observed 2026-10-24: posts Threads shows only to logged-in users, e.g. ones marked sensitive, still get HTML here, although most visitors can't see the embed; §11.2)*. 1,000 requests/hour. There's no `maxheight`: the embed is responsive, so its height follows the width and the content. Documented URL forms: `https://www.threads.com/@{username}/post/{shortcode}` and `https://www.threads.com/t/{shortcode}` *(observed 2026-10: `threads.net` hosts, trailing slashes and query strings are accepted too; the returned HTML uses `https://www.threads.com/t/{shortcode}?utm_source=th_embed&utm_campaign=threads_api` as its permalink)*.
+- **Post identity** *(practice)*: one post shows up under several URLs (both hosts, `/t/` or `/@user/post/`, with or without a query, fragment or trailing slash). Key, dedupe and compare saved posts by the shortcode, taken from `/(?:post|t)/([A-Za-z0-9_-]+)` after dropping the query and fragment, rather than by the raw URL.
+- **Token**: none since 2026-03-03, per the changelog *(observed 2026-10: token-less calls succeed, and responses, errors included, carry `Access-Control-Allow-Origin: *`, so page or extension code can call it and read the error body)*. The App Access Tokens page still says oEmbed needs an app token; if a token-less call is ever refused, call it server-side with one (§8.4), never from browser code.
 - **Errors** *(observed 2026-10)*:
   - Missing or non-embeddable post → HTTP 400, `code 24`, `error_subcode 4279056` ("Media Not Found", `is_transient: false`).
   - Not a Threads post URL → 400, `code 100`, subcode `2207047`.
   - `maxwidth` outside 320–658 → HTTP **500**, `code 100` ("Param maxwidth must be…"). It's a validation error, so don't retry it.
-- **By hand**: on threads.com, open the post's share menu and choose **Get embed code**. The link text is in the viewer's UI language; oEmbed's is English.
-- **Terms**: the HTML, content and metadata may only be used to show the post. The docs rule out consuming, manipulating, extracting or persisting them for anything else, analytics included. *(practice: keep the permalink as your record and fetch the HTML when you render or build the page; don't derive search indexes, stats or datasets from it. Scraping threads.com pages instead is outside the API, and Meta's terms restrict automated collection.)*
+- **By hand**: on threads.com, open the post's share menu and choose **Get embed code**. The link text is in the viewer's UI language; oEmbed's is English. Otherwise it's the same markup as oEmbed's HTML.
+- **Terms**: the HTML, content and metadata may only be used to show the post. The docs rule out consuming, manipulating, extracting or persisting them for anything else, analytics included. *(practice: keep the permalink as your record and fetch the HTML when you render or build the page; don't derive search indexes, stats or datasets from it. Treat embed code copied from the share menu the same way, since it's the same markup. Scraping threads.com pages instead is outside the API, and Meta's terms restrict automated collection.)*
 
 ### 11.2 How the embed renders
 
-Everything in this subsection was observed in embed.js in 2026-10. It's undocumented and may change.
+Everything in this subsection was observed in embed.js and live embeds in 2026-10 (last checked 2026-10-23). It's undocumented and may change.
 
-- **Markup**: the HTML is `<blockquote class="text-post-media" data-text-post-permalink="<permalink>" data-text-post-version="0" id="ig-tp-<shortcode>">` around a plain "View on Threads" link, then `<script async src="https://www.threads.com/embed.js">`.
+- **Markup**: the HTML is `<blockquote class="text-post-media" data-text-post-permalink="<permalink>" data-text-post-version="0" id="ig-tp-<shortcode>" style="…">` around a "View on Threads" link with the Threads logo, then `<script async src="https://www.threads.com/embed.js">`. The inline style hard-codes a white card (`background:#FFF`, `min-width:270px`, `max-width:650px`), so the fallback stays white on a dark page until the embed replaces it.
 - **Lifecycle**:
-  - embed.js turns each `blockquote.text-post-media` into an iframe of `<permalink minus query>/embed/<query>`, inserted before the blockquote at height 0.
-  - It loads **at most 3 at a time**. A slot frees when an iframe reports its height or after 10 s.
-  - The height arrives as a bare number via `postMessage` from `https://www.threads.com`. embed.js then sizes the iframe and removes the blockquote.
-  - An embed that never reports keeps a 0-px iframe, and the blockquote's link stays visible as the fallback.
-- **Dynamic pages**: `window.instgrm.Embeds.process()` re-scans the page for new blockquotes. A `<script>` inserted through `innerHTML` never runs, so in SPAs or after adding posts dynamically, load embed.js once and call `window.instgrm?.Embeds?.process()` after each insert. embed.js only needs `<blockquote class="text-post-media" data-text-post-permalink="<permalink>">` with a fallback link inside. *(practice: when the HTML is stored or comes from elsewhere, build that markup with DOM methods from a validated threads.com URL instead of injecting stored HTML through `innerHTML`, which is an XSS risk.)*
-- **Theme**: `data-theme="dark"` or `"auto"` on the blockquote adds `?theme=…` to the iframe URL and makes its background transparent.
-- **Raw iframe**: don't iframe the permalink itself, because post pages send `X-Frame-Options: DENY`. Where scripts can't load (a strict CSP, Chrome extension pages), iframe `<permalink>/embed/` directly and set its height from that `postMessage`. Check `event.origin`, and match `event.source` to the iframe's `contentWindow`.
+  - embed.js turns each `blockquote.text-post-media` into an iframe of `<permalink minus query>/embed/<query>`, inserted before the blockquote at height 0. The iframe takes over the `text-post-media` class and the blockquote's class becomes `text-post-media-registered`, so each blockquote is processed once.
+  - It loads **at most 3 at a time**. A slot frees when an iframe reports its height or after 10 s. It also re-scans once, 5 s after the DOM is ready.
+  - The embed page reports its height as a bare number via `postMessage` from `https://www.threads.com` (`https://www.threads.net` for a threads.net iframe): once it has rendered, and again whenever its content changes height (posts with images sent 2–4 reports as the media loaded). Resizing the iframe from outside doesn't bring a new report. Keep listening, and apply every report above 0.
+  - On that report embed.js sets the iframe's `style.height` and removes the element whose `id` the blockquote had. A blockquote without an `id` is never removed, so its link stays under the rendered post.
+  - embed.js sizes whichever iframe on the page sent the report, including iframes you created yourself.
+- **What the report means**:
+  - A deleted post, or a shortcode that never existed, still renders a card: the embed page (HTTP 200) shows "Cannot display thread" (in the viewer's language), reports about 190 px, and embed.js removes the fallback just as for a real post. A replaced blockquote doesn't prove the post exists.
+  - A post Threads shows only to logged-in users (e.g. marked sensitive) gets an HTTP 500 error page instead (Meta's "Sorry, something went wrong", still on threads.com, so the frame's URL and origin look normal), and no height report, for viewers who aren't logged in to Threads or whose browser blocks third-party cookies (Safari and private windows do by default). Logged-in viewers who allow third-party cookies see the post. oEmbed returns HTML for these posts as usual.
+  - Reports of `0` happen (seen once in testing and in a production gallery; the trigger is unknown, and neither a 0-px starting height nor the same post twice on a page reproduced it). embed.js then leaves a 0-px iframe and, when the blockquote had its `id`, removes the fallback too, so the post vanishes without a trace. Treat 0 as a failure (§11.3).
+  - An embed that never reports keeps its 0-px iframe, and the blockquote's link stays visible.
+- **Dynamic pages**: `window.instgrm.Embeds.process()` re-scans the page for new blockquotes. A `<script>` inserted through `innerHTML` never runs, so in SPAs or after adding posts dynamically, load embed.js once and call `window.instgrm?.Embeds?.process()` after each insert. embed.js needs `<blockquote class="text-post-media" data-text-post-permalink="<permalink>" id="ig-tp-<shortcode>">` with a fallback link inside; keep the `id` unique on the page. *(practice: when the HTML is stored or comes from elsewhere, build that markup with DOM methods from a validated threads.com URL instead of injecting stored HTML through `innerHTML`, which is an XSS risk.)*
+- **Theme**: `data-theme="dark"` or `"auto"` on the blockquote adds `?theme=…` to the iframe URL and makes its background transparent. The theme is fixed when the iframe is created; to switch, replace the iframe with a fresh blockquote and call `process()` again.
+- **Raw iframe**: don't iframe the permalink itself, because post pages send `X-Frame-Options: DENY`. Where scripts can't load (a strict CSP, Chrome extension pages), iframe `<permalink>/embed/` directly, add `?theme=dark` or `?theme=auto` yourself, and set its height from each bare-number `postMessage`, ignoring `0`. Check `event.origin` (both Threads hosts), and match `event.source` to the iframe's `contentWindow`. The report is a number, not an object, so a listener that expects `{height}` or Instagram's `{type: "MEASURE"}` drops it and makes it look as if no height is sent.
+- **Placeholder height**: embed.js sets `style.height`, so a CSS `min-height` on the iframe wins and leaves a blank band under every embed shorter than it. Put the placeholder on a wrapper, or set the iframe's `min-height` from the report yourself.
 - **Site policies**: allow `https://www.threads.com` in `script-src` and `frame-src`. The iframe's host follows the permalink, so old `threads.net` links produce `www.threads.net` iframes: either rewrite them to `www.threads.com` or allow both hosts. The embed page sends `Cross-Origin-Resource-Policy: same-origin`, so a page with `Cross-Origin-Embedder-Policy: require-corp` can't show it.
 
 ### 11.3 Pages with many embeds
 
-These are *(practice)* items from a production gallery of hundreds of posts.
+These are *(practice)* items from a production gallery of hundreds of posts and from tests of live embeds.
 
 - **The problem**: even with embed.js's 3-at-a-time cap, loading dozens of embeds in a row gets rate-limited (HTTP 429), and the remaining posts stay as plain links. Meta documents no limit for these loads; the oEmbed quota covers API calls only.
 - **Pacing**:
   - Show about 10 per page, or only process cards near the viewport.
   - Render the blockquotes without the `text-post-media` class (mark them, e.g. `data-embed-pending`).
   - Add the class to one blockquote at a time and call `instgrm.Embeds.process()`.
-  - Wait until that embed finishes or times out, then a few seconds more before the next (that gallery uses ≥ 3.6 s).
-  - Remove the class from an embed that failed, or the next `process()` call picks it up again.
-- **Detecting failure**: the page can't see a cross-origin iframe's HTTP status, and fetch/XHR wrappers never see these loads, so judge by outcome.
-  - Success means the blockquote was removed and the iframe is taller than ~120 px within ~12 s.
-  - After a few failures in a row, assume a rate limit: pause (that gallery uses 60 s × 1.5ⁿ, capped at 5 min), then resume more slowly.
-  - Hidden tabs throttle timers and layout, so don't mark an embed failed while `document.hidden`; re-check once the tab is visible.
-- **Fallback card**: for a failed embed, link to the post (allow only threads.com/threads.net URLs) and list the likely causes: deleted post; private, inactive or age-restricted account; geo-gating; rate limiting; a content or tracking blocker.
-- **Is a saved post still there?** Ask oEmbed (≤ 1,000/hour) rather than loading threads.com pages. `code 24` means it can no longer be embedded; treat other errors as transient and retry later.
+  - Wait until that embed reports or times out, then a few seconds more before the next (that gallery waits ≥ 3.6 s).
+  - embed.js never picks up a blockquote twice (§11.2). To retry a failed embed, remove its iframe and put the `text-post-media` class back on its blockquote.
+- **Detecting failure**: the page can't see a cross-origin iframe's HTTP status. Fetch/XHR wrappers, `console.error` overrides, `window` error events and a service worker don't see these loads either, since the iframe's requests and errors stay in its own context; only a failed load of embed.js itself is visible. Judge by outcome.
+  - Listen for the height report yourself (same `origin` and `source` checks as above). Success means a first report above 0 within ~12 s; a 0 report or none at all is a failure. Count only numeric reports: browser extensions that inject scripts into Threads frames can post their own messages from the same origin (a gallery that counted any threads.com message as success marked error pages as loaded).
+  - The iframe's `load` event isn't a signal: it fires for unavailable posts too, and for real ones it can come long after the report.
+  - Height can't tell a short text post from a "Cannot display thread" card. To learn whether a post is gone, ask oEmbed (last item).
+  - After a few failures in a row, assume a rate limit: pause (e.g. 60 s, growing × 1.5 each time, capped at 5 min), then resume more slowly.
+  - Hidden tabs throttle timers and don't run `requestAnimationFrame` at all, so a render step that waits on rAF stalls until the tab is shown; use a timer for it. Don't mark an embed failed while `document.hidden`; re-check once the tab is visible.
+- **Fallback card**: for a failed embed, link to the post (allow only threads.com/threads.net URLs) and list the likely causes: rate limiting, a content or tracking blocker, a CSP or network problem, or a post Threads shows only to logged-in users (the viewer isn't logged in to Threads or blocks third-party cookies). Don't blame a deleted post here: a missing post renders its "Cannot display thread" card and counts as loaded (§11.2), so finding gone posts is oEmbed's job (next item).
+- **Is a saved post still there?** Ask oEmbed (≤ 1,000/hour) rather than loading threads.com pages, and match posts by shortcode (§11.1). `code 24` means it can no longer be embedded; treat other errors as transient and retry later.
+- **Login-only posts** *(observed 2026-10-24)*: oEmbed can't flag them. Requesting `<permalink>/embed` without credentials, as a same-origin request from a threads.com page (e.g. an extension's content script), tells them apart: HTTP 500 means it doesn't embed for logged-out viewers, 200 with `class="Embed"` in the body embeds publicly, and 200 without it is the "Cannot display thread" card. Plain server-side requests got a generic page shell for every post in testing, so the check only worked from threads.com. Keep trying such posts in the page, since logged-in visitors can see them, and say on the fallback card that the post needs both a Threads login and third-party cookies allowed (a logged-in Safari visitor still can't see it).
 
 ### 11.4 Web Intents
 
@@ -295,7 +306,11 @@ These are *(practice)* items from a production gallery of hundreds of posts.
 | `follower_demographics` errors | Missing or multiple `breakdown`, `since`/`until` sent, or < 100 followers |
 | Quota errors | Check `threads_publishing_limit`; spread posts out |
 | No webhooks arrive | App not Live / no Advanced Access, business unverified, permission missing, or private account |
-| Embed stays a plain "View on Threads" link | Post not embeddable (oEmbed `code 24`); embed.js never ran (inserted via `innerHTML` → call `instgrm.Embeds.process()`); blocked by CSP, COEP or a content blocker; rate-limited after many embeds (§11.2–11.3) |
+| Embed stays a plain "View on Threads" link | embed.js never ran (inserted via `innerHTML` → call `instgrm.Embeds.process()`); blockquote lacks the `text-post-media` class; blocked by CSP, COEP or a content blocker; rate-limited after many embeds (§11.2–11.3) |
+| Embed shows "Cannot display thread" | Post missing or not embeddable → confirm with oEmbed (`code 24`) |
+| Embed fails only for logged-out visitors, or in Safari / private windows | Post shown only to logged-in users (e.g. marked sensitive): its `/embed` page is an HTTP 500 error without a Threads login and third-party cookies, although oEmbed returns HTML (§11.2) |
+| Post renders but a "View on Threads" link stays under it | Blockquote has no `id` (`ig-tp-<shortcode>`), so embed.js can't remove it (§11.2) |
+| Embed leaves an empty gap or disappears | A height report of 0; or a CSS `min-height` on the iframe overriding the reported height (§11.2) |
 | "Refused to display … X-Frame-Options 'deny'" | Iframing the post page → use embed.js or `<permalink>/embed/` |
 | oEmbed HTTP 500, `code 100`, "Param maxwidth…" | `maxwidth` outside 320–658 |
 
@@ -303,7 +318,8 @@ These are *(practice)* items from a production gallery of hundreds of posts.
 
 Several official examples are broken; write correct requests instead:
 - `curl -X GET -F …` (keyword search, insights) sends a multipart body. For GET use `curl -G --data-urlencode 'q=…' …`.
-- Missing `?` before `access_token` (Polls and Location retrieval examples); unbalanced quotes inside `-d` values (Ghost Posts, GIF, Links examples); `access_tokens=` (should be `access_token`) in the app-credential shortcut; `acceess_denied` (the real value is `access_denied`).
+- Missing `?` before `access_token` (Polls and Location retrieval examples); unbalanced quotes inside `-d` values (GIF, Links examples); `access_tokens=` (should be `access_token`) in the app-credential shortcut; `acceess_denied` (the real value is `access_denied`).
+- Share to Instagram Stories: `media_type=text` (must be `TEXT`), `-d "crossreshare_to_ig=true" | "crossreshare_to_ig_dark_mode=true"` (the `|` is a shell pipe; send one `-d` per parameter) and a missing `\` before the URL line.
 - The carousel-item example omits `media_type`, which the parameter table requires.
 - Some examples omit `/v1.0` (mentions, pagination); include it.
 - JSON params appear unescaped inside shell quotes; JSON-encode them (`json.dumps`, `JSON.stringify`) and URL-encode the form.

@@ -2,7 +2,6 @@
   "use strict";
   const { $, $$, store } = TAS;
   const DOC_LANG = { zh: "zh-Hant-TW", en: "en", ja: "ja", ko: "ko" };
-  const BENCH_FILE = { zh: "BENCHMARK.md", en: "BENCHMARK_en.md", ja: "BENCHMARK_ja.md", ko: "BENCHMARK_ko.md" };
   const i18nEls = $$("[data-i18n]");
   const zhHtml = i18nEls.map((el) => el.innerHTML);
   const ariaEls = $$("[data-i18n-aria]");
@@ -37,7 +36,7 @@
       langCur.textContent = b.textContent;
       langCur.lang = b.lang;
     });
-    $$("a[data-bench]").forEach((a) => { a.href = new URL(BENCH_FILE[next], a.href).href; });
+    $$("a[data-md]").forEach((a) => { a.href = new URL(`${a.dataset.md}${next === "zh" ? "" : `_${next}`}.md`, a.href).href; });
     labelTables();
     document.dispatchEvent(new CustomEvent("tas:lang", { detail: next }));
   }

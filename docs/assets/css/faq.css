@@ -3,16 +3,16 @@
 }
 
 .faq-title {
-  grid-column: 1 / span 3;
+  grid-column: 1 / span 4;
   font-size: var(--step-head);
-  line-height: 1.2;
+  letter-spacing: var(--track-display);
   align-self: start;
   position: sticky;
   top: calc(env(safe-area-inset-top, 0px) + 96px);
 }
 
 .faq-list {
-  grid-column: 4 / -1;
+  grid-column: 5 / -1;
   display: grid;
   gap: 8px;
 }
@@ -30,11 +30,12 @@
   grid-template-columns: minmax(0, 1fr) 16px;
   gap: 20px;
   align-items: center;
-  min-height: 76px;
-  padding: 18px 24px;
+  min-height: 80px;
+  padding: 20px 28px;
   font-size: var(--step-lead);
-  font-weight: 600;
-  line-height: 1.4;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: var(--track-head);
 }
 
 .qa summary::-webkit-details-marker {
@@ -88,11 +89,11 @@
 }
 
 .qa-body {
-  padding: 0 24px 26px;
+  padding: 0 28px 30px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 14px;
-  max-width: 42em;
+  max-width: 46em;
   font-size: var(--step-body);
 }
 

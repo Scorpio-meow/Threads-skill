@@ -424,8 +424,8 @@
         },
         "without_skill": {
           "pass_rate": {
-            "mean": 0.76,
-            "stddev": 0.2506,
+            "mean": 0.7593,
+            "stddev": 0.2505,
             "min": 0.5,
             "max": 1.0
           },
@@ -978,10 +978,10 @@
         },
         "without_skill": {
           "pass_rate": {
-            "mean": 0.76,
-            "stddev": 0.1309,
-            "min": 0.57,
-            "max": 0.86
+            "mean": 0.7599,
+            "stddev": 0.13,
+            "min": 0.5714,
+            "max": 0.8571
           },
           "time_seconds": {
             "mean": 775.75,
@@ -1528,9 +1528,9 @@
         },
         "without_skill": {
           "pass_rate": {
-            "mean": 0.85,
-            "stddev": 0.1192,
-            "min": 0.71,
+            "mean": 0.8512,
+            "stddev": 0.1172,
+            "min": 0.7143,
             "max": 1.0
           },
           "time_seconds": {
@@ -2270,8 +2270,8 @@
         },
         "without_skill": {
           "pass_rate": {
-            "mean": 0.8725,
-            "stddev": 0.1024,
+            "mean": 0.8705,
+            "stddev": 0.1025,
             "min": 0.75,
             "max": 1.0
           },
@@ -2845,10 +2845,10 @@
         },
         "without_skill": {
           "pass_rate": {
-            "mean": 0.8375,
-            "stddev": 0.064,
+            "mean": 0.8368,
+            "stddev": 0.0625,
             "min": 0.75,
-            "max": 0.89
+            "max": 0.8889
           },
           "time_seconds": {
             "mean": 1000.45,
@@ -4174,9 +4174,9 @@
         },
         "without_skill": {
           "pass_rate": {
-            "mean": 0.768,
-            "stddev": 0.1638,
-            "min": 0.38,
+            "mean": 0.7671,
+            "stddev": 0.164,
+            "min": 0.375,
             "max": 1.0
           },
           "time_seconds": {
@@ -4207,6 +4207,1245 @@
         "Grader suggestions: eval 1, add a local-validation check (emoji byte count, 5-link limit) and possibly the publishing quota; eval 2, score the 90-day grant; eval 3, require the Monday timing or the placeholder link (assertion 7), accept handing over the command when the user says the token is set (4), and require the account check on every handed-over publish path (6); eval 7, say whether a framework 422 counts as 'otherwise 403' and score the fallback lookup when root_post is missing; eval 8, score parsing the flat code-exchange error; eval 9, write the paging.next rule into assertion 6; eval 10, make assertion 7 require pausing for the user's OK.",
         "Issues outside the assertions: the with-skill eval 7 reply again suggests trying the app's other secret if signature checks keep failing, which points toward the Facebook secret (as in round 6); the with-skill eval 10 script prints the account but doesn't pause for confirmation before waiting until 08:00, never checks threads_publishing_limit, and says graph.threads.net is unreachable though that was never tested; the with-skill eval 3 handover spells out only option A's commands and only implies the token setup; the with-skill eval 5 defaults nested replies to flag-only, so nested spam stays visible until the user switches the policy.",
         "Process: the user's message was given to executors as prompt.txt in the run folder, and work/ was named as the user's working folder, the same for both configurations. All 20 executors ran at once. Executor transcripts were audited: no web tools, no skill access by baseline runs, no reads of the assertions (the eval 1 with-skill run piped eval_metadata.json to /dev/null), and outside URLs appear only in mock data, config examples or unsent request objects. No mock server: executors tested against their own local mocks, and graders re-ran those tests and probed with mocks of their own. Speed and cost: with the skill mean ~554 s and ~149K tokens vs ~654 s and ~135K without; the with-skill runs were faster on 8 of 10 evals. One run per configuration, so treat the gap as directional."
+      ]
+    },
+    {
+      "iteration": 8,
+      "metadata": {
+        "skill_name": "threads-api",
+        "skill_path": "threads-api/ installed as a folder (between 1.4 and 1.5: §11 rewritten from two production projects and the 2026-10-23 live tests, before the official-docs sync and before the 'reports once' correction; snapshot SKILL.md sha256 7cb954c58937090e4632ed61a9a581592da90f2c88f6f24274d01287d4b89c6e, scripts/threads_client.py sha256 b13fb1edd929ca88255cf1d212fa4d2c6128c5f21de21471f257b39a72946c89)",
+        "executor_model": "claude-opus-5-5",
+        "analyzer_model": "claude-opus-5-5",
+        "timestamp": "2026-10-23T10:38:30Z",
+        "evals_run": [
+          6,
+          11,
+          12
+        ],
+        "runs_per_configuration": 1
+      },
+      "runs": [
+        {
+          "eval_id": 11,
+          "eval_name": "eval-11-extension-preview",
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 918.6,
+            "tokens": 193592,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "States that the /embed/ page does send its height via postMessage, as a bare number (or numeric string) rather than an object, so the MEASURE listener never matches; fixes the listener to read the number and does not inject a content script into the iframe to measure it.",
+              "passed": true,
+              "evidence": "response.md:15: the embed page sends via postMessage 'a bare number (e.g. 734), not an object'; '{type: 'MEASURE', details: {height}}' is the Instagram format; 'e.data?.type' on a number is undefined, so every report is dropped by the if. response.md:32 rejects the content-script route (extra threads.com host permission, depends on internal DOM, 'the problem it solves does not exist'). Fixed listener at response.md:25-29 and threads-preview.js:388-392 (readHeight accepts typeof number, or a numeric string matching /^\\d+(?:\\.\\d+)?$/; objects are ignored). No content script is shipped; manifest.partial.json only adds storage plus graph.threads.net."
+            },
+            {
+              "text": "The message listener checks event.origin against the Threads hosts (https://www.threads.com, plus https://www.threads.net if threads.net iframes can occur) and matches event.source to the iframe's contentWindow before applying a height.",
+              "passed": true,
+              "evidence": "threads-preview.js:68 'if (!THREADS_ORIGINS.has(event.origin)) return;' where threads-url.js:13 defines THREADS_ORIGINS = {'https://www.threads.com', 'https://www.threads.net'}. threads-preview.js:69-70 and 84-89 map event.source to the card whose 'card.iframe.contentWindow === source' and return if there is no match; the height is only applied after both checks (line 75). The short snippet at response.md:26-27 has the same two checks."
+            },
+            {
+              "text": "A height report of 0, or no report within a timeout, never leaves the preview as an invisible or blank area with nothing else shown: the 0 is not applied as the final height (ignored or treated as a failure), and the card shows something usable instead, such as a placeholder or starting height, or a failure card with a link to the post or a retry.",
+              "passed": true,
+              "evidence": "threads-preview.js:74-81: only height > 0 is applied; a 0 calls fail(card). armTimeout (lines 136-149) calls fail(card) after REPORT_TIMEOUT_MS = 12000 with no positive report (deferred while the tab is hidden). fail() sets state 'failed'. render/noteFor (lines 360-368) then shows the badge '預覽沒載入' ('preview did not load'), an explanatory paragraph and a '重試' (retry) button, plus a one-time auto-retry after 60 s. The card header always has the '在 Threads 開啟' ('Open in Threads') link (lines 307-313). While loading, the slot keeps a 200px placeholder (threads-preview.css:70-73). The snippet at response.md:28 also ignores 0 ('e.data > 0'), and response.md:19 says to treat 0 or no report as a failure and not set the iframe to 0px."
+            },
+            {
+              "text": "Fixes dark mode by adding ?theme=dark (or ?theme=auto) to the /embed/ iframe URL.",
+              "passed": true,
+              "evidence": "threads-url.js:54-61 embedUrl() appends theme for 'dark'/'auto'. dashboard.js:9 sets PREVIEW_THEME = 'dark'. A mock run printed 'https://www.threads.com/t/DAbc_12-x/embed/?theme=dark' and '...?theme=auto'. response.md:38 says to add '?theme=dark' (or '?theme=auto' if the dashboard follows the system theme) and explains that the background becomes transparent."
+            },
+            {
+              "text": "Normalizes saved URLs to the post's shortcode (threads.net and threads.com hosts, /t/<code> and /@user/post/<code>, query string, fragment and trailing slash all map to one key) and dedupes or keys storage by that shortcode.",
+              "passed": true,
+              "evidence": "threads-url.js:7-9 accepts threads.com, www.threads.com, threads.net and www.threads.net, and matches /@user/post/<code> or /t/<code> with an optional trailing slash on the pathname, which excludes the query and fragment. compactSavedPosts (lines 76-118) dedupes by shortcode, and dashboard.js:47-50 writes the compacted list back. savePost in response.md:60-70 checks for an existing shortcode before saving. The oEmbed status cache is keyed by shortcode. A mock run with five variants (threads.net/@user/post, threads.com/t/ with a trailing slash, ?xmt=...#frag, threads.net/t/?xmt, a trailing slash) all returned shortcode 'DAbc_12-x', and compactSavedPosts collapsed them into one item. The code does not lowercase the URL (response.md:51)."
+            },
+            {
+              "text": "Explains that the iframe's load event fires for deleted posts too, and that a missing post renders a short 'Cannot display thread' card inside the iframe (which also reports a height), so neither onload nor height can tell a deleted post from a live one.",
+              "passed": true,
+              "evidence": "response.md:77: the load event only means the embed document finished loading. For a deleted post the embed page still responds and shows a '無法顯示這則串文' (Cannot display thread) card, and it 'even reports a height of about 190px', so neither the load event nor the height can tell (short text posts are about as tall). The iframe is cross-origin, so its content and HTTP status cannot be read. This matches grader-facts (about 194 px, load fires). The same explanation is in the threads-status.js:3-4 comment."
+            },
+            {
+              "text": "Detects deleted posts with the oEmbed endpoint (https://graph.threads.net/v1.0/oembed, no access token needed) and marks a post deleted only on the definitive not-found error (code 24); other errors are treated as transient. It does not scrape threads.com post pages for this.",
+              "passed": true,
+              "evidence": "threads-status.js:10 OEMBED_ENDPOINT = 'https://graph.threads.net/v1.0/oembed'. The fetch at lines 105-111 sends only ?url= and no token (credentials: 'omit'). Line 124: 'if (error?.code === 24) return { kind: 'gone' }'. 429 or codes 4/17/613 mean a pause and requeue (lines 82-85). Any other error returns kind 'error', which is not stored and leaves availability unchanged (lines 86-89, threads-preview.js:278). response.md:81-83 states the same rule ('other errors: treat as transient'). There is no fetch of threads.com pages anywhere in the code."
+            },
+            {
+              "text": "Keeps the iframe pointed at the /embed/ URL (never the post permalink itself, which refuses framing) and does not try to load embed.js in the extension page.",
+              "passed": true,
+              "evidence": "threads-preview.js:125 iframe.src = embedUrl(...), which threads-url.js:58 builds as 'https://www.threads.com/t/${shortcode}/embed/'. The permalink is used only for the '<a target=_blank>' open link (threads-preview.js:309) and the oEmbed url parameter. dashboard.html loads only the local threads-preview.css and dashboard.js. No embed.js script tag or import appears in any file."
+            }
+          ],
+          "notes": []
+        },
+        {
+          "eval_id": 12,
+          "eval_name": "eval-12-react-card",
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 661.6,
+            "tokens": 162129,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Gives each blockquote a unique id (e.g. ig-tp-<shortcode>) and explains that embed.js removes the fallback blockquote by that id once the embed reports its height, which is why the 'View on Threads' links stay.",
+              "passed": true,
+              "evidence": "threadsEmbed.js:62 sets `blockquote.id = `ig-tp-${shortcode}``; ThreadsCardList.jsx:23-25 dedupes by shortcode and keys cards by it so the id is unique on the page. response.md:13 explains the cause: embed.js, on receiving the height report, removes the element whose id equals the blockquote's; 'oEmbed 的 blockquote 都帶 id=\"ig-tp-<shortcode>\"。你的 blockquote 沒有 id，所以永遠不會被移除'. Matches grader-facts (removal by id; no id means never removed)."
+            },
+            {
+              "text": "Explains that the CSS min-height on the iframe overrides the inline height embed.js sets, and moves the placeholder to a wrapper (or sets min-height from the reported height) so short posts don't leave a blank band.",
+              "passed": true,
+              "evidence": "response.md:19: 'embed.js 用 iframe 的 style.height 設定實際高度，但 CSS 的 min-height 優先權比 height 高' (the 400px rule stretches a 180px post). Fix: the rule is deleted; ThreadsCard.css:53-58 puts `min-height: var(--threads-card-placeholder-height)` on the placeholder blockquote inside the host container, which embed.js removes after the height report, and the iframe rule (ThreadsCard.css:44-47) only sets width. On reloads, threadsEmbed.js:65-66 sets the placeholder height from the previously reported height (knownHeights). The placeholder sits on the blockquote rather than a literal wrapper, but it never constrains the iframe, so the assertion's intent is met."
+            },
+            {
+              "text": "Explains that embed.js only processes a blockquote once (it swaps the text-post-media class for text-post-media-registered), so retrying or re-showing a post means removing the old iframe and creating a fresh blockquote with the text-post-media class (e.g. a remount with a new key) before calling process() again.",
+              "passed": true,
+              "evidence": "response.md:25: 'embed.js 只找 blockquote.text-post-media，處理完就把它的 class 改成 text-post-media-registered…要重試，必須先拿掉舊的 iframe，換上一個全新的 blockquote（或把 class 加回去），再呼叫 process()'. Code: retry bumps `attempt` (ThreadsCard.jsx:95), which is an effect dependency (line 77); cleanup runs `host.replaceChildren()` (line 75) to drop the old iframe, the effect builds a new blockquote (lines 49-55), and runOne adds `text-post-media` and then calls `api.process()` (threadsEmbed.js:253-255). Re-showing after a page change remounts the shortcode-keyed card the same way."
+            },
+            {
+              "text": "Handles the theme by setting data-theme on the blockquote and re-creating the embed when the site theme changes, since the theme is fixed when embed.js creates the iframe.",
+              "passed": true,
+              "evidence": "threadsEmbed.js:63-64 sets `data-theme` to 'dark'/'auto' (light gets no attribute, the default). `theme` is in the effect deps (ThreadsCard.jsx:77), so a theme change tears down and rebuilds the blockquote and re-queues it. response.md:39: '主題在 iframe 建立時就決定了…iframe 建好之後不會再讀這個屬性，要換主題只能用新的 data-theme 重建 blockquote'. Consistent with grader-facts (theme read only at iframe creation; ?theme=dark|auto)."
+            },
+            {
+              "text": "Judges success by the iframe's height postMessage (a number greater than 0, with origin checked against the Threads hosts and event.source matched to that iframe's contentWindow) within a timeout, not by the iframe load event; a 0 report or no report leads to the fallback card.",
+              "passed": true,
+              "evidence": "threadsEmbed.js:269-281: the message listener checks `CONFIG.messageOrigins.includes(event.origin)` (www.threads.com / www.threads.net, threadsEmbedConfig.js:15), parses a numeric payload, and matches `iframe.contentWindow === event.source` for iframes in that card's host. Line 248-249: height > 0 means ok, otherwise 'zero-height'. Line 260: a 12 s timeout (reportTimeoutMs) gives 'timeout'. Any failure clears the host and shows ThreadsFallback (ThreadsCard.jsx:67-68, 91-97). The load event is not used, and response.md:47-51 explains why onload is unreliable. Minor: it also accepts numeric strings, which doesn't violate the assertion."
+            },
+            {
+              "text": "Builds the blockquote and lets embed.js modify it inside a container element whose children React doesn't render (e.g. created imperatively via a ref), so embed.js inserting the iframe and removing the blockquote doesn't conflict with React's reconciliation (the removeChild errors).",
+              "passed": true,
+              "evidence": "ThreadsCard.jsx:90 renders an empty `<div ref={hostRef} className=\"threads-card__embed\" />`. The blockquote is built with DOM APIs (threadsEmbed.js:55-75) and inserted with `host.replaceChildren(blockquote)` (ThreadsCard.jsx:55). The fallback is a React-rendered sibling outside the host. response.md:29 explains that the removeChild error comes from embed.js mutating DOM that React manages, and response.md:32 gives the fix: 'React 只渲染一個沒有任何子元素的容器 div'."
+            },
+            {
+              "text": "Loads embed.js once for the whole app (e.g. a shared module-level promise or a single script tag), not once per card.",
+              "passed": true,
+              "evidence": "threadsEmbed.js:79-127: module-level `scriptPromise` is reused; if `window.instgrm.Embeds.process` already exists it resolves at once; one `<script>` is appended to document.head; on failure it resets so a retry can try again. response.md:95 tells the user to remove the per-card script-injecting useEffect."
+            },
+            {
+              "text": "The fallback card links only to validated https://www.threads.com or https://www.threads.net post URLs and is built without inserting untrusted strings via innerHTML or dangerouslySetInnerHTML.",
+              "passed": true,
+              "evidence": "parseThreadsPostUrl (threadsEmbed.js:15-29) accepts only hostnames threads.com/www.threads.com/threads.net/www.threads.net and the paths /@user/post/<code> or /t/<code>, with the code limited to [A-Za-z0-9_-]+. It returns a rebuilt `https://www.threads.com/t/<shortcode>`, so the output is always https on www.threads.com, even for http input. The fallback `<a href={permalink}>` (ThreadsCard.jsx:130-133) uses only that value, and invalid URLs get no link. grep found no innerHTML, dangerouslySetInnerHTML, insertAdjacentHTML or outerHTML in the delivered code (only a comment at threadsEmbed.js:53). The blockquote link uses textContent."
+            }
+          ],
+          "notes": [
+            "The response says the embed.js internals were observed in 2026-10 and are undocumented, so they may change.",
+            "It was not tested in a real browser with real embed.js; the response lists manual checks to run before shipping.",
+            "The serial queue (one embed at a time plus a 3.6 s gap) means the 10th card on a page appears about 30-40 s in, and a theme toggle re-queues all cards serially. The justification (HTTP 429 rate limiting, a '3.6 s production value') is unverified."
+          ]
+        },
+        {
+          "eval_id": 6,
+          "eval_name": "eval-6-embed-wall",
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 983.0,
+            "tokens": 198633,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Identifies that <script> tags inserted via innerHTML never execute, and loads embed.js once, then triggers re-processing of newly inserted embeds with window.instgrm.Embeds.process().",
+              "passed": true,
+              "evidence": "response.md:7 '用 `innerHTML` 塞進去的 `<script>` 不會執行。每段嵌入碼最後那行 <script async src=...embed.js> 一段都沒有跑'. featured-wall.js:276-303 loadEmbedJs() injects embed.js only if no existing script tag / window.instgrm is absent; featured-wall.js:185-186 adds class 'text-post-media' to the next blockquote and calls window.instgrm.Embeds.process(). response.md:37 also tells the user to delete other embed.js script tags."
+            },
+            {
+              "text": "Says the page's CSP must allow https://www.threads.com in both script-src (embed.js) and frame-src (the embed iframes).",
+              "passed": true,
+              "evidence": "response.md:11 '`script-src` 和 `frame-src` 都要放 `https://www.threads.com`'; response.md:39-42 shows 'script-src 'self' https://www.threads.com; frame-src https://www.threads.com;'; featured.html:8 uses the same CSP in a meta tag placed before any script."
+            },
+            {
+              "text": "Attributes 'the first few load, then the rest stall' to rate limiting from loading too many embeds, and paces loading (pagination, lazy-loading near the viewport, or gating a few/one at a time with delays) instead of letting all 60 process at once.",
+              "passed": true,
+              "evidence": "response.md:9 '連續載幾十個嵌入會被 Threads 限流（HTTP 429），之後的貼文就一直停在連結框，也就是你看到的「後面整排卡住」'. Pacing in code: IntersectionObserver with rootMargin '800px 0px' (featured-wall.js:22, 335-342), one embed at a time via the `active` gate (featured-wall.js:168-187), and gapAfterEmbedMs 3600 between embeds (featured-wall.js:24, 211-223). Note: the 'first few occasionally appear' half is attributed to a separate embed.js + 5 s rescan race (response.md:8), but the stall itself is explicitly attributed to rate limiting."
+            },
+            {
+              "text": "Detects failed embeds by outcome with a timeout (e.g. the blockquote is never replaced or the iframe never gets a height), shows a fallback card linking to the post, and backs off when failures repeat.",
+              "passed": true,
+              "evidence": "featured-wall.js:236-248 listens for the bare-number height report, checks origin and matches event.source to the slot's iframe; height 0 is treated as failure. featured-wall.js:189-205 arms a 12 s timeout (reportTimeoutMs) that calls finish(item,false). showFallback (featured-wall.js:127-153) renders a card with a link '到 Threads 查看這則貼文' to the permalink plus a retry button. Back-off: featured-wall.js:214-221 pauses 60 s after 3 consecutive failures, growing x1.5 up to 5 min, and widens the per-embed gap up to 15 s."
+            },
+            {
+              "text": "Implements the weekly deleted-post check with the oEmbed endpoint (graph.threads.net/v1.0/oembed), not by scraping threads.com pages, and runs it outside the visitor's browser (e.g. a scheduled GitHub Actions job or script).",
+              "passed": true,
+              "evidence": "scripts/check_threads_posts.py:32 OEMBED_ENDPOINT = 'https://graph.threads.net/v1.0/oembed', queried per post in check_post() (lines 57-83); no page scraping. .github/workflows/check-threads-posts.yml:4-5 cron '23 1 * * 1' (weekly) runs the script on ubuntu-latest and commits changes (lines 37-48)."
+            },
+            {
+              "text": "Correctly states that the oEmbed endpoint can be called without an access token (changelog 2026-03-03), so no app, token or app secret is needed for the check — and never puts an app secret in browser code.",
+              "passed": true,
+              "evidence": "scripts/check_threads_posts.py:18 'oEmbed 從 2026-03-03 起不需要 token。'; response.md:62 '目前 oEmbed 不需要 token'. The optional THREADS_APP_TOKEN fallback is only a server-side GitHub secret ('它只在 Actions 裡使用，不能放進前端'); featured-wall.js contains no token or secret. Mock run confirmed no access_token parameter is sent when the env var is unset."
+            },
+            {
+              "text": "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
+              "passed": true,
+              "evidence": "scripts/check_threads_posts.py:79-81 returns 'gone' only when HTTP 400 and error.code == 24; everything else is 'error' and kept (lines 81-83, 143-155); code 24 is re-checked after 30 s before removal. Mock run (patched urlopen): only the post returning 400/code 24 twice was archived; posts returning 500, code 4 (rate limit), code 100 (invalid parameter), code 190, URLError, or code 24 then success were all kept; an all-error run exited 1 without modifying posts.json. The script does not read is_transient, but code 24 + HTTP 400 is the definitive not-found response per grader-facts."
+            },
+            {
+              "text": "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL.",
+              "passed": true,
+              "evidence": "featured-wall.js never creates an iframe; it only builds blockquotes (lines 98-104) and lets embed.js create the /embed/ iframes. iframe appears only as a CSS selector (featured-wall.css:28) and in a querySelector lookup (featured-wall.js:241)."
+            }
+          ],
+          "notes": []
+        },
+        {
+          "eval_id": 11,
+          "eval_name": "eval-11-extension-preview",
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.5,
+            "passed": 4,
+            "failed": 4,
+            "total": 8,
+            "time_seconds": 731.5,
+            "tokens": 150398,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "States that the /embed/ page does send its height via postMessage, as a bare number (or numeric string) rather than an object, so the MEASURE listener never matches; fixes the listener to read the number and does not inject a content script into the iframe to measure it.",
+              "passed": false,
+              "evidence": "The response does say the frame reports height and advises against a content script, but it gets the format wrong: response.md:5 says it sends a 'JSON 字串' and response.md:44 shows window.parent.postMessage('{\"type\":\"MEASURE\",\"details\":{\"height\":612}}', '*'). Per grader-facts it is a bare number (e.g. 498). The fix at embed-message.js:23-27 only accepts an object or JSON-object string with type === 'MEASURE'. A mock run of readMeasuredHeight(498) and readMeasuredHeight('498') both returned null, so the fixed listener still never applies a real height report."
+            },
+            {
+              "text": "The message listener checks event.origin against the Threads hosts (https://www.threads.com, plus https://www.threads.net if threads.net iframes can occur) and matches event.source to the iframe's contentWindow before applying a height.",
+              "passed": true,
+              "evidence": "dashboard-preview.js:50 has `if (!EMBED_ORIGINS.has(event.origin)) return;`. EMBED_ORIGINS (threads-url.js:5,11) is https://threads.com, https://www.threads.com, https://threads.net and https://www.threads.net. dashboard-preview.js:54-55 and 191-195 then find the controller via `frame.contentWindow === source` and return if there is none, all before controller.onMeasure applies a height."
+            },
+            {
+              "text": "A height report of 0, or no report within a timeout, never leaves the preview as an invisible or blank area with nothing else shown: the 0 is not applied as the final height (ignored or treated as a failure), and the card shows something usable instead, such as a placeholder or starting height, or a failure card with a link to the post or a retry.",
+              "passed": true,
+              "evidence": "embed-message.js:27 returns null unless height > 0, so a 0 is never applied (mock: readMeasuredHeight({type:'MEASURE',details:{height:0}}) -> null). Until a report arrives, a shimmer skeleton with min-height 240px is shown (dashboard-preview.css:160-175). dashboard-preview.js:171-181 starts an 8 s timer on load. If no report arrives in that time, the frame is set to 540px and made visible, the badge reads '預覽沒有回應' and a '重新載入預覽' retry button appears. The header always carries an '在 Threads 開啟' link (dashboard-preview.js:83-86)."
+            },
+            {
+              "text": "Fixes dark mode by adding ?theme=dark (or ?theme=auto) to the /embed/ iframe URL.",
+              "passed": false,
+              "evidence": "response.md:99 says '據我所知，Threads 的嵌入沒有公開的深色主題參數'. grader-facts says this is wrong, since ?theme=dark|auto is the supported parameter. embedUrl (threads-url.js:67) returns `.../post/${code}/embed/` with no theme query. The only dark-mode work is CSS: a brightness(0.9) filter and color-scheme: light on the iframe (dashboard-preview.css:181-193)."
+            },
+            {
+              "text": "Normalizes saved URLs to the post's shortcode (threads.net and threads.com hosts, /t/<code> and /@user/post/<code>, query string, fragment and trailing slash all map to one key) and dedupes or keys storage by that shortcode.",
+              "passed": true,
+              "evidence": "parseThreadsUrl (threads-url.js:30-55) accepts all four threads.com/threads.net hosts and matches both /@user/post/CODE and /t/CODE on the pathname only, so query and hash are dropped. The regexes are not end-anchored, so a trailing slash is fine. dedupePosts (posts-store.js:41-48) keys a Map by post.code, and savePost checks for duplicates by code. In a mock run, '.../threads.net/@a/post/ABC123?xmt=x#f', 'https://threads.com/t/ABC123/' and '.../threads.com/@a/post/ABC123/' all gave code ABC123. The delivered bun tests (51 pass) cover these variants."
+            },
+            {
+              "text": "Explains that the iframe's load event fires for deleted posts too, and that a missing post renders a short 'Cannot display thread' card inside the iframe (which also reports a height), so neither onload nor height can tell a deleted post from a live one.",
+              "passed": false,
+              "evidence": "The onload half is covered (response.md:151): load fires for any document, and Threads still returns a page for deleted posts. The rest is missing or contradicted. The response is unsure what the page shows ('無法查看之類的訊息') and states at response.md:174 that it does not know whether it '會不會也送 MEASURE'. Its design treats 'no MEASURE' as the deletion signal (response.md:8, 157). It also offers a height threshold, suspectHeightBelowPx (dashboard-preview.js:22, 150-156; response.md:179), so it never says that height cannot tell a deleted post from a live one."
+            },
+            {
+              "text": "Detects deleted posts with the oEmbed endpoint (https://graph.threads.net/v1.0/oembed, no access token needed) and marks a post deleted only on the definitive not-found error (code 24); other errors are treated as transient. It does not scrape threads.com post pages for this.",
+              "passed": false,
+              "evidence": "response.md:181 mentions the oEmbed endpoint but says '這版沒有實作它' and leaves open whether it needs a token. checkAvailability (threads-availability.js:28-58) instead fetches the threads.com /embed/ page and marks a post unavailable on HTTP 404/410 or on text markers found in the scraped HTML. There is no code 24 handling."
+            },
+            {
+              "text": "Keeps the iframe pointed at the /embed/ URL (never the post permalink itself, which refuses framing) and does not try to load embed.js in the extension page.",
+              "passed": true,
+              "evidence": "mountFrame sets frame.src = embedUrl(view.post) (dashboard-preview.js:130), which is always https://www.threads.com/@user/post/CODE/embed/ (threads-url.js:67). It throws, and no iframe is mounted, when the username is missing. No file loads embed.js, and dashboard.html loads only local dashboard.js and dashboard-preview.css."
+            }
+          ],
+          "notes": []
+        },
+        {
+          "eval_id": 12,
+          "eval_name": "eval-12-react-card",
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.38,
+            "passed": 3,
+            "failed": 5,
+            "total": 8,
+            "time_seconds": 897.8,
+            "tokens": 159753,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Gives each blockquote a unique id (e.g. ig-tp-<shortcode>) and explains that embed.js removes the fallback blockquote by that id once the embed reports its height, which is why the 'View on Threads' links stay.",
+              "passed": false,
+              "evidence": "The code half is present: ThreadsCard.jsx:204 sets `blockquote.id = `ig-tp-${post.shortcode}``. The explanation half is missing. response.md:18 puts the main blame for problem 1 on React owning the placeholder nodes and on several embed.js copies scanning at different times. response.md:19 only notes that the official markup has `id=\"ig-tp-<貼文代碼>\"` and says the simplified version's behavior is \"沒有保證\" (not guaranteed). It never says that embed.js removes the element whose id matches once the height report arrives, or that a missing id is why the link stays. The response also adds a CSS workaround that hides any leftover blockquote or link (ThreadsCard.css:54-56), which shows it did not identify the id-based removal as the mechanism."
+            },
+            {
+              "text": "Explains that the CSS min-height on the iframe overrides the inline height embed.js sets, and moves the placeholder to a wrapper (or sets min-height from the reported height) so short posts don't leave a blank band.",
+              "passed": true,
+              "evidence": "response.md:25-27 says embed.js sets the iframe height from the postMessage height report, and that `.threads-card iframe { min-height: 400px; }` 「在載入完成後還是有效，內容不到 400px 的短貼文就會被撐出空白」 (stays in effect after load and pads short posts). ThreadsCard.css:4-5 and :43 say any height or min-height on the iframe wins over what embed.js writes (\"不覆寫 embed.js 寫在 iframe 上的 inline style\"). For the fix, the reservation moves to the wrapper and applies only while pending (`.threads-card[data-state='idle'], .threads-card[data-state='loading'] { min-height: var(--threads-card-placeholder-height); }`, ThreadsCard.css:38-41), and the iframe gets `min-height: 0` (ThreadsCard.css:44-48)."
+            },
+            {
+              "text": "Explains that embed.js only processes a blockquote once (it swaps the text-post-media class for text-post-media-registered), so retrying or re-showing a post means removing the old iframe and creating a fresh blockquote with the text-post-media class (e.g. a remount with a new key) before calling process() again.",
+              "passed": false,
+              "evidence": "The response never mentions the text-post-media-registered class swap or the process-once behavior. It claims the opposite: response.md:35 says 「window.instgrm.Embeds.process() 是 Instagram embed.js 的 API。Threads 的嵌入沒有對應、有文件的重新掃描函式」 and that `window.instgrm` is usually `undefined`. grader-facts.md says process() exists on Threads' embed.js and re-scans the page. The component does remount with a new key and build a fresh `text-post-media` blockquote (ThreadsCard.jsx:48, :199-215), but it never calls process(). Instead it re-inserts the `<script>` to trigger a scan (response.md:98, threadsEmbedLoader.js:3-8, :37-67). grader-facts.md says that does not re-scan, because the handler registers only once per window. As a result, retries, page changes and theme switches in the delivered component would time out and fall back."
+            },
+            {
+              "text": "Handles the theme by setting data-theme on the blockquote and re-creating the embed when the site theme changes, since the theme is fixed when embed.js creates the iframe.",
+              "passed": false,
+              "evidence": "The component re-creates the embed when the theme changes (key `${post.permalink}|${theme}|${attempt}`, ThreadsCard.jsx:48). It never sets data-theme on the blockquote, though: createPlaceholder (ThreadsCard.jsx:199-215) sets only the class, data-text-post-permalink, data-text-post-version, id and style. data-theme appears only on the outer wrapper div, as a CSS hook (ThreadsCard.jsx:161), and the component relies on `style={{ colorScheme: theme }}` (ThreadsCard.jsx:165). response.md:41 claims 「Meta 也沒有為 Threads 嵌入提供有文件的主題參數（不像 X 嵌入有 data-theme）」, which contradicts grader-facts.md (embed.js turns data-theme=\"dark\"|\"auto\" into ?theme= on the /embed/ URL)."
+            },
+            {
+              "text": "Judges success by the iframe's height postMessage (a number greater than 0, with origin checked against the Threads hosts and event.source matched to that iframe's contentWindow) within a timeout, not by the iframe load event; a 0 report or no report leads to the fallback card.",
+              "passed": false,
+              "evidence": "Some of this is right: there is a timeout (ThreadsCard.jsx:125-128), the load event is rejected as a success signal (response.md:52, ThreadsCard.jsx:97), and event.source is matched to the frame's contentWindow (threadsEmbedLoader.js:74-78, :91, :102). However, dispatchFrameMessage (threadsEmbedLoader.js:74-78) checks neither event.origin nor event.data, so any message from that window counts as success. A height report of 0 would therefore mark the card 'ready' rather than show the fallback. threadsEmbedLoader.js:14 says explicitly that it does not parse the message content. Success can also come from a ResizeObserver height change (ThreadsCard.jsx:108-113), which is not the postMessage check the assertion requires."
+            },
+            {
+              "text": "Builds the blockquote and lets embed.js modify it inside a container element whose children React doesn't render (e.g. created imperatively via a ref), so embed.js inserting the iframe and removing the blockquote doesn't conflict with React's reconciliation (the removeChild errors).",
+              "passed": true,
+              "evidence": "React renders an empty host, `<div ref={hostRef} className=\"threads-card__host\" />` (ThreadsCard.jsx:167), and the comment says React never renders its children (ThreadsCard.jsx:58-59). The blockquote is built with DOM APIs and textContent (createPlaceholder, ThreadsCard.jsx:199-215) and inserted with `host.replaceChildren(createPlaceholder(post))` (ThreadsCard.jsx:120). It is cleared in the effect cleanup (ThreadsCard.jsx:149). The skeleton and fallback are React siblings of the host, not children of it (ThreadsCard.jsx:168-171). response.md:37 explains the removeChild error as React removing a node that embed.js had already taken, and response.md:86 explains why the empty host avoids it."
+            },
+            {
+              "text": "Loads embed.js once for the whole app (e.g. a shared module-level promise or a single script tag), not once per card.",
+              "passed": false,
+              "evidence": "Loading goes through one module, but the script is deliberately inserted again for every scan request. flushScanRequests creates and appends a new `<script>` each time (threadsEmbedLoader.js:37-67), and response.md:98 says 「要讓 embed.js 處理新的 blockquote，可靠的做法是再插一次 <script>」. Requests are batched only within one setTimeout tick (threadsEmbedLoader.js:27-35). Because each card starts from its own IntersectionObserver (ThreadsCard.jsx:135-143), and page changes, retries and theme switches each trigger a scan, the script is inserted many times per session, and often once per card. That is not loading it once for the app."
+            },
+            {
+              "text": "The fallback card links only to validated https://www.threads.com or https://www.threads.net post URLs and is built without inserting untrusted strings via innerHTML or dangerouslySetInnerHTML.",
+              "passed": true,
+              "evidence": "parseThreadsPermalink (threadsPermalink.js:13-35) requires `https:`, a hostname in {threads.com, www.threads.com, threads.net, www.threads.net}, and the path `/^\\/@([A-Za-z0-9._]+)\\/post\\/([A-Za-z0-9_-]+)\\/?$/`. It then rebuilds the permalink from the parsed parts. ThreadsCard returns null for anything that does not validate (ThreadsCard.jsx:42). The fallback renders `href={post.permalink}` and the text through JSX (ThreadsCard.jsx:176-196), and the placeholder uses textContent (ThreadsCard.jsx:211). There is no innerHTML or dangerouslySetInnerHTML anywhere in the outputs. A mock run rejected javascript:, http:, evil.com and www.threads.com.evil.com, and stripped userinfo. Minor deviation: the apex hosts threads.com and threads.net are accepted, and so are non-default ports (https://www.threads.com:8443/@a/post/b is kept as-is). Both stay on Meta-owned Threads hosts, so the security intent is met."
+            }
+          ],
+          "notes": []
+        },
+        {
+          "eval_id": 6,
+          "eval_name": "eval-6-embed-wall",
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.38,
+            "passed": 3,
+            "failed": 5,
+            "total": 8,
+            "time_seconds": 1239.9,
+            "tokens": 197504,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Identifies that <script> tags inserted via innerHTML never execute, and loads embed.js once, then triggers re-processing of newly inserted embeds with window.instgrm.Embeds.process().",
+              "passed": false,
+              "evidence": "The first part is there: response.md:7 says '`innerHTML` 不會執行 `<script>`'. But the code never calls window.instgrm.Embeds.process(). A grep for 'instgrm' and 'process(' across outputs finds nothing. Instead each post gets its own same-origin helper frame (threads-embed.html) that loads embed.js again (threads-embed-frame.js:80-87, 102), so embed.js loads once per frame, up to 60 times, not once per page. The response also justifies this design with a claim that contradicts grader-facts: response.md:8 says embed.js 'only processes the blockquotes already on the page when it runs', and response.md:19 says the design avoids betting on whether embed.js re-scans later elements. Grader-facts says process() exists on Threads' embed.js and that embed.js re-scans once 5 s after DOM ready."
+            },
+            {
+              "text": "Says the page's CSP must allow https://www.threads.com in both script-src (embed.js) and frame-src (the embed iframes).",
+              "passed": true,
+              "evidence": "response.md:10 diagnoses that without a Threads domain in `script-src`, embed.js is blocked, and without one in `frame-src`, the post iframes are blocked. The page where embed.js actually runs, threads-embed.html:16, sets 'script-src 'self' https://www.threads.com https://www.threads.net; frame-src https://www.threads.com https://www.threads.net'. The main wall page (featured-threads.html:11) correctly needs only frame-src 'self', because it frames only the same-origin helper page. So both directives are named and implemented with https://www.threads.com, in the page that loads embed.js."
+            },
+            {
+              "text": "Attributes 'the first few load, then the rest stall' to rate limiting from loading too many embeds, and paces loading (pagination, lazy-loading near the viewport, or gating a few/one at a time with delays) instead of letting all 60 process at once.",
+              "passed": false,
+              "evidence": "The pacing is implemented: an IntersectionObserver queue with data-max-concurrent=3 (threads-wall.js:176-185, 226-238; featured-threads.html:34-36). The attribution is wrong, though. response.md:8 blames the symptom on a race in embed.js's timing ('就是在搶時間：已經插進去的前幾則被轉成卡片，之後才插進去的就不會再被處理'). response.md:11 blames `innerHTML +=` rebuilding the iframes, and response.md:12 only says 60 iframes are 'heavy' (很重). Rate limiting is never named as the cause of the front-end stall; '限流' appears only for the oEmbed check script (response.md:82)."
+            },
+            {
+              "text": "Detects failed embeds by outcome with a timeout (e.g. the blockquote is never replaced or the iframe never gets a height), shows a fallback card linking to the post, and backs off when failures repeat.",
+              "passed": false,
+              "evidence": "There is a 15 s timeout (threads-wall.js:173), and a fallback link card remains: the in-frame blockquote link (threads-embed-frame.js:36-52), or the wall's link card when the frame never boots (threads-wall.js:141-146). There is no backoff of any kind. settle() simply frees the slot and calls pump() immediately (threads-wall.js:151-154), so repeated failures keep loading the next three posts at full rate; a grep for backoff finds nothing. Success is also judged by the Threads iframe's `load` event (threads-embed-frame.js:75), not by the outcome. Per grader-facts, that event also fires for a 'Cannot display thread' card, and it fires before the height report."
+            },
+            {
+              "text": "Implements the weekly deleted-post check with the oEmbed endpoint (graph.threads.net/v1.0/oembed), not by scraping threads.com pages, and runs it outside the visitor's browser (e.g. a scheduled GitHub Actions job or script).",
+              "passed": true,
+              "evidence": "threads-check.config.json:5 sets 'oembedEndpoint': 'https://graph.threads.net/v1.0/oembed', and requestOembed() calls it (threads-posts.mjs:199-225). check-threads-posts.yml:4-6 schedules it weekly with cron '17 3 * * 1' and runs `bun scripts/threads-posts.mjs check` on ubuntu-latest. response.md:61 explicitly rejects scraping post pages."
+            },
+            {
+              "text": "Correctly states that the oEmbed endpoint can be called without an access token (changelog 2026-03-03), so no app, token or app secret is needed for the check — and never puts an app secret in browser code.",
+              "passed": false,
+              "evidence": "The response states the opposite of grader-facts. It sends `?url=…&access_token=…` (response.md:62). It tells the user to create a Meta app (response.md:66) and to use an App access token 'TH|<App ID>|<App Secret>' (response.md:67). The script aborts without THREADS_ACCESS_TOKEN (threads-posts.mjs:127-133, 202). The app secret is kept out of browser code (it is a GitHub secret), but the main claim is wrong, and the run needlessly asks for an app secret."
+            },
+            {
+              "text": "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
+              "passed": false,
+              "evidence": "classify() (threads-posts.mjs:170-197) never checks for code 24. After handling rate-limit, auth, 403, 5xx, codes 1/2 and is_transient, it falls through to 'if (status >= 400 && status < 500) return { kind: 'missing' }' (line 193-195). So an invalid-parameter error, such as HTTP 400 with code 100, or a non-JSON 404, is counted as 'missing'. After strikesToRemove=2 consecutive weeks such a post is removed (lines 313-335). Rate limits and 5xx are handled safely (fatal abort, or transient), but invalid-parameter errors are not treated as transient."
+            },
+            {
+              "text": "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL.",
+              "passed": true,
+              "evidence": "The only iframe the code creates points at the same-origin helper page (threads-wall.js:162-168: src = config.frameSrc + '#u=<url>'). Threads iframes are created only by the official embed.js inside that helper page. No code frames a threads.com permalink directly."
+            }
+          ],
+          "notes": [
+            "response.md:104 admits it never called the real Threads API; the oEmbed path, the app token format and the deletion error codes are 'as far as I know'.",
+            "Any 4xx without a recognized code is classified as 'missing', so invalid-parameter errors can remove posts after 2 weeks.",
+            "It asks the user to create a Meta app and store an app token/secret that the endpoint does not need.",
+            "It avoids embed.js re-processing by isolating each post in a same-origin helper iframe that loads embed.js separately."
+          ]
+        }
+      ],
+      "run_summary": {
+        "with_skill": {
+          "pass_rate": {
+            "mean": 1.0,
+            "stddev": 0.0,
+            "min": 1.0,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 854.4,
+            "stddev": 170.0462,
+            "min": 661.6,
+            "max": 983.0
+          },
+          "tokens": {
+            "mean": 184784.6667,
+            "stddev": 19781.6163,
+            "min": 162129,
+            "max": 198633
+          }
+        },
+        "without_skill": {
+          "pass_rate": {
+            "mean": 0.4167,
+            "stddev": 0.0722,
+            "min": 0.375,
+            "max": 0.5
+          },
+          "time_seconds": {
+            "mean": 956.4,
+            "stddev": 259.2163,
+            "min": 731.5,
+            "max": 1239.9
+          },
+          "tokens": {
+            "mean": 169218.3333,
+            "stddev": 24938.689,
+            "min": 150398,
+            "max": 197504
+          }
+        },
+        "delta": {
+          "pass_rate": "+0.58",
+          "time_seconds": "-102.0",
+          "tokens": "+15566"
+        }
+      },
+      "notes": [
+        "With skill passes 24/24 assertions (100%), without skill 10/24 (42%). Eval 6 repeats round 7 exactly (8/8 vs 3/8), so the rewritten §11 caused no regression there.",
+        "Eval 11 assertion 3 was reworded after the first grading. It used to require the iframe itself to keep a usable starting height; the with-skill run starts its iframe at 0 px (placeholder on the wrapper) and failed on that alone, although a re-test showed 0-px iframes report normally and the run shows a failure card with a link and a retry when a report is 0 or missing. The assertion now checks that outcome (no invisible blank area). Both eval 11 runs were regraded from scratch with fresh graders: with skill 7/8 -> 8/8, without skill 4/8 -> 4/8. The first gradings are kept as grading.v1.json.",
+        "10 of 24 assertions pass in both configurations and don't discriminate: origin/source checks, 0/timeout handling, shortcode dedupe and /embed/-only framing (eval 11), wrapper placeholder, React-free host and validated fallback link (eval 12), CSP, scheduled oEmbed job and no permalink framing (eval 6). In eval 11 without skill, the origin/source and 0-handling assertions pass even though its listener drops every real (bare-number) report. The gap comes from embed.js and oEmbed specifics: bare-number height report, ?theme=, blockquote id, the class swap, process() existing, token-less oEmbed and code 24.",
+        "Without skill, graders found confident but false claims: height arrives as a JSON-string MEASURE message; Threads has no theme parameter; instgrm.Embeds.process() is Instagram-only; re-inserting embed.js re-scans; oEmbed needs an app token; any unknown 4xx means deleted.",
+        "The skill used in this round said the embed page reports its height once. A re-test after the runs showed posts with images report 2-4 times as media loads. All three with-skill responses repeated 'reports once' (eval 6 and 11 told users to fix card widths because of it), although their code still applied later reports. SKILL.md was corrected after the runs; this round did not re-run with the fix.",
+        "Deviation: the eval 6 without-skill run loaded the real embed.js and two embed pages in the browser pane while testing (it thought the pane was offline). It saw embed.js convert its blockquotes; its score is still 3/8.",
+        "With skill was faster on average (854 s vs 956 s) and used about 15.6k more tokens per run. Every run executed once, so these averages are rough.",
+        "Grader suggestions for the evals: eval 6 has no assertion about the old threads.net links (rewrite to threads.com or allow both hosts in frame-src); eval 12 has no assertion about deleted posts (the 'Cannot display thread' card can't be detected client-side); eval 6 assertion 1 requires process() specifically, while per-post helper iframes that each run embed.js would also work; eval 11 assertions 2-3 pass even when a real bare-number report is never applied (have graders replay a numeric message through the handler); no assertion checks that later positive reports keep being applied."
+      ]
+    },
+    {
+      "iteration": 9,
+      "metadata": {
+        "skill_name": "threads-api",
+        "skill_path": "threads-api/ installed as a folder (release candidate for 1.5, snapshot taken before the run: SKILL.md sha256 33c7156739e0498a75b613bb7f8eabf33abcbd72f90a56e5bcfc9e00205ced44, scripts/threads_client.py sha256 b13fb1edd929ca88255cf1d212fa4d2c6128c5f21de21471f257b39a72946c89; after the runs, 1.5 also changed the version number, the §11.3 fallback-card causes and the §11.1 note that oEmbed responses carry CORS headers)",
+        "executor_model": "claude-opus-5-5",
+        "analyzer_model": "claude-opus-5-5",
+        "timestamp": "2026-10-23T11:35:03Z",
+        "evals_run": [
+          6,
+          11,
+          12
+        ],
+        "runs_per_configuration": 1
+      },
+      "runs": [
+        {
+          "eval_id": 11,
+          "eval_name": "eval-11-extension-preview",
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 9,
+            "failed": 0,
+            "total": 9,
+            "time_seconds": 887.4,
+            "tokens": 192301,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "States that the /embed/ page does send its height via postMessage, as a bare number (or numeric string) rather than an object, so the MEASURE listener never matches; fixes the listener to read the number and does not inject a content script into the iframe to measure it.",
+              "passed": true,
+              "evidence": "response.md:3 '不需要 content script。/embed/ 本來就會回報高度，是你的 listener 把訊息丟掉了'; response.md:7 says the page postMessages '一個裸數字（例如 612）' and '(612).type 是 undefined，所以你的判斷式從來不會成立'; response.md:9 argues against the content-script approach. threads-preview.js:33-37 parseHeightReport accepts typeof number or a numeric string. Mock replay: a {type:'MEASURE',details:{height:300}} object left style.height unset, a bare 534 set it to 534px. No content script is delivered (manifest.json has only storage + graph.threads.net)."
+            },
+            {
+              "text": "The message listener checks event.origin against the Threads hosts (https://www.threads.com, plus https://www.threads.net if threads.net iframes can occur) and matches event.source to the iframe's contentWindow before applying a height.",
+              "passed": true,
+              "evidence": "threads-preview.js:9 THREADS_ORIGINS = {'https://www.threads.com','https://www.threads.net'}; onMessage at :336 returns unless THREADS_ORIGINS.has(event.origin), :337-338 looks up cardByWindow.get(event.source) (populated from iframe.contentWindow at :309-311) and returns if absent, all before style.height is set at :347. Mock replay: height 500 from origin https://evil.example and height 500 from a foreign source window were both ignored."
+            },
+            {
+              "text": "A height report of 0, or no report within a timeout, never leaves the preview as an invisible or blank area with nothing else shown: the 0 is not applied as the final height (ignored or treated as a failure), and the card shows something usable instead, such as a placeholder or starting height, or a failure card with a link to the post or a retry.",
+              "passed": true,
+              "evidence": "threads-preview.js:341-345: a 0 is never applied; if no prior success it calls embedFailed, otherwise it is ignored. embedFailed (:364-373) and the 12 s timer (:315-327, dashboard.js:16) show a notice via showNotice (:222-252) with '在 Threads 開啟' link and a '重試' button; while loading, .tp-frame-box.is-loading keeps a 240px skeleton (preview.css:89-92). Mock replay: first report 0 -> state 'failed', notice visible with title '預覽載入失敗', link https://www.threads.com/t/BBB, button '重試'; a 0 after 600px kept 600px; no report within the timeout -> 'failed' with visible notice."
+            },
+            {
+              "text": "Fixes dark mode by adding ?theme=dark (or ?theme=auto) to the /embed/ iframe URL.",
+              "passed": true,
+              "evidence": "threads-url.js:55-61 buildEmbedUrl sets searchParams theme for 'dark'/'auto'; dashboard.js:35-39 picks 'dark' from <html data-theme> or prefers-color-scheme. response.md:22 'iframe 網址改成 https://www.threads.com/t/<code>/embed/?theme=dark（用 auto 則跟著系統）'. Mock replay produced https://www.threads.com/t/AAA/embed/?theme=dark."
+            },
+            {
+              "text": "Normalizes saved URLs to the post's shortcode (threads.net and threads.com hosts, /t/<code> and /@user/post/<code>, query string, fragment and trailing slash all map to one key) and dedupes or keys storage by that shortcode.",
+              "passed": true,
+              "evidence": "threads-url.js:6-8 hostname regex covers (www.)threads.com/net, path regex covers /@user/post/<code> and /t/<code> with optional trailing slash; :32 uses url.pathname so query and fragment drop. dedupeSavedPosts (:69-106) groups by shortcode and dashboard.js:47 writes the deduped list back to chrome.storage.local; status cache is keyed by shortcode. Mock replay: six variants (threads.net /@User.Name/post, threads.com /t/, ?xmt=..., #frag, no-scheme threads.net/t/...?igshid, /embed/) all parsed to 'DAbc_-12' and deduped to one entry (duplicatesRemoved 5)."
+            },
+            {
+              "text": "Explains that the iframe's load event fires for deleted posts too, and that a missing post renders a short 'Cannot display thread' card inside the iframe (which also reports a height), so neither onload nor height can tell a deleted post from a live one.",
+              "passed": true,
+              "evidence": "response.md:60 'iframe 的 load 事件只代表「iframe 裡的頁面載完了」。貼文被刪除後，/embed/ 頁面還是會正常載入，顯示一張「無法顯示串文」（Cannot display thread）的卡片，甚至照常回報高度（大約 190px）'; response.md:61 '光看高度也分不出是「很短的文字貼文」還是「無法顯示」的卡片'. Matches grader-facts (~194 px, load fires)."
+            },
+            {
+              "text": "Detects deleted posts with the oEmbed endpoint (https://graph.threads.net/v1.0/oembed, no access token needed) and marks a post deleted only on the definitive not-found error (code 24); other errors are treated as transient. It does not scrape threads.com post pages for this.",
+              "passed": true,
+              "evidence": "threads-preview.js:10 OEMBED_ENDPOINT = 'https://graph.threads.net/v1.0/oembed'; checkEmbeddable (:47-63) sends only url, no token. classifyOembedResult (:40-44) returns 'gone' only for error.code === 24, else 'unknown'; pumpChecks (:461-464) re-queues 'unknown' with backoff and never marks gone. markGone is reached only from a cached/fresh 'gone' status (:133, :477-478). Timeouts/0 reports go to a separate 'failed' state. No fetch of threads.com pages anywhere. Mock: classify code 24 -> gone, code 4 -> unknown, null body -> unknown."
+            },
+            {
+              "text": "Keeps the iframe pointed at the /embed/ URL (never the post permalink itself, which refuses framing) and does not try to load embed.js in the extension page.",
+              "passed": true,
+              "evidence": "threads-preview.js:306 iframe.src = buildEmbedUrl(...), which always yields https://www.threads.com/t/<code>/embed/ (threads-url.js:58). The permalink is used only as an <a href> in the notice (:228) and for the oEmbed query. dashboard.html loads only dashboard.js and preview.css; no embed.js reference in any file."
+            },
+            {
+              "text": "Keeps applying every later height report above 0 from the same iframe (posts with images report again as their media loads) instead of stopping after the first one, and does not tell the user that the page reports its height only once.",
+              "passed": true,
+              "evidence": "threads-preview.js:346-347 applies style.height on every >0 report with no first-only guard; the reported flag only controls queue settlement. response.md:13 '每次大於 0 的回報都套用。有圖片或影片的貼文，媒體載入後會再回報 2–4 次；只套用第一次的話，長貼文還是會被切掉'. Nowhere says it reports only once. Mock replay: 534 -> 574 -> '600' were all applied in sequence; a later 420 also revived a card that had failed on a first 0."
+            }
+          ],
+          "notes": []
+        },
+        {
+          "eval_id": 12,
+          "eval_name": "eval-12-react-card",
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 9,
+            "failed": 0,
+            "total": 9,
+            "time_seconds": 845.5,
+            "tokens": 185849,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Gives each blockquote a unique id (e.g. ig-tp-<shortcode>) and explains that embed.js removes the fallback blockquote by that id once the embed reports its height, which is why the 'View on Threads' links stay.",
+              "passed": true,
+              "evidence": "response.md:21 explains that after the height report embed.js removes 'the element named by the blockquote's id', that official markup carries id=\"ig-tp-<shortcode>\" and the user's doesn't, so the blockquote and link stay below the iframe. threadsEmbed.js:177 sets blockquote.id = `ig-tp-${shortcode}`. Uniqueness: response.md:23 and :145 say the id must be unique on the page, and CommunityPicks.jsx:13-27 dedupes by shortcode. A mock run of mountThreadsEmbed confirmed the generated blockquote has id 'ig-tp-ABC'."
+            },
+            {
+              "text": "Explains that the CSS min-height on the iframe overrides the inline height embed.js sets, and moves the placeholder to a wrapper (or sets min-height from the reported height) so short posts don't leave a blank band.",
+              "passed": true,
+              "evidence": "response.md:27 says embed.js sets the iframe's style.height, a CSS min-height wins over height, so `.threads-card iframe { min-height: 400px }` stretches every post shorter than 400 px. response.md:29 moves the placeholder to the outer container and applies it only while loading. ThreadsCard.css:25-28 sets min-height on .threads-card only for data-status waiting/loading, and ThreadsCard.css:30-33 has no height on the iframe."
+            },
+            {
+              "text": "Explains that embed.js only processes a blockquote once (it swaps the text-post-media class for text-post-media-registered), so retrying or re-showing a post means removing the old iframe and creating a fresh blockquote with the text-post-media class (e.g. a remount with a new key) before calling process() again.",
+              "passed": true,
+              "evidence": "response.md:35 says each blockquote is processed once: the iframe takes the text-post-media class and the blockquote becomes text-post-media-registered, and process() only finds blockquotes that still have text-post-media. response.md:46 gives the fix as 'clear the container, build a brand-new blockquote, then call process()'. In the code, retry bumps `attempt` (ThreadsCard.jsx:111-114, dep at :98). Cleanup calls host.replaceChildren(), which removes the old iframe (:96). mountThreadsEmbed then calls host.replaceChildren(buildBlockquote(...)) with className 'text-post-media' before window.instgrm.Embeds.process() (threadsEmbed.js:174, :252, :256). The list keys on shortcode (CommunityPicks.jsx:39)."
+            },
+            {
+              "text": "Handles the theme by setting data-theme on the blockquote and re-creating the embed when the site theme changes, since the theme is fixed when embed.js creates the iframe.",
+              "passed": true,
+              "evidence": "response.md:52 says the theme is decided when the iframe is created: data-theme=\"dark\" makes embed.js append ?theme=dark and use a transparent background. response.md:54-56 says the only fix is to rebuild with a new data-theme, so theme is an effect dependency. threadsEmbed.js:181 sets data-theme='dark' when theme is dark. ThreadsCard.jsx:98 lists `theme` in the layout-effect deps, so cleanup clears the host and the embed is re-mounted. response.md:57 also rejects data-theme=\"auto\" because it follows the OS, not the site toggle."
+            },
+            {
+              "text": "Judges success by the iframe's height postMessage (a number greater than 0, with origin checked against the Threads hosts and event.source matched to that iframe's contentWindow) within a timeout, not by the iframe load event; a 0 report or no report leads to the fallback card.",
+              "passed": true,
+              "evidence": "threadsEmbed.js:224-232 drops any message whose origin is not in messageOrigins ['https://www.threads.com','https://www.threads.net'] (threadsEmbedConfig.js:12) or whose source is not host.querySelector('iframe').contentWindow. toHeight accepts a bare number (:193-197). height > 0 resolves 'loaded' and 0 resolves 'failed'. A 12 s timer (:234-244, firstReportTimeoutMs) resolves 'failed'. On failure ThreadsCard.jsx:50-54/:75 clears the host and sets status 'failed', which renders ThreadsFallback (:121). response.md:62-72 explicitly rejects onload. Mock replay: bare 498 from www.threads.com gave {status:'loaded',height:498}; 0 gave {status:'failed',reason:'zero-height'}; a wrong origin and a wrong event.source were both ignored (still pending); 300 from www.threads.net gave loaded."
+            },
+            {
+              "text": "Builds the blockquote and lets embed.js modify it inside a container element whose children React doesn't render (e.g. created imperatively via a ref), so embed.js inserting the iframe and removing the blockquote doesn't conflict with React's reconciliation (the removeChild errors).",
+              "passed": true,
+              "evidence": "ThreadsCard.jsx:119 renders `<div ref={hostRef} className=\"threads-card__embed\" />` with no React children, and the comment says it must never have any. The blockquote and link are created with document.createElement and inserted via host.replaceChildren (threadsEmbed.js:172-190, :252). The skeleton and fallback are React siblings outside the host. response.md:40 explains the removeChild error: embed.js inserts, re-classes and deletes nodes React manages, and React then tries to remove or move a node that has moved."
+            },
+            {
+              "text": "Loads embed.js once for the whole app (e.g. a shared module-level promise or a single script tag), not once per card.",
+              "passed": true,
+              "evidence": "threadsEmbed.js:39-86 has a module-level `scriptPromise`. loadThreadsEmbedScript() returns early if instgrm.Embeds.process exists or a promise is pending, reuses an existing script tag, and inserts a single <script> into document.head. The script is only removed and retried after a failure (:60-65, :89-94). response.md:47 and :106 say embed.js is loaded once and the per-card script insertion should be deleted."
+            },
+            {
+              "text": "The fallback card links only to validated https://www.threads.com or https://www.threads.net post URLs and is built without inserting untrusted strings via innerHTML or dangerouslySetInnerHTML.",
+              "passed": true,
+              "evidence": "parseThreadsPostUrl (threadsEmbed.js:18-33) parses with new URL and allows only the threads.com, www.threads.com, threads.net and www.threads.net hostnames. The path must match /@user/post/<code> or /t/<code> with restricted character classes. The permalink is rebuilt as 'https://www.threads.com' + path, so output is always https even for http input. ThreadsFallback (ThreadsCard.jsx:147-151) renders `<a href={permalink}>` only when permalink is non-null, through JSX. The mock showed javascript:alert(1) and threads.com.evil.com both return null, and an http threads.net URL is rewritten to https://www.threads.com/@a.b/post/XyZ_1. A grep of the outputs found no innerHTML, dangerouslySetInnerHTML, insertAdjacentHTML or outerHTML in the code."
+            },
+            {
+              "text": "Points out that a deleted or unavailable post still renders a 'Cannot display thread' card that reports a height, so client-side success detection counts it as loaded, and recommends pruning such posts with the oEmbed endpoint (code 24 means gone), e.g. on the backend or in a scheduled job.",
+              "passed": true,
+              "evidence": "response.md:64 says deleted or non-embeddable posts still load the embed page (showing 'Cannot display thread') and fire load. response.md:74 says that card also reports about 190 px, so height alone can't tell it from a short text post, and points to backend oEmbed checks. response.md:179 says the frontend can't distinguish the two. response.md:177-186 recommends a periodic (e.g. daily) backend oEmbed call per URL and removing the post on HTTP 400 code 24 (subcode 4279056). It also states no token is needed and the 1,000/hour limit, both of which match grader-facts."
+            }
+          ],
+          "notes": [
+            "Not tested in a real browser against threads.com (no network). The embed.js behaviors relied on are observed, not documented (response.md:160-166).",
+            "The fallback copy names 'post deleted' as a cause of a timeout or 0 report, which contradicts how deleted posts actually behave."
+          ]
+        },
+        {
+          "eval_id": 6,
+          "eval_name": "eval-6-embed-wall",
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 9,
+            "failed": 0,
+            "total": 9,
+            "time_seconds": 965.6,
+            "tokens": 202575,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Identifies that <script> tags inserted via innerHTML never execute, and loads embed.js once, then triggers re-processing of newly inserted embeds with window.instgrm.Embeds.process().",
+              "passed": true,
+              "evidence": "response.md:7 states the cause outright: \"用 innerHTML 插入的 `<script>` 不會執行\". assets/featured-wall.js:157-177 (loadEmbedScript) returns the existing window.instgrm.Embeds if it is already there. Otherwise it appends a single <script> and resolves only after checking that Embeds.process is a function. featured-wall.js:335-337 adds class text-post-media to the newly built blockquote and calls embeds.process(). response.md:43 tells the user to delete every other embed.js tag so that two copies don't compete."
+            },
+            {
+              "text": "Says the page's CSP must allow https://www.threads.com in both script-src (embed.js) and frame-src (the embed iframes).",
+              "passed": true,
+              "evidence": "response.md:10: \"CSP 要在 `script-src` 和 `frame-src` 都放行 `https://www.threads.com`，少一個就會整片失效\". response.md:38-41 gives the exact snippet \"script-src 'self' https://www.threads.com; frame-src https://www.threads.com\". featured.html:6-13 contains the same comment and a meta CSP that includes both."
+            },
+            {
+              "text": "Attributes 'the first few load, then the rest stall' to rate limiting from loading too many embeds, and paces loading (pagination, lazy-loading near the viewport, or gating a few/one at a time with delays) instead of letting all 60 process at once.",
+              "passed": true,
+              "evidence": "response.md:8: \"一次 60 則會被 Threads 限流…連續載幾十個還是會被回 HTTP 429…看起來就是「後面整排卡住」\". On pacing, featured-wall.js:405-415 uses an IntersectionObserver with a 600px rootMargin, so only cards near the viewport become eligible. runScheduler (featured-wall.js:375-403) loads one card at a time and sleeps gapMs (3600 ms, featured.html:43) between cards. Blockquotes get the text-post-media class only when their turn comes (featured-wall.js:335), so embed.js never sees all 60 at once."
+            },
+            {
+              "text": "Detects failed embeds by outcome with a timeout (e.g. the blockquote is never replaced or the iframe never gets a height), shows a fallback card linking to the post, and backs off when failures repeat.",
+              "passed": true,
+              "evidence": "Outcome and timeout: an attempt fails if the iframe's first postMessage height is 0 (featured-wall.js:300-301) or if no height arrives within reportTimeoutMs = 12000 (featured-wall.js:327-330 and 349-362). Fallback: showFailure (featured-wall.js:235-261) removes the dead iframe and shows a card with a link to the post (\"在 Threads 查看\"), the possible causes and a retry button. Back-off: after 3 consecutive failures the loop pauses for pauseMs (60 s), multiplying the pause by 1.5 up to 5 min and the per-card gap by 1.5 up to 10 s (featured-wall.js:390-398). Caveat: on timeout, judgeTimeout counts an iframe whose getBoundingClientRect().height > 0 as a success. That measurement includes borders, so if embed.js gives its 0-height iframe a CSS border, a stalled embed could be marked OK. I could not check embed.js's iframe styling offline, so this does not change the verdict."
+            },
+            {
+              "text": "Implements the weekly deleted-post check with the oEmbed endpoint (graph.threads.net/v1.0/oembed), not by scraping threads.com pages, and runs it outside the visitor's browser (e.g. a scheduled GitHub Actions job or script).",
+              "passed": true,
+              "evidence": ".github/workflows/check-threads-posts.yml:6-8 sets a weekly cron ('17 1 * * 1') plus workflow_dispatch, and line 33 sets THREADS_OEMBED_ENDPOINT: https://graph.threads.net/v1.0/oembed. scripts/check-threads-posts.mjs:58-101 (askOembed) only calls that endpoint and never fetches threads.com pages. The job runs on ubuntu-latest, not in the visitor's browser."
+            },
+            {
+              "text": "Correctly states that the oEmbed endpoint can be called without an access token (changelog 2026-03-03), so no app, token or app secret is needed for the check — and never puts an app secret in browser code.",
+              "passed": true,
+              "evidence": "response.md:56: \"這個端點目前不需要 token\". response.md:86: \"oEmbed 依 changelog 從 2026-03-03 起就不需要 token\". scripts/check-threads-posts.mjs:44-47 treats THREADS_APP_TOKEN as optional, and the workflow runs without it. No browser file (featured.html, featured-wall.js, threads-url.js) contains or asks for a token or secret. The response does offer an optional fallback: it suggests storing TH|<APP_ID>|<APP_SECRET> in GitHub Secrets if 190/104 or 429 errors appear, citing that the App Access Tokens docs page still says a token is required. This fallback is server-side only and secret-scoped, so it doesn't break the 'never in browser code' clause, and the main statement that no token is needed is correct per grader-facts."
+            },
+            {
+              "text": "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
+              "passed": true,
+              "evidence": "The code removes a post only when code === 24 (check-threads-posts.mjs:96), and only if a recheck after CONFIRM_DELAY_MS also returns code 24 (lines 189-202). code 100/2207047 is classed as 'invalid' and kept (line 97). 429 or rate-limit codes and auth codes throw StopRun before any write (lines 98-99, 103-113). Everything else is classed as 'transient' and kept (line 100). I confirmed this with a Bun mock oEmbed server in the scratchpad. A code-24 post and its threads.net duplicate were removed. A post that returned 24 first and then OK, a 500, a 502 non-JSON response, 100/2207047, plain 100, and an unparseable URL were all kept. A 429 mid-run exited 1 and left the file byte-identical. Connection refused was classed as transient, exited 1, and left the file unchanged. The script doesn't read is_transient, but code 24 is exactly the definitive not-found error described in grader-facts."
+            },
+            {
+              "text": "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL.",
+              "passed": true,
+              "evidence": "None of the delivered code creates an iframe. featured-wall.js only builds blockquote.text-post-media elements with data-text-post-permalink (lines 216-227, 335), and embed.js creates the /embed/ iframes. featured-wall.js:263-265 and 271-281 only read the iframe and set its style.height. No permalink is set as an iframe src anywhere."
+            },
+            {
+              "text": "Handles the old threads.net links so their embeds aren't blocked: either rewrites them to https://www.threads.com before building the embed (e.g. from the shortcode), or allows both https://www.threads.com and https://www.threads.net in the CSP's frame-src (and script-src where needed).",
+              "passed": true,
+              "evidence": "assets/threads-url.js:7-32 accepts threads.net and threads.com hosts, extracts the shortcode and returns permalink `https://www.threads.com/t/${shortcode}`. featured-wall.js:142 and 219 use that rewritten permalink for data-text-post-permalink, so every iframe is on www.threads.com. response.md:9 explains why: threads.net permalinks would produce www.threads.net iframes, which a threads.com-only frame-src blocks. response.md:42 notes that frame-src therefore doesn't need threads.net."
+            }
+          ],
+          "notes": [
+            "The response notes that the embed.js behaviours it relies on (class swap, bare-number postMessage, removal by id, 3-at-a-time) were observed rather than documented.",
+            "The response is unsure whether style-src 'self' in the sample CSP blocks embed.js inline styles.",
+            "If oEmbed starts rejecting tokenless calls or the shared runner IP gets rate-limited, the response suggests an optional THREADS_APP_TOKEN GitHub secret."
+          ]
+        },
+        {
+          "eval_id": 11,
+          "eval_name": "eval-11-extension-preview",
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.44,
+            "passed": 4,
+            "failed": 5,
+            "total": 9,
+            "time_seconds": 881.8,
+            "tokens": 167000,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "States that the /embed/ page does send its height via postMessage, as a bare number (or numeric string) rather than an object, so the MEASURE listener never matches; fixes the listener to read the number and does not inject a content script into the iframe to measure it.",
+              "passed": false,
+              "evidence": "response.md:5 and :34 say the data is a JSON string: '最可能的原因是送來的 e.data 是 JSON 字串' / \"Instagram 送的是 '{\\\"type\\\":\\\"MEASURE\\\",\\\"details\\\":{\\\"height\\\":612}}' 這種 JSON 字串\". Per grader-facts the page sends a bare number. lib/embed-height.js:31-48 readEmbedHeight only accepts MEASURE objects/JSON strings and a probe object; for a number it hits `if (!msg || typeof msg !== 'object') return null`. Mock replay of 498, 534, 574, '498', 194 through createEmbedHeightRouter applied no heights ([]). The response also ships a content-script measuring fallback (optional/embed-height-probe.js, optional/manifest.content-scripts.json) and tells the user to fall back to it if no messages arrive (response.md:46-53)."
+            },
+            {
+              "text": "The message listener checks event.origin against the Threads hosts (https://www.threads.com, plus https://www.threads.net if threads.net iframes can occur) and matches event.source to the iframe's contentWindow before applying a height.",
+              "passed": true,
+              "evidence": "lib/embed-height.js:13 THREADS_ORIGIN_RE = /^https:\\/\\/(?:www\\.)?threads\\.(?:com|net)$/; onMessage returns early if !isThreadsOrigin(event.origin) (:70-75), then findHandler compares iframe.contentWindow === source (:61-67) and returns if no handler (:89) before calling handler(height). Mock replay: object messages from https://evil.example and from an unregistered source were dropped; www.threads.com / www.threads.net accepted. (It also accepts bare threads.com/threads.net without www, a harmless broadening.)"
+            },
+            {
+              "text": "A height report of 0, or no report within a timeout, never leaves the preview as an invisible or blank area with nothing else shown: the 0 is not applied as the final height (ignored or treated as a failure), and the card shows something usable instead, such as a placeholder or starting height, or a failure card with a link to the post or a retry.",
+              "passed": true,
+              "evidence": "0 is never applied: toPositiveNumber requires n > 0 (embed-height.js:19-22) and the router drops heights below minHeightPx 60 (:90, config.js:25); a bare 0 is dropped as well (replay). The frame starts at initialHeightPx 240 with a '載入預覽中…' placeholder (dashboard.js:109,180; dashboard.css:193-201). If no height arrives within heightTimeoutMs 6000 after load, markUnmeasured sets a 560px resizable frame and shows the hint '沒有收到這則預覽的高度回報，可以拖曳預覽框右下角調整高度。' (dashboard.js:129-134,143; dashboard.html:33). Every card also has a header link to the post (dashboard.js:96-99)."
+            },
+            {
+              "text": "Fixes dark mode by adding ?theme=dark (or ?theme=auto) to the /embed/ iframe URL.",
+              "passed": false,
+              "evidence": "No theme parameter anywhere (grep for 'theme' finds only response.md:61). config.js:15 urlParams: {}. response.md:61 states the opposite of the ground truth: '就我所知，Threads 嵌入目前沒有深色主題參數'. The only change is `color-scheme: light` on the iframe element (dashboard.css:226) plus a dark skeleton, which keeps the card white."
+            },
+            {
+              "text": "Normalizes saved URLs to the post's shortcode (threads.net and threads.com hosts, /t/<code> and /@user/post/<code>, query string, fragment and trailing slash all map to one key) and dedupes or keys storage by that shortcode.",
+              "passed": true,
+              "evidence": "lib/threads-url.js:16 host regex accepts (www.)threads.com|net; :51 splits pathname with filter(Boolean) (trailing slash) and ignores query/hash; :54-66 handle /@user/post/CODE and /t/CODE, returning { code }. groupSavedPosts groups by ref.code (:111-134) for display, and compactSavedPosts writes a deduped list back to storage (:159-197; dashboard.js:330-357). tests/run-tests.mjs:35-51 covers threads.net/.com, /t/, ?xmt=, #comments, trailing slash, /embed/; I ran `bun tests/run-tests.mjs` and all 17 tests passed."
+            },
+            {
+              "text": "Explains that the iframe's load event fires for deleted posts too, and that a missing post renders a short 'Cannot display thread' card inside the iframe (which also reports a height), so neither onload nor height can tell a deleted post from a live one.",
+              "passed": false,
+              "evidence": "Covers only the load half: response.md:94 'iframe 的 load 事件只代表「有一份文件載入完成」。Threads 回的「這則貼文無法顯示」頁面也是一份正常載入的文件'. It never says the not-found card also reports a height or that height cannot distinguish it; its argument is only about cross-origin content and status codes being unreadable."
+            },
+            {
+              "text": "Detects deleted posts with the oEmbed endpoint (https://graph.threads.net/v1.0/oembed, no access token needed) and marks a post deleted only on the definitive not-found error (code 24); other errors are treated as transient. It does not scrape threads.com post pages for this.",
+              "passed": false,
+              "evidence": "lib/post-status.js:100-121 fetches the threads.com post permalink (canonicalPostUrl) with credentials:'omit', marks 404/410 as gone and parses og:url from the HTML (classifyPostHtml :75-86). That is scraping threads.com post pages, with optional host permissions requested for it (manifest.json:7-10). oEmbed is only mentioned as a backend alternative, with a hedge that a token may be needed: response.md:111 '不過需不需要 token、配額多少，請以 Meta 的文件為準，而且 token 不能放在擴充功能裡'. No code 24 handling."
+            },
+            {
+              "text": "Keeps the iframe pointed at the /embed/ URL (never the post permalink itself, which refuses framing) and does not try to load embed.js in the extension page.",
+              "passed": true,
+              "evidence": "iframe.src is only ever set to embedUrl(...) (dashboard.js:111,181), which always builds `${canonicalPostUrl(ref)}/embed/` (threads-url.js:84-91), or to about:blank to unload. No embed.js script in dashboard.html or any JS. The only embed.js mention is about inspecting it on a separate localhost/https test page (response.md:45)."
+            },
+            {
+              "text": "Keeps applying every later height report above 0 from the same iframe (posts with images report again as their media loads) instead of stopping after the first one, and does not tell the user that the page reports its height only once.",
+              "passed": false,
+              "evidence": "The router does not unregister after the first message, and it would re-apply repeated reports in the MEASURE format it expects (replay: two MEASURE objects -> [534, 574]). But the real reports are bare numbers, and readEmbedHeight returns null for them, so the delivered handler applies none of them. Replaying 498 -> 534 -> 574 applied nothing ([]). It also drops any report from 1 to 59 px (minHeightPx 60, embed-height.js:90), so not every report above 0 is applied. The response never claims the page reports only once, but it does not keep applying the real reports."
+            }
+          ],
+          "notes": [
+            "The response admits it could not verify the height-message format, whether /t/<code>/embed/ works, or the deleted-post HTTP status and og:url (response.md:129-134).",
+            "Without a theme parameter, the response says the card stays white wherever the embed's own body is white.",
+            "The deleted-post check scrapes threads.com permalinks and needs optional host permissions. It is unverified, and the response asks the user to calibrate it with debugCheck().",
+            "A content-script height probe is shipped as an opt-in fallback.",
+            "After a 6 s timeout the frame becomes manually resizable at 560px. Because the handler drops real bare-number reports, this is effectively the path every card will take."
+          ]
+        },
+        {
+          "eval_id": 12,
+          "eval_name": "eval-12-react-card",
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.33,
+            "passed": 3,
+            "failed": 6,
+            "total": 9,
+            "time_seconds": 1500.0,
+            "tokens": 235465,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Gives each blockquote a unique id (e.g. ig-tp-<shortcode>) and explains that embed.js removes the fallback blockquote by that id once the embed reports its height, which is why the 'View on Threads' links stay.",
+              "passed": false,
+              "evidence": "createPlaceholder (mountThreadsEmbed.js:189-204) sets class, data-text-post-permalink and data-text-post-version but no id. The diagnosis for issue 1 (response.md:15) blames embed.js being executed many times per document ('embed.js 在同一份文件裡被執行了很多次... 同一個 blockquote 被好幾輪處理重疊'), which contradicts the ground truth (embed.js registers once per window and removes the element whose id equals the blockquote's id; no id means it is never removed). The response admits 'I can't verify line by line offline how embed.js cleans up' (response.md:17) and instead removes leftovers itself via removeLeftoverPlaceholders (mountThreadsEmbed.js:210-220). No mention of id-based removal."
+            },
+            {
+              "text": "Explains that the CSS min-height on the iframe overrides the inline height embed.js sets, and moves the placeholder to a wrapper (or sets min-height from the reported height) so short posts don't leave a blank band.",
+              "passed": true,
+              "evidence": "response.md:21: 'embed.js 會依貼文內容的實際高度設定 iframe 的高度... 你的 `.threads-card iframe { min-height: 400px; }` 直接套在 iframe 上，而 `min-height` 的優先順序高於 `height`。短貼文實際只有 200 多 px，iframe 還是被撐到 400px'. The reserve moves to the wrapper only while loading: ThreadsCard.css:36-38 '.threads-card[data-status='loading'] { min-height: var(--threads-card-reserve); }', and the iframe gets 'min-height: 0' (ThreadsCard.css:45-51). The outer frame height follows inner content via ResizeObserver (mountThreadsEmbed.js:72-77), and the measured height is reused as the reserve on rebuild (ThreadsCard.jsx:83)."
+            },
+            {
+              "text": "Explains that embed.js only processes a blockquote once (it swaps the text-post-media class for text-post-media-registered), so retrying or re-showing a post means removing the old iframe and creating a fresh blockquote with the text-post-media class (e.g. a remount with a new key) before calling process() again.",
+              "passed": false,
+              "evidence": "The class swap to text-post-media-registered is never mentioned. The explanation given is factually wrong: response.md:33-34 says embed.js replaces the blockquote with the iframe and takes it out of the document ('把 React 建立的 blockquote 換成 iframe，也就是把它從文件中拿掉'), whereas embed.js inserts the iframe before the blockquote and only renames its class. It also says 'window.instgrm 是 Instagram 嵌入程式的全域物件。Threads 沒有公開文件化、可以重複呼叫的處理 API' (response.md:37), contradicting the ground truth that Threads' embed.js registers on window.instgrm and process() re-scans. The fix remounts with a new key but explicitly never calls process() ('完全不呼叫 `process()`', response.md:40), loading a fresh embed.js in a new per-card iframe document instead."
+            },
+            {
+              "text": "Handles the theme by setting data-theme on the blockquote and re-creating the embed when the site theme changes, since the theme is fixed when embed.js creates the iframe.",
+              "passed": false,
+              "evidence": "The blockquote gets no data-theme (mountThreadsEmbed.js:189-204); data-theme is only set on the React wrapper div for the site's own CSS (ThreadsCard.jsx:91). The response states 'Threads 嵌入也沒有公開的主題參數（不像 X 的 `data-theme`）' (response.md:44), which the ground truth says is wrong (data-theme=\"dark\"|\"auto\" makes embed.js append ?theme=). It relies on CSS color-scheme inheritance and concedes '這一段由 Threads 決定，我無法保證' (response.md:48). Re-creation on theme change does happen (key includes theme, ThreadsCard.jsx:55), but the required mechanism is missing."
+            },
+            {
+              "text": "Judges success by the iframe's height postMessage (a number greater than 0, with origin checked against the Threads hosts and event.source matched to that iframe's contentWindow) within a timeout, not by the iframe load event; a 0 report or no report leads to the fallback card.",
+              "passed": false,
+              "evidence": "handleMessage (mountThreadsEmbed.js:85-91) checks origin (isThreadsOrigin, https + threads.com/threads.net incl. subdomains) and matches event.source to an iframe's contentWindow, with a 15 s visible-time timeout (threadsEmbed.config.js:24) and not the load event. But it never inspects event.data: the comment says '不讀訊息內容（格式沒有公開文件）' (mountThreadsEmbed.js:84; also response.md:60). Any message from that iframe, including a bare 0 height report, calls succeed(), so a 0 report does not lead to the fallback card."
+            },
+            {
+              "text": "Builds the blockquote and lets embed.js modify it inside a container element whose children React doesn't render (e.g. created imperatively via a ref), so embed.js inserting the iframe and removing the blockquote doesn't conflict with React's reconciliation (the removeChild errors).",
+              "passed": true,
+              "evidence": "ThreadsCard.jsx:95-96 renders an empty '<div ref={hostRef} className=\"threads-card__host\" />' with the comment that React never puts children in it. mountThreadsEmbed appends an imperatively created same-origin iframe to that host (mountThreadsEmbed.js:41-45, 145) and builds the blockquote and embed.js script inside that iframe's document via DOM APIs (mountThreadsEmbed.js:96-102), so embed.js never touches React-owned nodes. response.md:38 links the removeChild error to React removing a node embed.js has already moved out from under it."
+            },
+            {
+              "text": "Loads embed.js once for the whole app (e.g. a shared module-level promise or a single script tag), not once per card.",
+              "passed": false,
+              "evidence": "The design loads embed.js once per card, in each card's own iframe document: response.md:71 '每張卡在自己的同源 iframe 裡載入一次 embed.js' and response.md:83 'embed.js 每張卡執行一次，下載走瀏覽器快取'. Code: build() appends a new <script src=CONFIG.scriptSrc> for every mount (mountThreadsEmbed.js:97-102). It also tells the user to remove embed.js from the main page (response.md:611)."
+            },
+            {
+              "text": "The fallback card links only to validated https://www.threads.com or https://www.threads.net post URLs and is built without inserting untrusted strings via innerHTML or dangerouslySetInnerHTML.",
+              "passed": true,
+              "evidence": "The fallback href is the permalink from toThreadsPermalink (threadsPermalink.js:15-35): it parses with URL, allows only threads.com/threads.net hosts (apex or www), requires the path /@user/post/code, and always rebuilds the URL as 'https://${hostname}/@user/post/code', dropping query and hash. An invalid URL produces a fallback with no link (ThreadsCard.jsx:43-48, 111). The fallback is plain JSX text (ThreadsCard.jsx:105-124); the blockquote uses setAttribute/textContent (mountThreadsEmbed.js:189-204); the only doc.write is the constant FRAME_HTML (mountThreadsEmbed.js:3, 165). There is no innerHTML or dangerouslySetInnerHTML. One nuance: the apex hosts (https://threads.com/...) are also accepted, but these are Threads-owned hosts and the spirit of the check is met."
+            },
+            {
+              "text": "Points out that a deleted or unavailable post still renders a 'Cannot display thread' card that reports a height, so client-side success detection counts it as loaded, and recommends pruning such posts with the oEmbed endpoint (code 24 means gone), e.g. on the backend or in a scheduled job.",
+              "passed": false,
+              "evidence": "The first half is present: response.md:63 '被刪除或改成私人的貼文，Threads 可能回一張「無法顯示」的內嵌頁，它同樣會回報高度，前端分不出來。這種情況要靠後台定期檢查清單裡的網址是否還能公開瀏覽，把失效的移除。' It never mentions the oEmbed endpoint or error code 24, so it gives no concrete way to detect a gone post."
+            }
+          ],
+          "notes": []
+        },
+        {
+          "eval_id": 6,
+          "eval_name": "eval-6-embed-wall",
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.44,
+            "passed": 4,
+            "failed": 5,
+            "total": 9,
+            "time_seconds": 1438.5,
+            "tokens": 228314,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Identifies that <script> tags inserted via innerHTML never execute, and loads embed.js once, then triggers re-processing of newly inserted embeds with window.instgrm.Embeds.process().",
+              "passed": false,
+              "evidence": "The first half is met: response.md:7-8 says scripts inserted via innerHTML do not execute. The rest is not. The response never calls window.instgrm.Embeds.process() (grep for 'instgrm' and 'process(' across outputs finds nothing). It also says the opposite: response.md:11 states \"官方沒有公開「請重新掃描」的 API，這條路靠不住\". grader-facts says process() exists and re-scans for blockquote.text-post-media. Instead of loading embed.js once, the design loads it separately in each of the 60 same-origin embed-frame.html frames (embed-frame.js:105-110)."
+            },
+            {
+              "text": "Says the page's CSP must allow https://www.threads.com in both script-src (embed.js) and frame-src (the embed iframes).",
+              "passed": true,
+              "evidence": "response.md:18: \"要嵌入，CSP 得同時放行 embed.js 的網域（script-src）和貼文 iframe 的網域（frame-src）。Threads 已經從 threads.net 搬到 threads.com…\". In the delivered design the document that runs embed.js is embed-frame.html, and its CSP (embed-frame.html:5) has \"script-src 'self' https://www.threads.com https://www.threads.net; frame-src https://www.threads.com https://www.threads.net\". The main page only needs frame-src 'self' (index.html:5), and that holds for this nested-frame architecture."
+            },
+            {
+              "text": "Attributes 'the first few load, then the rest stall' to rate limiting from loading too many embeds, and paces loading (pagination, lazy-loading near the viewport, or gating a few/one at a time with delays) instead of letting all 60 process at once.",
+              "passed": true,
+              "evidence": "response.md:14-15 under \"60 個 iframe 同時載入\": \"一次全部開，連線會塞住，也容易被 Threads 限流…看起來就像整排停住\". This ties the stall to loading too many embeds at once, including rate limiting. Note that the 'first few appear' part is put down mainly to a timing difference (response.md:10-11), so the rate-limit attribution is one of several causes rather than the headline. Pacing is clearly implemented. An IntersectionObserver queues a card only when it nears the viewport (threads-wall.js:262-273, rootMargin from data-preload-margin=\"600px 0px\"). A concurrency queue allows at most data-max-concurrent=3 (load-queue.js:19-41, index.html:29). Placeholder min-height keeps all 60 from intersecting at once (threads-wall.css:29-35)."
+            },
+            {
+              "text": "Detects failed embeds by outcome with a timeout (e.g. the blockquote is never replaced or the iframe never gets a height), shows a fallback card linking to the post, and backs off when failures repeat.",
+              "passed": false,
+              "evidence": "Timeout and fallback exist. Each item has a 20 s timer (threads-wall.js:207-211). Success is signalled when the inner Threads iframe fires 'load' (embed-frame.js:57). On timeout the card shows a 'slow' fallback with an \"在 Threads 查看 @author 的貼文\" link and a retry button (threads-wall.js:127-139, threads-wall.css:69-73). There is no backoff. item.attempts is incremented (threads-wall.js:195) but never read. On timeout the slot is released immediately, so the next item starts while the slow iframe keeps loading (threads-wall.js:208-210). Nothing slows down or pauses after repeated failures. Also, per grader-facts the iframe 'load' event fires even for a missing post's 'Cannot display thread' card, so the success signal is weak."
+            },
+            {
+              "text": "Implements the weekly deleted-post check with the oEmbed endpoint (graph.threads.net/v1.0/oembed), not by scraping threads.com pages, and runs it outside the visitor's browser (e.g. a scheduled GitHub Actions job or script).",
+              "passed": false,
+              "evidence": "It does run outside the browser, in a weekly GitHub Actions job (threads-featured-check.yml:11-14), and it does not scrape pages. But it does not use oEmbed. It lists the token owner's posts via GET /me/threads and /me/replies and treats featured posts missing from that list as deleted (check-deleted-posts.js:26-46, response.md:115-117). No 'oembed' string appears anywhere in the outputs."
+            },
+            {
+              "text": "Correctly states that the oEmbed endpoint can be called without an access token (changelog 2026-03-03), so no app, token or app secret is needed for the check — and never puts an app secret in browser code.",
+              "passed": false,
+              "evidence": "oEmbed is never mentioned. The response requires the opposite setup: a Meta App with threads_basic + threads_read_replies, a long-lived token obtained with the app secret (response.md:141-147: \"client_secret=<App 密鑰>\"), a THREADS_ACCESS_TOKEN secret, and a PAT with Secrets write access for token refresh (response.md:149-153). It also wrongly claims other people's posts cannot be checked (response.md:137: \"別人的貼文，Threads API 沒有可靠的查法\"), although grader-facts says tokenless oEmbed works for any post. The app secret is not in browser code, but the main claim is absent."
+            },
+            {
+              "text": "Removes a post only on the definitive not-found error (code 24 / 'Media Not Found', is_transient false); other errors (5xx, rate limits, network failures, invalid-parameter errors) are treated as transient and never remove posts.",
+              "passed": false,
+              "evidence": "The removal criterion is absence from the /me/threads + /me/replies listing for missThreshold=2 consecutive runs (plan.js:64-89, config.json:7). It is not a code 24 / is_transient:false error. Error codes are never used to decide deletion. API errors do abort the run without changes (threads-client.js:71-80, check-deleted-posts.js:168-176), which is safe, but the required definitive-signal logic is not implemented. Non-owner posts are never checked at all."
+            },
+            {
+              "text": "Does not put a post's permalink page itself in an iframe (Threads post pages refuse framing); any direct iframe uses the /embed/ URL.",
+              "passed": true,
+              "evidence": "The only iframe the code creates is the same-origin embed-frame.html, with the permalink passed in the hash (threads-wall.js:198-205: src.hash = new URLSearchParams({ id, u: item.permalink })). Inside it, embed.js builds the Threads iframe from a blockquote with data-text-post-permalink (embed-frame.js:67-81), and embed.js uses the /embed/ URL. No code frames a Threads permalink directly."
+            },
+            {
+              "text": "Handles the old threads.net links so their embeds aren't blocked: either rewrites them to https://www.threads.com before building the embed (e.g. from the shortcode), or allows both https://www.threads.com and https://www.threads.net in the CSP's frame-src (and script-src where needed).",
+              "passed": true,
+              "evidence": "Both are done. The front end rebuilds every permalink from author + shortcode on data-permalink-origin=\"https://www.threads.com\" (threads-wall.js:107 buildPermalink(permalinkOrigin, parsed.author, parsed.shortcode); index.html:28). normalize-posts.js rewrites threads.net to threads.com in posts.json (normalize.js:84). embed-frame.html:5 lists both www.threads.com and www.threads.net in script-src and frame-src. One caveat: /t/<code> links are rejected as un-embeddable (threads-wall.js:89-95). That is wrong per grader-facts, but it does not affect the .net to .com handling."
+            }
+          ],
+          "notes": []
+        }
+      ],
+      "run_summary": {
+        "with_skill": {
+          "pass_rate": {
+            "mean": 1.0,
+            "stddev": 0.0,
+            "min": 1.0,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 899.5,
+            "stddev": 60.9574,
+            "min": 845.5,
+            "max": 965.6
+          },
+          "tokens": {
+            "mean": 193575.0,
+            "stddev": 8435.4654,
+            "min": 185849,
+            "max": 202575
+          }
+        },
+        "without_skill": {
+          "pass_rate": {
+            "mean": 0.4074,
+            "stddev": 0.0642,
+            "min": 0.3333,
+            "max": 0.4444
+          },
+          "time_seconds": {
+            "mean": 1273.4333,
+            "stddev": 340.5555,
+            "min": 881.8,
+            "max": 1500.0
+          },
+          "tokens": {
+            "mean": 210259.6667,
+            "stddev": 37634.2035,
+            "min": 167000,
+            "max": 235465
+          }
+        },
+        "delta": {
+          "pass_rate": "+0.59",
+          "time_seconds": "-373.9",
+          "tokens": "-16685"
+        }
+      },
+      "notes": [
+        "Round 9 reruns evals 6, 11 and 12 against the SKILL.md that will ship as 1.5: §11 rewritten from two production projects and live tests, the 'reports its height once' claim corrected (image posts report 2-4 times), and the official-docs sync of 2026-10-23. Each eval gained a 9th assertion after round 8 (27 in total). Neither configuration had internet access, and this round the runs were also told not to open web pages with any browser tool; none reported doing so.",
+        "With skill passes 27/27 (100%), without skill 11/27 (41%): eval 6 9/9 vs 4/9, eval 11 9/9 vs 4/9, eval 12 9/9 vs 3/9.",
+        "The 'reports once' fix took effect. Eval 11 with skill applies every report above 0 (the grader replayed 534, then 574, then '600' through the delivered handler and all three were applied) and passes the new 9th assertion; none of the three with-skill responses tells the user the page reports only once (round 8: all three did). Eval 11 without skill again parses the height as a JSON-string MEASURE message, so replaying 498, 534 and 574 applied nothing and its 9th assertion fails.",
+        "New 9th assertions: eval 6 (old threads.net links) passes in both configurations and doesn't discriminate this round; eval 11 (keep applying later reports) and eval 12 (a deleted post's 'Cannot display thread' card looks like success, so prune with oEmbed code 24) pass with skill and fail without.",
+        "Without skill, the same confident but false claims as round 8 came back: Threads has no theme parameter (evals 11, 12), there is no re-scan API / process() is Instagram's (evals 6, 12), the height arrives as a JSON-string MEASURE message (eval 11). For deleted posts it listed the user's own posts through the API (eval 6, needing an app, a token and a secrets-write PAT) or scraped threads.com pages (eval 11) instead of token-less oEmbed.",
+        "Grader suggestions for the evals: split eval 6 assertion 1 into 'diagnoses that innerHTML scripts don't run' and 'doesn't claim there is no re-scan API', so a per-post wrapper-iframe design isn't failed the same way as a wrong fix; reword eval 12 assertion 7 to 'doesn't rely on re-inserting embed.js into the same document'; make eval 11 assertion 9 replay real bare-number reports; tighten eval 11's oEmbed assertion around reading the error body (graph.threads.net sends Access-Control-Allow-Origin: * on errors too, checked after these gradings); start eval 12's success timeout only when that card's iframe actually starts loading.",
+        "Problems no assertion caught: eval 12 with skill listed 'post deleted' among the causes of a failed load, copied from the skill's fallback-card text, although a deleted post renders a 'Cannot display thread' card and counts as loaded. The skill's §11.3 fallback-card causes were corrected after this round. Eval 6 without skill silently drops /t/ links, claiming they can't be embedded.",
+        "With skill was faster on average and used fewer tokens than without (see run_summary); every configuration ran once, so these averages are rough."
+      ]
+    },
+    {
+      "iteration": 10,
+      "metadata": {
+        "skill_name": "threads-api",
+        "skill_path": "threads-api/ installed as a folder (1.5, with the 2026-10-24 additions on login-only posts, numeric-only reports and the fallback-card causes; scripts/threads_client.py sha256 b13fb1edd929ca88255cf1d212fa4d2c6128c5f21de21471f257b39a72946c89)",
+        "executor_model": "claude-opus-5-5",
+        "analyzer_model": "claude-opus-5-5",
+        "timestamp": "2026-10-23T19:50:08Z",
+        "evals_run": [
+          12,
+          13
+        ],
+        "runs_per_configuration": 1
+      },
+      "runs": [
+        {
+          "eval_id": 12,
+          "eval_name": "eval-12-react-card",
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 9,
+            "failed": 0,
+            "total": 9,
+            "time_seconds": 860.2,
+            "tokens": 179280,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Gives each blockquote a unique id (e.g. ig-tp-<shortcode>) and explains that embed.js removes the fallback blockquote by that id once the embed reports its height, which is why the 'View on Threads' links stay.",
+              "passed": true,
+              "evidence": "response.md:14: 'embed.js 收到 iframe 的高度回報後，會刪掉和 blockquote 同 `id` 的元素，也就是那個備援連結。官方 embed code 的 blockquote 帶有 `id=\"ig-tp-<shortcode>\"`，你的沒有，所以這個連結一直不會被刪。' Line 16 adds that the id must be unique per page and dedupes by shortcode. Code: threadsEmbed.js:113 `quote.id = `ig-tp-${post.shortcode}``; threadsUrl.js:22-32 uniqueThreadsPosts dedupes by shortcode. Mock run: after a bare-number report the blockquote with id ig-tp-AAA111 was removed."
+            },
+            {
+              "text": "Explains that the CSS min-height on the iframe overrides the inline height embed.js sets, and moves the placeholder to a wrapper (or sets min-height from the reported height) so short posts don't leave a blank band.",
+              "passed": true,
+              "evidence": "response.md:22: 'embed.js 是用 iframe 的 `style.height` 設定高度。你的 `.threads-card iframe { min-height: 400px; }` 會蓋過它'; line 24: '不要對 iframe 設 `min-height` 或 `height`。佔位高度改放在外層卡片上，載入成功就拿掉'. ThreadsCard.css:20-27 puts min-height on .threads-card only for idle/queued/loading states; no iframe rule in the CSS; ThreadsCard.jsx:81-82 drops the placeholder variable once loaded/failed."
+            },
+            {
+              "text": "Explains that embed.js only processes a blockquote once (it swaps the text-post-media class for text-post-media-registered), so retrying or re-showing a post means removing the old iframe and creating a fresh blockquote with the text-post-media class (e.g. a remount with a new key) before calling process() again.",
+              "passed": true,
+              "evidence": "response.md:30: 'embed.js 每個 blockquote 只處理一次。處理時，它把 blockquote 的 class 從 `text-post-media` 改成 `text-post-media-registered`'; line 40: '重試或換主題時，丟掉舊的 iframe 和 blockquote，建一個全新的 blockquote 再呼叫 `process()`。' Code: fail() -> teardown removes the stage incl. iframe (threadsEmbed.js:153-157,194-200); retry -> startAttempt -> host.replaceChildren(), then mount builds a new blockquote with class text-post-media and calls api.process() (lines 224-236, 264-266, 110-125). Mock run: after a timeout failure, retry() produced a new iframe and a fresh blockquote that embed.js re-registered, and a later height report set status 'loaded'."
+            },
+            {
+              "text": "Handles the theme by setting data-theme on the blockquote and re-creating the embed when the site theme changes, since the theme is fixed when embed.js creates the iframe.",
+              "passed": true,
+              "evidence": "response.md:46: '主題由 blockquote 的 `data-theme` 決定 ... iframe 一旦建好，主題就固定了'; line 48: '切主題時重建 blockquote 再呼叫 `process()`'. Code: buildBlockquote sets data-theme from config.themeAttribute (threadsEmbed.js:116-117); setTheme starts a swap attempt (lines 286-301); ThreadsCard.jsx:58-61 forwards theme changes. Mock run: setTheme('dark') created a second iframe with '?theme=dark' while keeping the old one, and after the new iframe reported, only the dark iframe remained."
+            },
+            {
+              "text": "Judges success by the iframe's height postMessage (a number greater than 0, with origin checked against the Threads hosts and event.source matched to that iframe's contentWindow) within a timeout, not by the iframe load event; a 0 report or no report leads to the fallback card.",
+              "passed": true,
+              "evidence": "handleMessage checks `config.messageOrigins.includes(event.origin)` (threadsEmbed.js:43; origins https://www.threads.com and https://www.threads.net in threadsEmbedConfig.js:5) and `frame.contentWindow === event.source` (line 48); onReport succeeds only on height > 0 and fails on 0 (lines 219-221); armTimeout fails after reportTimeoutMs = 12000 (lines 159-174). No load listener on the iframe. response.md:63-64 states the same. Mock run: bare number 498 -> 'loaded'; wrong origin, wrong source and object data ignored; 0 -> 'failed' with the host emptied; no report in 12 s -> 'failed', which renders ThreadsFallback (ThreadsCard.jsx:89). Caveat: readHeight (line 38) also accepts digit-only strings (mock: '355' -> 'loaded'), which is looser than 'a number' and contradicts the response's '只認數字', but bare-number reports are handled exactly as the assertion requires."
+            },
+            {
+              "text": "Builds the blockquote and lets embed.js modify it inside a container element whose children React doesn't render (e.g. created imperatively via a ref), so embed.js inserting the iframe and removing the blockquote doesn't conflict with React's reconciliation (the removeChild errors).",
+              "passed": true,
+              "evidence": "ThreadsCard.jsx:87 renders `<div ref={hostRef} className=\"threads-card__host\" />` with no children; threadsEmbed.js:224-229 creates the stage and blockquote with document.createElement and appends them to host. response.md:34 explains the removeChild NotFoundError as React removing nodes embed.js already moved/removed, and line 39: 'React 只渲染一個沒有子節點的 `<div className=\"threads-card__host\">` ... React 不會碰它沒渲染的子節點'."
+            },
+            {
+              "text": "Loads embed.js once for the whole app (e.g. a shared module-level promise or a single script tag), not once per card.",
+              "passed": true,
+              "evidence": "threadsEmbed.js:5 `let scriptPromise = null;` and loadThreadsEmbedScript (lines 11-32) returns the existing API or the shared promise, inserting one script into document.head; it only resets on load error. response.md:41: 'embed.js 全站只載入一次，用一個共用的 Promise。' Mock run with four cards and a theme swap: 'script inserts total 1'."
+            },
+            {
+              "text": "The fallback card links only to validated https://www.threads.com or https://www.threads.net post URLs and is built without inserting untrusted strings via innerHTML or dangerouslySetInnerHTML.",
+              "passed": true,
+              "evidence": "parseThreadsPost (threadsUrl.js:5-20) parses with new URL, requires host in threads.com/www.threads.com/threads.net/www.threads.net and a /@user/post/<code> or /t/<code> path, then rebuilds the permalink as `https://www.threads.com` + normalized path. ThreadsFallback renders `<a href={post.permalink}>` via JSX only when post is valid (ThreadsCard.jsx:32-36); invalid URLs get no link. buildBlockquote uses setAttribute/textContent. Grep for innerHTML/dangerouslySetInnerHTML/insertAdjacentHTML/outerHTML across outputs: no matches in code."
+            },
+            {
+              "text": "Points out that a deleted or unavailable post still renders a 'Cannot display thread' card that reports a height, so client-side success detection counts it as loaded, and recommends pruning such posts with the oEmbed endpoint (code 24 means gone), e.g. on the backend or in a scheduled job.",
+              "passed": true,
+              "evidence": "response.md:68: '被刪除或根本不存在的貼文，仍會顯示「Cannot display thread」的小卡 ... 並正常回報高度，所以會被判定為成功 ... 請在後台用 oEmbed 檢查：`GET https://graph.threads.net/v1.0/oembed?url=<貼文網址>`，不用 token，每小時上限 1,000 次。回傳 `code 24` 就表示已無法嵌入，從清單移除即可。這一步應該在新增貼文時或每天排程跑，不要讓每個訪客的瀏覽器去呼叫。'"
+            }
+          ],
+          "notes": [
+            "response.md:147: embed.js behavior is observed (Oct 2026), not documented by Meta",
+            "response.md:157: not run in a real browser against real posts; React component only compiled",
+            "response.md:158: background preload during theme swap not verified against the real embed",
+            "response.md:139: the color-scheme: normal workaround is untested",
+            "Serial loading (one embed at a time, 3.6 s gap) means the 10th card on a page waits roughly 30-40 s; the response acknowledges the trade-off (line 130)"
+          ]
+        },
+        {
+          "eval_id": 13,
+          "eval_name": "eval-13-login-only-posts",
+          "configuration": "with_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 1.0,
+            "passed": 8,
+            "failed": 0,
+            "total": 8,
+            "time_seconds": 756.6,
+            "tokens": 171810,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Identifies the three posts as ones Threads shows only to logged-in users (e.g. marked sensitive): visitors who aren't logged in to Threads, or whose browser blocks third-party cookies (Safari and private windows do by default), get Meta's error page, while a logged-in viewer who allows third-party cookies (like the author in Chrome) sees them.",
+              "passed": true,
+              "evidence": "response.md:5: \"那 3 則是 Threads 只開放給登入使用者看的貼文（例如被標成敏感內容）。訪客如果沒登入 Threads，或瀏覽器封鎖第三方 Cookie（Safari 和無痕視窗預設都會封鎖），這種貼文的嵌入頁 ... 就會回 HTTP 500，畫面就是 Meta 那個「Sorry, something went wrong」。你平常用的 Chrome 有登入 Threads，一般視窗也允許第三方 Cookie，所以你看得到。\" All parts covered (login-only/sensitive, not logged in OR third-party cookies blocked, Safari/private default, author's logged-in Chrome with 3P cookies), consistent with grader-facts."
+            },
+            {
+              "text": "States that oEmbed still returns embed HTML (HTTP 200) for such posts, so the weekly oEmbed check can't flag them; oEmbed's code 24 only catches posts that are gone.",
+              "passed": true,
+              "evidence": "response.md:11: \"這種貼文的 oEmbed 照樣回 200，也有 html ... 還有已刪除的貼文（回 code 24）；它分辨不出「只限登入」。所以你的 Action 本身沒寫錯，只是這類貼文本來就不在它看得到的範圍。\" States 200 + html, ties code 24 to deleted posts, and says the check cannot distinguish login-only. It also lists private/deactivated/age-restricted/geo-restricted accounts as things oEmbed rejects; that is outside grader-facts but doesn't contradict them."
+            },
+            {
+              "text": "Explains why the current success check passes on the error page: the error page still loads from www.threads.com, and the CSS min-height on the iframe makes the height test pass regardless of what the frame shows.",
+              "passed": true,
+              "evidence": "response.md:18 table row: \"錯誤頁也是 www.threads.com 自己回的，網址和 origin 都正常。跨來源 iframe 的 HTTP 狀態碼，你的頁面本來就讀不到\"; response.md:19: \"embed.js 只有收到嵌入頁的高度回報才會設定 style.height。錯誤頁不會回報，所以 style.height 一直是 0，但 .sidebar-threads iframe { min-height: 300px; } 蓋過了它，量到的 300px 就被當成成功\". Line 17 also correctly explains that embed.js inserts the iframe at height 0 whether the load later succeeds or fails."
+            },
+            {
+              "text": "Rewrites success detection around the embed page's height postMessage: a numeric report greater than 0, with event.origin checked against the Threads hosts and event.source matched to that iframe, within a timeout; the error page sends no report, so it ends in the fallback. Iframe presence, its src or its rendered height are not treated as success.",
+              "passed": true,
+              "evidence": "threads-sidebar.js:244-255: the message listener returns early unless MESSAGE_ORIGINS (line 2: https://www.threads.com, https://www.threads.net) has event.origin; heightFrom(event.data) (lines 23-27) accepts typeof number (finite, >=0); slotForSource (lines 211-216) matches event.source to the slot's iframe.contentWindow; height > 0 calls succeed(). arm() (lines 158-169) starts a reportTimeoutMs timer (12000 in sidebar-threads.html:8) whose expiry calls fail() with 'not-processed' or 'no-height-report', so having an iframe still counts as failure. fail() (lines 150-156) puts in the fallback card. Nothing reads iframe src or measured height. A bare number like 498 passes heightFrom and succeeds. Minor: heightFrom also accepts numeric strings (line 25, NUMERIC_TEXT), so it is slightly looser than the bare-number format, though it still needs a numeric value from a Threads origin and the matching iframe."
+            },
+            {
+              "text": "Moves the placeholder height off the iframe (e.g. to a wrapper) or drops it, since a CSS min-height on the iframe overrides the height embed.js sets.",
+              "passed": true,
+              "evidence": "threads-sidebar.css:6-8 puts min-height: var(--threads-placeholder-height) on the .threads-slot <li>, and only while it is idle/queued/loading. There is no min-height on the iframe. response.md:56 says to delete `.sidebar-threads iframe { min-height: 300px; }`; response.md:19 explains that the iframe min-height overrides style.height (\"蓋過了它\"); response.md:50: \"佔位高度改放在 <li> 上 ... 成功或失敗後就拿掉\"."
+            },
+            {
+              "text": "Shows a fallback card for these posts that links to the post on Threads and says the post needs both a Threads login and third-party cookies allowed in the browser (a card that mentions only logging in fails, since a logged-in Safari or private-window visitor still can't see it), doesn't call the post deleted, and keeps trying to load these posts in the page because logged-in visitors can see them.",
+              "passed": true,
+              "evidence": "sidebar-threads.html:27-31, login-only card: \"要在這裡看到它，需要登入 Threads，而且瀏覽器要允許第三方 Cookie。Safari 和無痕視窗預設封鎖第三方 Cookie，所以即使登入了也可能看不到\" plus <a data-role=\"link\"> \"到 Threads 查看這則貼文\". threads-sidebar.js:102-104 sets its href to the permalink https://www.threads.com/t/<shortcode>. The card text never calls the post deleted; the generic 'unknown' card (line 30) also names login plus third-party cookies. data-login-only slots are still observed, queued and passed to Embeds.process() (blockquoteFor at lines 112-125 puts the card inside the blockquote; start at lines 171-178). response.md:102: \"背景照樣嘗試嵌入。登入 Threads 又允許第三方 Cookie 的讀者 ... 嵌入成功後會自動換成貼文。\""
+            },
+            {
+              "text": "Gives a working way to find such posts ahead of time that doesn't rely on oEmbed: requesting <permalink>/embed without credentials as a same-origin request from a threads.com page (e.g. a DevTools console snippet, a bookmarklet or an extension content script), where HTTP 500 means login-only and HTTP 200 with class=\"Embed\" in the body means it embeds publicly; a real (headless) browser loading the embed page while logged out also counts. A check that only looks at the HTTP status of a plain server-side request (curl, Node or Python fetch, a CI job) doesn't pass.",
+              "passed": true,
+              "evidence": "find-login-only-posts.js:2-4 refuses to run unless location.origin is https://www.threads.com. Line 46 does fetch(`/t/${shortcode}/embed/`, { credentials: 'omit', cache: 'no-store' }). classify (lines 24-35) maps 500 to login-only, 200 + /class=\"Embed(?:\\s[^\"]*)?\"/ to public, and other 200s to unavailable/deleted. A mocked-fetch run in the grader's scratchpad classified LOGIN1→500 login-only, PUB2→200 public, GONE3→200 unavailable and 429→unexpected, sent relative same-origin requests with credentials 'omit', and threw on a non-threads.com origin. response.md:69 says server-side curl/fetch in Actions cannot tell the posts apart; response.md:87 gives a manual logged-out check (private window opening the /embed/ URL)."
+            },
+            {
+              "text": "Doesn't promise a way to make these posts visible to logged-out visitors (no token, proxy or embed parameter changes that) and doesn't treat them as deleted or remove them from the list.",
+              "passed": true,
+              "evidence": "response.md:107: \"「只限登入」是 Threads 那邊的判定，嵌入端改不了。\" No token, proxy or parameter workaround is offered. The delivered code keeps the posts in the list, marked with data-login-only, and keeps trying to embed them, and response.md:104 says the card \"不會說「貼文已刪除」\". Borderline: response.md:107 also says \"如果這個側欄的目的是讓讀者讀到內容，最實際的做法是換成其他公開貼文；如果這 3 則一定要留，就用 data-login-only\". That is a conditional editorial suggestion left to the user. The solution itself does not remove them, so this passes."
+            }
+          ],
+          "notes": [
+            "Response flags that the numeric height report, HTTP 500 error page and class=\"Embed\" marker are 2026-10 observations, not an official spec",
+            "Firefox behavior with partitioned third-party cookies is stated as an untested guess",
+            "Headless-browser automation in CI was not tested",
+            "User is asked to confirm in Safari/private window, since no live Threads test was run"
+          ]
+        },
+        {
+          "eval_id": 12,
+          "eval_name": "eval-12-react-card",
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.33,
+            "passed": 3,
+            "failed": 6,
+            "total": 9,
+            "time_seconds": 716.6,
+            "tokens": 142904,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Gives each blockquote a unique id (e.g. ig-tp-<shortcode>) and explains that embed.js removes the fallback blockquote by that id once the embed reports its height, which is why the 'View on Threads' links stay.",
+              "passed": false,
+              "evidence": "The code sets the id (threadsEmbedDom.js:6 `blockquote.id = `ig-tp-${post.code}``), but the explanation does not identify the mechanism. response.md:13-15 lists the missing id as one of three vague 'factors' next to multiple script runs and React/embed.js contention, then says (response.md:16) it could not read embed.js so 'the new component does not depend on its internal behavior'. It hides non-iframe siblings itself (threadsEmbedDom.js:18-27). Nowhere does it say embed.js removes the element whose id matches the blockquote's id when the height report arrives."
+            },
+            {
+              "text": "Explains that the CSS min-height on the iframe overrides the inline height embed.js sets, and moves the placeholder to a wrapper (or sets min-height from the reported height) so short posts don't leave a blank band.",
+              "passed": true,
+              "evidence": "response.md:20: 'embed.js 會依 iframe 內容回報的實際高度設定 iframe 的 `height`，但 `min-height` 的優先權比 `height` 高。結果內容只有 200px 的短貼文，還是被撐到 400px。' response.md:21 moves the reserve to the outer card, active only while not loaded. ThreadsCard.css:12-17 applies min-height only for data-status idle/loading on .threads-card, and ThreadsCard.css:19-22 puts no height or min-height on the iframe."
+            },
+            {
+              "text": "Explains that embed.js only processes a blockquote once (it swaps the text-post-media class for text-post-media-registered), so retrying or re-showing a post means removing the old iframe and creating a fresh blockquote with the text-post-media class (e.g. a remount with a new key) before calling process() again.",
+              "passed": false,
+              "evidence": "response.md:27 says, in general terms, that an already-processed blockquote is not found again and that a retry must remove the old iframe and add a fresh blockquote. It never mentions the text-post-media -> text-post-media-registered swap. It also claims (response.md:25) '`window.instgrm.Embeds.process()` 是 Instagram 的 embed.js 提供的 API，不是 Threads 的', which grader-facts contradicts: process() exists on Threads' embed.js and re-scans. Instead of calling process(), the fix re-inserts the embed.js script (threadsEmbedLoader.js:8-19; response.md:72). Per grader-facts, loading embed.js a second time does not re-scan, so the delivered retry, page change and theme re-creation would not render."
+            },
+            {
+              "text": "Handles the theme by setting data-theme on the blockquote and re-creating the embed when the site theme changes, since the theme is fixed when embed.js creates the iframe.",
+              "passed": false,
+              "evidence": "No data-theme is set anywhere: createBlockquote in threadsEmbedDom.js:3-16 sets only class, id, data-text-post-permalink and data-text-post-version. The response relies on CSS color-scheme instead (ThreadsCard.jsx:44 `style={{ colorScheme: theme }}`) and states (response.md:40) 'Threads 官方嵌入碼沒有文件化的主題參數', which grader-facts contradicts (data-theme -> ?theme=dark|auto). theme is in the effect deps (ThreadsCard.jsx:35), so it does re-create, but without data-theme the result stays light, and the re-creation depends on the script re-insertion that does not re-scan."
+            },
+            {
+              "text": "Judges success by the iframe's height postMessage (a number greater than 0, with origin checked against the Threads hosts and event.source matched to that iframe's contentWindow) within a timeout, not by the iframe load event; a 0 report or no report leads to the fallback card.",
+              "passed": false,
+              "evidence": "No message listener exists in any delivered file (grep for 'message|postMessage' finds only response.md:469, a speculative remark). Success comes from the iframe `load` event plus a ResizeObserver settle timer (threadsEmbedDom.js:50 `iframe.addEventListener('load', handleLoad...)`, :53-63 `setTimeout(() => finish(true), config.settleMs)`). So a login-only post whose /embed/ returns an HTTP 500 page (load fires, no height report) would be marked ready and shown as an empty iframe."
+            },
+            {
+              "text": "Builds the blockquote and lets embed.js modify it inside a container element whose children React doesn't render (e.g. created imperatively via a ref), so embed.js inserting the iframe and removing the blockquote doesn't conflict with React's reconciliation (the removeChild errors).",
+              "passed": true,
+              "evidence": "ThreadsCard.jsx:47 renders `<div ref={mountRef} className=\"threads-card__mount\" hidden={status === 'error'} />` with no React children. The blockquote is built imperatively (threadsEmbedDom.js:3-16, :35 `mount.replaceChildren(createBlockquote(...))`) and cleaned up with replaceChildren on dispose (:86-90). The fallback is a React sibling, not inside the mount. response.md:28-30 explains that the removeChild errors come from React and embed.js both touching the same nodes, and gives this as the fix."
+            },
+            {
+              "text": "Loads embed.js once for the whole app (e.g. a shared module-level promise or a single script tag), not once per card.",
+              "passed": false,
+              "evidence": "threadsEmbedLoader.js:3-23 only merges requests made in the same microtask. pendingScan is reset to null (line 7), and every later request appends a new `<script src=embed.js>` and removes it after load. response.md:72: '需要掃描時，插入一個新的 `<script src=\".../embed.js\">`...一頁 10 張卡片只執行一次'. That is once per batch: every page change, retry, theme change and IntersectionObserver-delayed card adds another script tag, not one load per app. Per grader-facts, those reloads also do not re-scan."
+            },
+            {
+              "text": "The fallback card links only to validated https://www.threads.com or https://www.threads.net post URLs and is built without inserting untrusted strings via innerHTML or dangerouslySetInnerHTML.",
+              "passed": true,
+              "evidence": "threadsUrl.js:11-20 requires the https: protocol, a hostname in [threads.com, www.threads.com, threads.net, www.threads.net] and the path /@user/post/code, then rebuilds the permalink as `https://www.threads.com/@${username}/post/${code}`. A bun test of this parser returned null for http://, javascript:, evil.com, www.threads.com.evil.com and a path containing quote/HTML characters, and the canonical threads.com URL for valid input. The fallback uses JSX `href={post.permalink}` and text children (ThreadsCard.jsx:48-60). The blockquote link uses textContent (threadsEmbedDom.js:13). Neither innerHTML nor dangerouslySetInnerHTML appears in the delivered code."
+            },
+            {
+              "text": "Points out that a deleted or unavailable post still renders a 'Cannot display thread' card that reports a height, so client-side success detection counts it as loaded, and recommends pruning such posts with the oEmbed endpoint (code 24 means gone), e.g. on the backend or in a scheduled job.",
+              "passed": false,
+              "evidence": "Partially covered. response.md:44 says onload still fires for deleted posts. response.md:51 says the frontend cannot tell them apart ('Threads 會在 iframe 裡顯示它自己的提示') and recommends a backend check at entry time plus a scheduled re-check 'using the Threads oEmbed endpoint'. But it never says that the 'Cannot display thread' card reports a height, and it never says how to read the oEmbed result: no mention of code 24 (or the HTTP 400) as the 'gone' signal. It only says '失效的網址就不要回給前端', which leaves transient errors and rate limits indistinguishable from deletions."
+            }
+          ],
+          "notes": []
+        },
+        {
+          "eval_id": 13,
+          "eval_name": "eval-13-login-only-posts",
+          "configuration": "without_skill",
+          "run_number": 1,
+          "result": {
+            "pass_rate": 0.75,
+            "passed": 6,
+            "failed": 2,
+            "total": 8,
+            "time_seconds": 990.9,
+            "tokens": 177399,
+            "tool_calls": 0,
+            "errors": 0
+          },
+          "expectations": [
+            {
+              "text": "Identifies the three posts as ones Threads shows only to logged-in users (e.g. marked sensitive): visitors who aren't logged in to Threads, or whose browser blocks third-party cookies (Safari and private windows do by default), get Meta's error page, while a logged-in viewer who allows third-party cookies (like the author in Chrome) sees them.",
+              "passed": true,
+              "evidence": "response.md:5 says the 3 posts are not dead, they are posts you can't see without logging in (\"沒登入就看不到的貼文\"). Lines 7-8 say the author's normal Chrome sends threads.com third-party cookies into the iframe so it loads as the logged-in author, while Safari (ITP) and Chrome incognito block third-party cookies, so the iframe is always logged out and gets Meta's \"Sorry, something went wrong\" page, \"就算讀者在 Safari 有登入 Threads，嵌入裡還是未登入\". Line 37 names sensitive or age-restricted content as the most common cause. Lines 36-38 also hedge with other causes (replies in private threads, archived posts), but the main diagnosis matches."
+            },
+            {
+              "text": "States that oEmbed still returns embed HTML (HTTP 200) for such posts, so the weekly oEmbed check can't flag them; oEmbed's code 24 only catches posts that are gone.",
+              "passed": true,
+              "evidence": "response.md:17 says the oEmbed html is a fixed blockquote plus script, not a rendered result, and that a 200 only means the URL maps to a post; \"這支 API 不會告訴你沒登入的人能不能看\". Line 19 says the check is still useful because it catches deleted posts and mistyped URLs (\"抓得到刪文、網址打錯\"), and line 103 says oEmbed catches deletions while the new check catches logged-out visibility. Code 24 is never named, but the substance is there. A side claim is wrong: line 17 says oEmbed is queried with the user's access token and returns 200 because 'your token's identity can see it'. Per the facts, oEmbed needs no token and returns 200 for login-only posts anyway."
+            },
+            {
+              "text": "Explains why the current success check passes on the error page: the error page still loads from www.threads.com, and the CSS min-height on the iframe makes the height test pass regardless of what the frame shows.",
+              "passed": true,
+              "evidence": "response.md:26 says the error page comes back from that same URL, so the src doesn't change. Line 27 says the 8-second height check measures the iframe element's layout height and that `.sidebar-threads iframe { min-height: 300px; }` keeps it at 300px or more. Both required parts are present. Line 27 also claims that without the rule the iframe would default to 150px and still pass. That is false: embed.js inserts the iframe at height 0, so min-height is what makes the test pass. Line 25 says embed.js replaces the blockquote right away, but embed.js only removes the blockquote when a height report arrives."
+            },
+            {
+              "text": "Rewrites success detection around the embed page's height postMessage: a numeric report greater than 0, with event.origin checked against the Threads hosts and event.source matched to that iframe, within a timeout; the error page sends no report, so it ends in the fallback. Iframe presence, its src or its rendered height are not treated as success.",
+              "passed": false,
+              "evidence": "The origin check (js/threads-sidebar.js:153), the event.source match (:157) and the timeouts (js/threads-embed-core.js:109-127) are present. But the handler only accepts an Instagram-style `{type:\"MEASURE\",details:{height}}` object or JSON string (js/threads-embed-core.js:78-84; response.md:54). The real report is a bare number. I replayed it through the delivered sidebar flow using the run's own fake DOM: a message with data 498 from https://www.threads.com, sent by the good post's iframe, gives readMeasuredHeight(498) === null. The good post then ends in state 'card' with reason load-failed instead of 'ok'. So every public embed would also be replaced by the fallback card. Success also needs height >= 120 (minMeasuredHeight), not > 0."
+            },
+            {
+              "text": "Moves the placeholder height off the iframe (e.g. to a wrapper) or drops it, since a CSS min-height on the iframe overrides the height embed.js sets.",
+              "passed": true,
+              "evidence": "response.md:68 says to delete `.sidebar-threads iframe { min-height: 300px; }`; the wrapper keeps 300px only while data-state=\"loading\". css/threads-sidebar.css:23-30 has no iframe min-height and puts `min-height: var(--threads-slot-reserve)` on `.threads-slot[data-state=\"loading\"]`. The response never says that a CSS min-height overrides embed.js's height, but the required change is made."
+            },
+            {
+              "text": "Shows a fallback card for these posts that links to the post on Threads and says the post needs both a Threads login and third-party cookies allowed in the browser (a card that mentions only logging in fails, since a logged-in Safari or private-window visitor still can't see it), doesn't call the post deleted, and keeps trying to load these posts in the page because logged-in visitors can see them.",
+              "passed": false,
+              "evidence": "The card links to the post (js/threads-sidebar.js:93-106) and doesn't call it deleted. But the login-required text, threads-embeds.json:17, mentions only logging in: \"Threads 只開放登入的使用者看這則貼文，點上面的連結登入後就能看到完整內容。\" It says nothing about third-party cookies. The response also recommends not embedding these posts at all: response.md:107 \"已知要登入才看得到的，就不要嵌入\", using `display: card`. createSlot (js/threads-sidebar.js:50-52) then never tries to load them, so logged-in visitors can't see them either."
+            },
+            {
+              "text": "Gives a working way to find such posts ahead of time that doesn't rely on oEmbed: requesting <permalink>/embed without credentials as a same-origin request from a threads.com page (e.g. a DevTools console snippet, a bookmarklet or an extension content script), where HTTP 500 means login-only and HTTP 200 with class=\"Embed\" in the body means it embeds publicly; a real (headless) browser loading the embed page while logged out also counts. A check that only looks at the HTTP status of a plain server-side request (curl, Node or Python fetch, a CI job) doesn't pass.",
+              "passed": true,
+              "evidence": "response.md:76 gives a manual check: copy the embed iframe's src from DevTools Elements and open it in an incognito or Safari private window; \"看到「Sorry, something went wrong」就是這種貼文\". That is a real logged-out browser loading the /embed page, which per the facts returns Meta's error page for login-only posts. So it is a working way that doesn't rely on oEmbed. The console probe (scripts/devtools-probe.js) also tells them apart, since it logs any threads.com message, though it says to look for MEASURE. The Playwright CI check, which the response calls the most reliable method (line 48), does not work: it parses heights with the same MEASURE parser. A mocked public post with bare-number reports 534 and 574 plus author text classifies as blocked/no-measure. The control post would therefore fail and the run would exit 2 as 'untrusted'. This pass rests on the manual tip only."
+            },
+            {
+              "text": "Doesn't promise a way to make these posts visible to logged-out visitors (no token, proxy or embed parameter changes that) and doesn't treat them as deleted or remove them from the list.",
+              "passed": true,
+              "evidence": "No token, proxy or embed-parameter fix is proposed. response.md:5 says \"那 3 則沒有失效\". The cards use a separate login-required reason, not a deleted one (threads-embeds.json:16-19), and the sample config keeps the login-only post in the list as a card (threads-embeds.json:28-33). Borderline: response.md:108 offers, as an opt-in for an all-embed sidebar, to swap the 3 posts for other public posts, or to repost if the cause is a reply in a private thread. The default handling keeps them listed."
+            }
+          ],
+          "notes": []
+        }
+      ],
+      "run_summary": {
+        "with_skill": {
+          "pass_rate": {
+            "mean": 1.0,
+            "stddev": 0.0,
+            "min": 1.0,
+            "max": 1.0
+          },
+          "time_seconds": {
+            "mean": 808.4,
+            "stddev": 73.2563,
+            "min": 756.6,
+            "max": 860.2
+          },
+          "tokens": {
+            "mean": 175545.0,
+            "stddev": 5282.0877,
+            "min": 171810,
+            "max": 179280
+          }
+        },
+        "without_skill": {
+          "pass_rate": {
+            "mean": 0.5417,
+            "stddev": 0.2946,
+            "min": 0.3333,
+            "max": 0.75
+          },
+          "time_seconds": {
+            "mean": 853.75,
+            "stddev": 193.9594,
+            "min": 716.6,
+            "max": 990.9
+          },
+          "tokens": {
+            "mean": 160151.5,
+            "stddev": 24391.6484,
+            "min": 142904,
+            "max": 177399
+          }
+        },
+        "delta": {
+          "pass_rate": "+0.46",
+          "time_seconds": "-45.4",
+          "tokens": "+15394"
+        }
+      },
+      "notes": [
+        "Round 10 checks the 2026-10-24 additions: posts Threads shows only to logged-in users (§11.1, §11.2, §11.3, §12), counting only numeric height reports, and the fallback-card causes. It runs the new eval 13 (a blog sidebar where three login-only posts show Meta's error page to logged-out readers) and reruns eval 12 as a regression check. Same conditions as round 9: no internet, no browser tools; none of the runs reported using them.",
+        "With skill passes 17/17 (100% averaged per eval), without skill 9/17 (54%): eval 12 9/9 vs 3/9, eval 13 8/8 vs 6/8.",
+        "Eval 13 with skill identifies the login-only posts, explains why oEmbed and the old check miss them, counts only numeric height reports, keeps trying to load these posts and shows a card that names both the Threads login and third-party cookies, and finds such posts ahead of time with a same-origin, credential-less /embed check from a threads.com page (the grader confirmed 500 / 200 with class=\"Embed\" / 200 without it are classified correctly).",
+        "Eval 13 discriminates less than evals 6, 11 and 12: 6 of its 8 assertions pass in both configurations. Without the skill the model still worked out the logged-in / third-party-cookie cause, the oEmbed blind spot, why the old check passed, the min-height fix and a manual private-window check. It loses on the height report (its listener only accepts an Instagram-style {type: 'MEASURE', details: {height}} object, so the grader's bare-number 498 was ignored and every working embed would turn into a fallback card) and on the page handling (it stops embedding the login-only posts and its card mentions only logging in). It also wrongly says oEmbed's 200 depends on an access token.",
+        "Eval 12 with skill passes all 9 again; its fallback card no longer lists 'post deleted' and names rate limiting, blockers, network problems and login-only posts / blocked third-party cookies, matching the corrected §11.3. Without skill repeats rounds 8 and 9: process() called Instagram-only, re-inserting embed.js to re-scan, no theme parameter, success by load plus ResizeObserver.",
+        "Grader suggestions: in eval 13, say in assertion 7 whether a manual 'open it in a private window' tip is enough or require the recommended detection method to classify public and login-only posts correctly (the without-skill Playwright check has the same format bug and would mark public posts as failed); say in assertion 8 whether suggesting replacement counts as removal; add an assertion that deleted posts (a ~194 px 'Cannot display thread' card) pass height detection and still need oEmbed code 24. In eval 12, add an assertion on the fallback card's stated causes and a separate one that re-scanning goes through window.instgrm.Embeds.process() and that process() isn't called Instagram-only."
       ]
     }
   ]

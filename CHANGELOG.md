@@ -4,14 +4,68 @@
 
 本專案的重要變動都記在這裡，格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。版本號跟著 `threads-api/SKILL.md` 的 `metadata.version` 走，Agensi 上的版本也用同一個號碼；1.0 之前的變動依日期記錄。
 
-## 未發布
+## [1.5] - 2026-10-24
+
+### 新增
+
+- `evals/evals.json` 新增第 11、12 題，各 8 個檢查項目。第 11 題是 Chrome 擴充功能（Manifest V3）在自己的頁面用 iframe 直接嵌 `/embed/` 的預覽，涵蓋高度回報、深色模式、網址去重和被刪的貼文；第 12 題是 React 18 元件裡的嵌入卡片，涵蓋殘留的備援連結、`min-height` 造成的空白、重試與 removeChild 錯誤、主題切換，以及怎麼判斷載入成敗。
+- 第 8 輪評測：用改寫第 11 節後的技能跑第 6、11、12 題，兩種設定都不能上網。有技能 24 項全部通過，沒技能通過 10 項（各題平均 42%）；第 6 題和第 7 輪一樣是 8/8 對 3/8，沒有退步。
+  - 第 11 題第 3 項在第一次評分後改寫。原本要求 iframe 本身先有起始高度，有技能的版本因為 iframe 從 0 px 開始、佔位高度放在外層容器而失分（7/8）。當天重測發現從 0 px 開始的 iframe 一樣會正常回報高度，而且這個版本在回報 0 或逾時時，會改顯示附連結和重試按鈕的失敗卡片。所以第 3 項改成檢查結果：回報 0 或沒回報時，不能只留一塊看不見的空白。兩組由新的評分者從頭重評，有技能 8/8，沒技能維持 4/8。
+  - 沒技能的版本有幾個講得很肯定、但其實錯誤的說法：高度是 JSON 字串格式的 `MEASURE` 訊息、Threads 沒有主題參數、`instgrm.Embeds.process()` 只有 Instagram 才有、重新插入 embed.js 就會重新掃描、oEmbed 要 app token、收到任何不認得的 4xx 都當成貼文已刪除。
+  - 這一輪的技能還寫著嵌入頁「只回報一次」高度，三題有技能的回覆都照著寫，第 6、11 題還因此要使用者把卡片寬度寫死（程式本身仍會套用之後的回報）。作答後重測發現有圖片的貼文會回報 2–4 次，1.5 已改正（見「變更」）。
+  - 第 6 題沒技能的作答在測試時，誤用瀏覽器面板載入了真的 embed.js 和兩個嵌入頁，違反不能上網的規則；分數仍是 3/8。
+- `evals/evals.json` 依第 8 輪評分者的建議，第 6、11、12 題各新增第 9 個檢查項目，檢查項目從 98 項增為 101 項：
+  - 第 6 題：要處理舊的 threads.net 連結，改寫成 threads.com，或在 CSP 的 `frame-src` 同時允許兩個網域。
+  - 第 11 題：之後收到大於 0 的高度回報要繼續套用，也不能告訴使用者嵌入頁只回報一次。
+  - 第 12 題：要指出被刪或無法嵌入的貼文也會顯示「無法顯示串文」卡片並回報高度，前端會把它當成載入成功，所以要用 oEmbed（`code 24`）清掉這些貼文。
+- 第 9 輪評測：用 1.5 版的 SKILL.md 重跑第 6、11、12 題，兩種設定都不能上網，這一輪也不准用瀏覽器工具開網頁。有技能 27 項全部通過，沒技能通過 11 項（各題平均 41%）。
+  - 「只回報一次」的修正生效：第 11 題有技能的版本會套用每一則大於 0 的回報，評分者把 534、574、"600" 依序送進它的處理函式，三次都套用，新增的第 9 項通過；三題有技能的回覆都沒再說只回報一次。沒技能的版本又把高度當成 JSON 字串格式的 `MEASURE`，送進 498、534、574 一則都沒套用。
+  - 新增的檢查項目：第 6 題（threads.net 連結）兩種設定都通過，這一輪分不出差別；第 11、12 題的第 9 項只有有技能的版本通過。
+  - 沒技能的版本又出現第 8 輪那幾個錯誤說法：沒有主題參數（第 11、12 題）、沒有重新掃描的 API（第 6、12 題）、高度是 JSON 字串格式的 `MEASURE`（第 11 題）。要找出被刪的貼文時，它改用 API 列出使用者自己的貼文來比對（第 6 題，需要 App、token 和能寫入 secrets 的 GitHub token），或去抓 threads.com 的網頁（第 11 題），都沒有用不需要 token 的 oEmbed。
+  - 這一輪的技能快照早於三處修改：第 11.3 節備援卡片列出的原因、第 11.1 節 oEmbed 的 CORS 說明，以及版本號。備援卡片的原因在第 10 輪第 12 題驗證過（見下），CORS 說明還沒評測。
+  - 兩輪的結果記在四語版 benchmark 摘要和 `evals/benchmark.json`。
+- `evals/evals.json` 新增第 13 題，8 個檢查項目，檢查項目從 101 項增為 109 項。題目是部落格側欄嵌了 12 則貼文，其中 3 則只開放登入者觀看，沒登入的讀者只看到 Meta 的錯誤頁；作者每週的 oEmbed 檢查，和「iframe 出現、網址在 threads.com、高度大於 120px」的成功判斷都沒抓到。檢查項目涵蓋：認出只限登入者觀看、oEmbed 照樣回 200、舊的判斷為什麼會過、改用數字高度回報、佔位高度、備援卡片要說明登入與第三方 Cookie 並繼續嘗試載入、事先找出這類貼文的方法，以及不承諾讓沒登入的人看見、也不把貼文移除。
+- 第 10 輪評測：驗證 2026-10-24 補上的內容（只限登入者觀看的貼文、只認數字回報、備援卡片的原因），跑新增的第 13 題，並重跑第 12 題確認沒有退步，條件和第 9 輪相同。有技能 17 項全部通過，沒技能通過 9 項（各題平均 54%）。
+  - 第 13 題有技能 8/8：給只限登入者觀看的貼文的備援卡片同時寫出需要登入 Threads 和允許第三方 Cookie，判斷成功只認數字回報，並用 threads.com 頁面內不帶 Cookie 的同源請求事先找出這類貼文。
+  - 第 13 題沒技能 6/8：它自己推論出要登入和第三方 Cookie 的原因，所以這題的差距比其他嵌入題小。失分在監聽器只收 `MEASURE` 格式的物件，評分者送進 498 沒有套用，12 則都會掉到備援卡片；以及只限登入者觀看的貼文改成不嵌入、直接顯示卡片，卡片也只提到登入。它也說 oEmbed 要 token。
+  - 第 12 題有技能 9/9，備援卡片不再把「貼文被刪」列為原因，改列限流、阻擋器、網路問題和只限登入者觀看的貼文；沒技能 3/9，錯誤說法和第 8、9 輪相同。
+  - 結果記在四語版 benchmark 摘要和 `evals/benchmark.json`。
 
 ### 變更
 
+- SKILL.md 第 11 節依兩個實際專案的經驗和 2026-10-23 的實測改寫。兩個專案是精選貼文牆 [Threadfolio](https://github.com/Scorpio-meow/Threadfolio)（原名 Threads-Featured-Posts），以及儲存嵌入碼的 Chrome 擴充功能 [Threadkeep](https://github.com/Scorpio-meow/Threadkeep)（原名 Threads-embedded-code）；實測是在本機測試頁載入真的嵌入、讀當天線上的 embed.js 原始碼，並呼叫 oEmbed。
+  - 第 11.1 節：比對和去重改用短碼；記下 oEmbed 回傳的 permalink 是 `/t/<短碼>?utm_source=th_embed…`；從分享選單「取得內嵌程式碼」複製的嵌入碼和 oEmbed 的輸出是同一份標記，比照同樣的使用限制 *(practice)*；oEmbed 的回應（包括錯誤）都帶 `Access-Control-Allow-Origin: *`，網頁或擴充功能頁面可以直接呼叫，也讀得到錯誤內容。
+  - 第 11.2 節：
+    - blockquote 要有唯一的 `id`（`ig-tp-<短碼>`）。embed.js 靠它移除備援連結，沒有 id 時連結會留在貼文下方；原本寫只要 class 和 permalink 就夠。
+    - embed.js 會把 blockquote 的 class 換成 `text-post-media-registered`，同一個 blockquote 只處理一次；DOM 就緒 5 秒後還會再掃描一次。
+    - 高度以純數字回報，內容變高時會再報（有圖片的貼文 2–4 次），從外部改 iframe 大小不會再報。
+    - 回報 0 時 embed.js 會留下 0 px 的 iframe，有 id 時連備援連結一起移除，貼文就無聲消失。原因還不清楚，起始高度 0 和同一則貼文放兩次都重現不出來。
+    - 被刪除或不存在的貼文會顯示「無法顯示串文」卡片並回報約 190 px，blockquote 被換掉不代表貼文存在。2026-10-24 用 Threadfolio 移除的 8 則貼文再確認：oEmbed 都回 `code 24`，`/embed` 都回 200 並顯示這張卡片。
+    - 只開放登入者觀看的貼文（例如被列為敏感內容）：沒登入 Threads 或瀏覽器封鎖第三方 Cookie 的訪客會拿到 HTTP 500 錯誤頁（Meta 的「Sorry, something went wrong」，網址仍在 threads.com），也不會回報高度；已登入且允許第三方 Cookie 的訪客看得到。oEmbed 對這類貼文照樣回嵌入 HTML，所以第 11.1 節補上說明，第 11.3 節新增用 `/embed` 分辨的方法，備援卡片的原因也加上這一項，第 12 節多一列。這是 Threadkeep 2026-10-23 發現、2026-10-24 用 Threadfolio 標記的 3 則貼文實測確認的，第 10 輪用新增的第 13 題評測過（見「新增」）。第 11.3 節也要求備援卡片同時寫出需要登入 Threads 和允許第三方 Cookie（已登入的 Safari 訪客一樣看不到）。
+    - embed.js 會調整頁面上任何送出回報的 iframe，包括自己建的；主題在建立 iframe 時就固定。
+    - 直接嵌 `/embed/` 時要自己加 `?theme=`；只收物件格式訊息的監聽器會以為沒有回報。
+    - iframe 上的 CSS `min-height` 會蓋過 embed.js 設的高度；官方嵌入碼的備援卡片寫死白底。
+  - 第 11.3 節：
+    - 成功的判準改成約 12 秒內第一次回報大於 0，不再看 blockquote 有沒有被移除；iframe 的 `load` 事件不能當訊號。只認數字的回報，因為注入 Threads 框架的擴充功能也會從同一個網域送出自己的訊息；這點是 2026-10-24 依 Threadfolio 的修正補上的，第 10 輪第 12、13 題有技能的版本都只認數字回報。
+    - 重試要移除 iframe，再把 class 加回 blockquote；原本寫的是失敗時要拿掉 class。
+    - 改寫 `console.error`、監聽 `window` 的 error 事件和 service worker，也都看不到嵌入的載入；背景分頁不會執行 `requestAnimationFrame`。
+    - 原本引用貼文牆的退避數字和那個專案的程式不符，改成一般性的建議。
+    - 備援卡片列出的原因拿掉「貼文被刪」，改列限流、內容或追蹤阻擋器、CSP 或網路問題，因為被刪的貼文會顯示「無法顯示串文」並算成載入成功。這是第 9 輪第 12 題評分時發現的，修改後還沒評測。
+  - 第 12 節疑難排解：「停在純連結」那列拿掉「貼文無法嵌入」，新增「顯示無法顯示串文」「貼文下方留著連結」「留下空白或貼文消失」三列。
+- SKILL.md 依 2026-10-23 重新同步的官方文件更新。changelog 最新一筆仍是 2026-08-18，沒有新增或移除端點、參數、欄位或限額：
+  - 開頭的文件說明改成「2026-10-23 同步；changelog 最新一筆是 2026-08-18」。
+  - 第 8.2 節：審核通過前只能替 App 的 Threads Testers 發文。新文件不再提「自己的帳號」，所以提醒把自己的帳號也加成測試人員。
+  - 第 8.4 節：App token 的回應寫成 `{"access_token": "TH|<APP_ID>|<APP_SECRET>", "token_type": "bearer"}`，並註明它含 app secret，不能出現在 log、用戶端程式或 App 安裝檔裡。
+  - 第 8.1、4.1、4.2 節：轉發和 IG 限時動態跨分享也需要 `threads_content_publish`；跨分享出去的限時動態會套用使用者在 IG 的隱私和觀眾設定。
+  - 第 4.2 節：`text_entities` 的 offset 說明寫「正整數」，範例卻從 0 開始，提醒以 0 起算。
+  - 第 8.3 節：文件範例都改用 `graph.threads.com`。
+  - 第 13 節：Ghost Posts 範例的引號已修好，從清單移除；新增 Share to Instagram Stories 範例的三個錯誤（`media_type=text` 寫成小寫、參數之間用了 `|`、少一個換行的 `\`）。其餘各項在新文件裡仍然沒修。
+- `threads-api/SKILL.md` 的 `metadata.version` 調高為 1.5。
+- README 四語版的「嵌入貼文」「裝了有什麼差別」「測試結果」「已知限制」、介紹網站（評測數字、文件同步日期、App Review 前的權限說明和 FAQ；評測表的題目欄加上最小寬度，避免欄位變多後被擠成一行一兩個字）和 `docs/llms.txt` 一併更新。
 - 安全政策 `SECURITY*.md` 改用統一格式：新增 Email 回報管道，寫明 14 天內首次回覆、最晚在回報後 90 天公開，適用時申請 CVE；翻譯檔改名為 `SECURITY_en.md`、`SECURITY_ja.md`、`SECURITY_ko.md`，檔內連結改用完整網址。
 - README、變更記錄、benchmark 摘要與 `.github/` 社群檔案的翻譯檔也改用 `_xx` 命名，例如 `README_en.md`、`CHANGELOG_ja.md`、`evals/BENCHMARK_ko.md`、`.github/i18n/CODE_OF_CONDUCT_en.md`；介紹網站與站內連結一併更新。
 
-## 1.4 - 2026-10-19
+## [1.4] - 2026-10-19
 
 ### 新增
 
@@ -42,7 +96,7 @@
 - SKILL.md 第 14 節新增技能檔案不在磁碟上時的做法（有些平台只在要求時提供檔案、不允許存檔）：向載入技能的地方取得 `scripts/threads_client.py`，用 `python3 - <參數>` 從標準輸入交給 Python 執行，不另外存檔；第 3 節第 5 步加上指向第 14 節的參照。README 四語版的 Agensi 一節改成同樣的說法。修改後還沒重跑評測。
 - 安裝說明（README 四語版）：Codex 的 `$skill-installer` 補上它會裝到 `~/.codex/skills/`（有設定 `CODEX_HOME` 時是 `$CODEX_HOME/skills/`），不是表格裡的 `~/.agents/skills/`；Codex 兩處都會讀，但原始碼把前者標為已淘汰、為了相容才保留的位置，所以提醒不要兩處各放一份。Copilot CLI 補上加入資料夾只會登記位置、不會複製。「更新與移除」表新增 Codex（目的地已存在時安裝器會中止，要先刪掉舊資料夾）、Copilot CLI、Kiro（文件沒寫，用刪除再匯入）、Agensi 四列。依據是 openai/codex 原始碼（2026-10-19 `main` 的 `host_roots.rs` 和 skill-installer 的 `install-skill-from-github.py`），以及 Codex、GitHub Copilot CLI、Kiro 的官方文件。
 
-## 1.3 - 2026-10-19
+## [1.3] - 2026-10-19
 
 ### 變更
 
@@ -54,7 +108,7 @@
   - Claude 應用程式的步驟改為 Pro、Max 方案，補上各系統壓縮 ZIP 的方法，以及從 Settings > Capabilities 上傳的位置。
   - 介紹網站的工具列表、「要怎麼手動安裝？」「在 Claude 應用程式怎麼用？」、`docs/llms.txt` 和「使用問題」issue 表單一併更新。
 
-## 1.2 - 2026-10-18
+## [1.2] - 2026-10-18
 
 ### 新增
 
@@ -70,7 +124,7 @@
 - GitHub 首頁的 Contributing 等分頁會從 repo 根目錄解析社群檔案裡的相對連結，點了會 404；改用以 `/` 開頭、從 repo 根目錄算起的路徑。
 - GitHub 首頁的 Code of conduct 分頁顯示的是英文版：行為準則的英、日、韓文版移到 `.github/i18n/`，分頁改為顯示繁中版。
 
-## 1.1 - 2026-10-18
+## [1.1] - 2026-10-18
 
 ### 新增
 
@@ -113,7 +167,7 @@
   - 時間軸長條上放不下的標籤改為隱藏，不再被截斷。
   - 窄螢幕上頁首的連結放不下時移到第二行，不再疊在網站名稱上。
 
-## 1.0 - 2026-10-18
+## [1.0] - 2026-10-18
 
 ### 新增
 
@@ -149,3 +203,10 @@
 - SKILL.md 第 11 節從「oEmbed and Web Intents」擴充為嵌入貼文：oEmbed 不需要 token 與錯誤碼、embed.js 的載入行為、大量嵌入時的節流與失敗處理。
 - SKILL.md 的 description 縮短為 196 字元。
 - README 重寫：各工具的安裝方式、一行安裝的 `skills add` 指令、設定與權限對照表、參與貢獻說明。
+
+[1.5]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.4...v1.5
+[1.4]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.3...v1.4
+[1.3]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.2...v1.3
+[1.2]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.1...v1.2
+[1.1]: https://github.com/Scorpio-meow/Threads-skill/compare/v1.0...v1.1
+[1.0]: https://github.com/Scorpio-meow/Threads-skill/releases/tag/v1.0

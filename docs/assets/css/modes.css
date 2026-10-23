@@ -1,112 +1,251 @@
 .modes {
-  padding-top: calc(var(--section) * 0.4);
+  padding-top: var(--section);
 }
 
 .modes-head {
-  grid-column: 1 / span 6;
-  display: grid;
-  gap: 18px;
-  margin-bottom: clamp(40px, 6vw, 72px);
+  align-items: end;
+  row-gap: 20px;
+  margin-bottom: clamp(48px, 6vw, 88px);
 }
 
-.modes-grid {
-  grid-column: 1 / -1;
+.modes-head .sec-title {
+  grid-column: 1 / span 6;
+}
+
+.modes-head .lede {
+  grid-column: 7 / -1;
+  font-size: var(--step-body);
+  max-width: 30em;
+}
+
+.modes-split {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "text stage"
+    "range range";
+  max-width: 1680px;
+  margin-inline: auto;
+}
+
+.modes-text {
+  grid-area: text;
+  display: grid;
+  background: var(--surface);
+  padding: clamp(48px, 6vw, 96px) clamp(24px, 4vw, 72px) clamp(48px, 5vw, 80px) max(var(--margin), env(safe-area-inset-left, 0px));
+  min-height: min(78svh, 760px);
 }
 
 .mode {
+  grid-area: 1 / 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-  align-content: center;
-  max-width: 34em;
-  min-width: 0;
-}
-
-.mode-fig {
+  align-content: start;
+  gap: 24px;
   min-width: 0;
 }
 
 .mode h3 {
-  font-size: var(--step-lead);
-  font-weight: 600;
+  font-size: var(--step-head);
+  letter-spacing: var(--track-display);
+  max-width: 9em;
+}
+
+:root:lang(en) .mode h3 {
+  max-width: 10em;
+}
+
+:root:lang(ja) .mode h3 {
+  font-size: var(--step-sub);
+  max-width: 13em;
 }
 
 .mode p {
-  color: var(--ink);
+  max-width: 30em;
 }
 
 .mode .ask {
-  color: var(--muted);
+  position: relative;
+  padding-left: 30px;
+  margin-top: auto;
+}
+
+.mode .ask::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.js .mode {
+  transition: opacity 420ms var(--ease-soft), visibility 420ms, transform 520ms var(--ease-out);
+}
+
+.js .mode:not(.is-active) {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+}
+
+.modes-stage {
+  grid-area: stage;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--field);
+  padding: clamp(40px, 5vw, 80px) max(var(--margin), env(safe-area-inset-right, 0px)) clamp(40px, 5vw, 80px) clamp(24px, 4vw, 72px);
+}
+
+.modes-stage::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 88%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--accent);
+  left: 40%;
+  top: 22%;
+  transition: transform 900ms var(--ease-out);
+  transform: translate(calc(var(--k, 0) * -9%), calc(var(--k, 0) * -6%));
 }
 
 .mode-fig {
-  margin-bottom: 40px;
+  grid-area: 1 / 1;
+  width: min(100%, 600px);
+  min-width: 0;
 }
 
-@media (min-width: 1024px) {
-  .js .modes-grid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--gap);
-    row-gap: 0;
-  }
+.js .mode-fig {
+  transition: opacity 420ms var(--ease-soft), visibility 420ms, transform 620ms var(--ease-out);
+}
 
-  .js .modes-grid .mode {
-    grid-column: 1 / span 5;
-    min-height: 68vh;
-    padding-block: 8vh;
-  }
+.js .mode-fig:not(.is-active) {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.985);
+}
 
-  .js .modes-grid .mode :is(h3, p) {
-    transition: color 600ms ease;
-  }
+.modes-stage [data-ui].panel {
+  box-shadow: none;
+}
 
-  .js .modes-grid .mode:not(.is-active) :is(h3, p) {
-    color: var(--muted);
-  }
+.modes-stage [data-ui] .code {
+  font-size: 13px;
+}
 
-  .js .mode[data-step="0"] {
-    grid-row: 1;
-  }
+.modes-range {
+  --range-top: 36px;
+  grid-area: range;
+  position: relative;
+  padding: var(--range-top) max(var(--margin), env(safe-area-inset-right, 0px)) 0 max(var(--margin), env(safe-area-inset-left, 0px));
+}
 
-  .js .mode[data-step="1"] {
-    grid-row: 2;
-  }
+.stops {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 6px;
+}
 
-  .js .mode[data-step="2"] {
-    grid-row: 3;
-  }
+.stops li:nth-child(2) {
+  text-align: center;
+}
 
-  .js .modes-grid .mode-fig {
-    grid-column: 7 / -1;
-    grid-row: 1 / span 3;
-    align-self: start;
-    position: sticky;
-    top: calc(env(safe-area-inset-top, 0px) + 14vh);
-    margin: 0;
-    transition: opacity 1200ms var(--ease-soft), transform 1200ms var(--ease-soft);
-  }
+.stops li:nth-child(3) {
+  text-align: right;
+}
 
-  .js .modes-grid .mode-fig:not(.is-active) {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(14px);
+.stops button {
+  border: 0;
+  background: none;
+  padding: 8px 0;
+  min-height: 44px;
+  font-size: var(--step-body);
+  font-weight: 600;
+  color: var(--muted);
+  text-align: inherit;
+  transition: color var(--t-hover) ease;
+}
+
+.stops button[aria-current="true"] {
+  color: var(--ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .stops button:hover {
+    color: var(--ink);
   }
+}
+
+html:not(.js) .modes-split {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: none;
+}
+
+html:not(.js) .modes-text,
+html:not(.js) .modes-stage {
+  grid-area: auto;
+  display: grid;
+  gap: 48px;
+  min-height: 0;
+}
+
+html:not(.js) .mode,
+html:not(.js) .mode-fig {
+  grid-area: auto;
 }
 
 @media (max-width: 1023px) {
-  .modes-head {
+
+  .modes-head .sec-title,
+  .modes-head .lede {
     grid-column: 1 / -1;
   }
 
-  .mode {
-    max-width: 40em;
+  .modes-split {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "stage"
+      "range"
+      "text";
   }
 
-  .mode-fig {
-    margin-bottom: 56px;
+  .modes-stage {
+    min-height: 0;
+    padding: 48px var(--margin);
+  }
+
+  .modes-stage::before {
+    width: 120%;
+    left: 30%;
+    top: 30%;
+  }
+
+  .modes-range {
+    --range-top: 20px;
+    background: var(--surface);
+  }
+
+  .modes-text {
+    min-height: 0;
+    padding: 28px var(--margin) 56px;
+  }
+
+  .mode h3 {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .stops button {
+    font-size: var(--step-small);
   }
 }
